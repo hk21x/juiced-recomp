@@ -3,12 +3,35 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
-- Milestone: 0 - set up
-- XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 17 LTCG argument maps to prove
+- Milestone: 1 - boots: 100 s headless without a trap, the THQ, Juice Games and intro Bink movies play; every frame black in the reference renderer
+- XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
-- GitHub: private hk21x/juiced-recomp; SDK at fork main 26f372b
+- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (bb0e1c0 = fork main 26f372b + SetViewport(NULL); not yet on fork main)
 
 ## Log
+
+### 2026-11-11 - Boots through the logo movies headless; frames black
+
+config/juiced.toml: every [abi] map the scan asked for, each proven from the function body (CDevice_KickOff edx;
+DrawVertices stack/ecx/eax; SetStreamSource eax/edi/ebx; SetTexture ecx/eax; SetTransform eax/edx; Swap eax; ...).
+Direct3D_CreateDevice gets only flags (eax), parameters (stack) and the out pointer (ecx): LTCG dropped the first three,
+which the host never reads, so edx/ebx/esi stand in for them. The scan's D3DResource_IsBusy is BlockOnResource (as in
+True Crime). Named by hand: SetTile 0x2AD8D0 (it crashed programming the GPU's tile registers), InitDefaultState 0x2AA7F0,
+SelectVertexShaderDirect 0x2AF740 (ecx, eax), BinkWait 0x246290, BinkNextFrame 0x246D70 (from the game's movie step
+0x103550; the SDK's Bink pacing called the unnamed BinkWait). Data: DirtyFlags, RenderState, IndexData, Streams,
+DeferredTextureState, FvfShader (0x2AF990, called by game code, reads it from the device), and the simple render state
+table 0x3108E0, found by True Crime's table contents and confirmed by its two readers.
+
+SDK (branch `juiced`, bb0e1c0): SetViewport(NULL) keeps the viewport and clears the scissors, as the library's 0x2AD512
+does; Juiced's render state setter 0x2A9900 passes NULL (the host read guest address 0).
+
+Evidence: scripts/harness.sh 120: 7080 frames, no trap; THQ.bik, juicegames.bik and JuicedCGI_NTSC.bik open in turn.
+A movie frame (CAP=1500) has 5 draws: two plain quads, the movie (640x480 YUY2) and a logo into a 640x960 target
+0x01460000, then one triangle copies it into 0x03D86000 at 640x480. All use the game's own vertex programs through
+SelectVertexShaderDirect.
+
+Next: why the reference renderer shows black (REF_DRAWLOG wrote an empty list at frame 1499): the programs, their
+constants (pushed by the game), or which surface is shown.
 
 ### 2026-11-11 - Repository set up
 

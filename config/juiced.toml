@@ -4,8 +4,48 @@ includes = ["game.toml"]
 
 # XDK 5849 D3D8LTCG: what the scan misses or gets wrong, each proven by the instructions given (addresses in this image)
 [symbols]
+# the scan's D3DResource_IsBusy (constants 1.00) is this: it waits in D3D_BlockOnTime (0x2AE9E7, 0x2AEA0B, 0x2AEA1E) and
+# returns nothing, as True Crime's 0x2BD910 does; callers include the resource free 0x2AC520
+D3D_BlockOnResource            = 0x2AE9B0
+D3DResource_IsBusy             = 0
+# Bink (2002): the game's movie step 0x103550 polls BinkWait until 0, then BinkDoFrame (0x103769) and BinkNextFrame
+BinkWait                       = 0x246290  # 0x1035F4 and 0x103601 loop on it; ret 4
+BinkNextFrame                  = 0x246D70  # 0x1035D6 and 0x103615, after the frame is decoded; ret 4
+D3DDevice_SetTile              = 0x2AD8D0  # (index ecx, tile eax): stores 24 bytes at +0x1AC0 + 0x18 * index, then programs the GPU's tile registers (0x2B2376)
+D3DDevice_SelectVertexShaderDirect = 0x2AF740  # (attribute format ecx, slot eax): 0x2AF75D copies the 0x100 byte format into the library's own shader 0x2BD420 (+0x14), 0x2AF75F selects 0x2BD421 at the slot; NULL takes 0x2AF768
+D3D_InitDefaultState           = 0x2AA7F0  # loops over a table of 20 (state, value) at 0x2B8BE0, simple states (below 0x5C) through 0x2A9B60, deferred by the dirty flags (0x3106C0), complex through 0x2B86A8; then the 11 texture stage defaults at 0x2B8B88
 
 [data]
+D3D_DirtyFlags           = 0x2BC380  # D3DDevice_SelectVertexShader 0x2AF7A0 ors 0x70 into it; the device pointer 0x2BC378 + 8
+D3D_RenderState          = 0x2BC388  # D3DDevice_SetPixelShader 0x2AFE40 copies 0x39 dwords of the definition here
+D3D_IndexData            = 0x2BD228  # D3DDevice_SetIndices 0x2AD7B4 stores the buffer's data, 0x2AD7BB 0 without one
+D3D_Streams              = 0x2BD360  # D3DDevice_SetStreamSource 0x2AF490: stride at +0, buffer at +8, 12 bytes each
+D3D_DeferredTextureState = 0x2B9CC0  # D3DDevice_SetTextureState_TexCoordIndex 0x2A9B90 stores [stage << 7] + 0x2B9D30, kTssTexCoordIndex is 28
+D3D_FvfShader            = 0x2BD248  # the device init 0x2B4E53 stores it as the vertex shader (+0x794); 0x2AF990, which game code calls, reads it
+D3D_SimpleRenderStateEncode = 0x3108E0  # 0x2AA82B and 0x2AAAF0 read [state * 4 + it]; its contents equal True Crime's table (0x2C80D8 there)
 
 # argument locations of the LTCG functions, in API order, each proven by the function's own instructions and its callers
 [abi]
+CDevice_KickOff = ["edx"]                       # 0x2AE890 reads the device's flags at [edx+8], its push at [edx]; plain ret
+D3DDevice_DrawVertices = ["stack", "ecx", "eax"] # 0x2AC020: the stack's primitive follows 0x17FC, ecx the start vertex is OR'd into each batch, eax the count; ret 4
+D3DDevice_SelectVertexShader = ["eax", "ebx"]   # 0x2AF7A0: handle in eax (stored at +0x798, minus 1 at +0x794), address in ebx (pushed after 0x1EA0)
+D3DDevice_SetIndices = ["edi", "ebx"]           # 0x2AD7A0: the index buffer in edi (AddRef, stored at +0x7A0), the base vertex in ebx (+0x1C)
+D3DDevice_SetPalette = ["ecx", "eax"]           # 0x2AD700: stage in ecx (slot +0xF98 + 4 * stage, method 0x1B20 + 0x40 * stage), palette in eax
+D3DDevice_SetPixelShader = ["eax"]              # 0x2AFE40: the handle in eax, stored at +0x784
+D3DDevice_SetPixelShaderConstant = ["ecx", "stack", "eax"]  # 0x2B0050: register in ecx (counts up), data on the stack (16 bytes a step), count in eax (counts down); ret 4
+D3DDevice_SetShaderConstantMode = ["eax"]       # 0x2AF860: the mode in eax, flag 0x10 to +8, the rest to +0x1928
+D3DDevice_SetStreamSource = ["eax", "edi", "ebx"]  # 0x2AF490: stream in eax (12 byte slots at 0x2BD360), buffer in edi (AddRef), stride in ebx
+D3DDevice_SetTexture = ["ecx", "eax"]           # 0x2AD550: stage in ecx (slot +0xF88 + 4 * stage), texture in eax (AddRef, its data pushed)
+D3DDevice_SetTextureState_TexCoordIndex = ["esi", "stack"]  # 0x2A9B90: stage in esi (state table 0x2B9D30 + 0x80 * stage), value on the stack; ret 4
+D3DDevice_SetTransform = ["eax", "edx"]         # 0x2AD220: state in eax (+0xC60 + 0x40 * state, 1 the projection), matrix in edx (16 dwords copied)
+D3DDevice_Swap = ["eax"]                        # 0x2AB670: flags in eax (0 means 5)
+D3DDevice_SelectVertexShaderDirect = ["ecx", "eax"]  # 0x2AF742 the format from ecx, 0x2AF746 the slot from eax (into ebx for SelectVertexShader); plain ret
+D3DDevice_SetTile = ["ecx", "eax"]              # 0x2AD8D0: index in ecx (+0x1AC0 + 0x18 * index), the D3DTILE in eax; plain ret
+D3D_BlockOnResource = ["eax"]                   # 0x2AE9B0 reads the resource's Common from eax
+D3DResource_IsBusy = ["eax"]                    # the scan's placeholder; not in this image (see [symbols])
+D3D_InternalRelease = ["esi"]                   # 0x2AC760 reads the resource's Common from esi
+D3D_MakeRequestedSpace = ["stack", "eax"]       # (minimum, requested): 0x2AFE97 passes the push size in eax and half of it on the stack; 0x2AE785 adds eax to the push, 0x2AE77A ret 4
+# (adapter, type, window, flags, parameters, device out): 0x2B8780 reads the flags in eax (& 0x10), the parameters
+# from the stack (passed to 0x2B4310), the out pointer in ecx; ret 4. LTCG dropped the first three, which the host
+# does not read: edx, ebx and esi only fill their places
+Direct3D_CreateDevice = ["edx", "ebx", "esi", "eax", "stack", "ecx"]
