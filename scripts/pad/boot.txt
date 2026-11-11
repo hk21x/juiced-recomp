@@ -1,0 +1,10 @@
+# skip the warning and the logo and intro movies, START at the title; the presses after it go on to a new profile, saved ("Save Successful" over the live city at vblank 3600)
+600 START
+900 START
+1200 START
+1500 START
+1800 START
+2100 START
+2400 START
+2700 START
+3000 START

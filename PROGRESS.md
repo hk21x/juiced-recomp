@@ -3,12 +3,26 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
-- Milestone: 1 - boots: 100 s headless without a trap; the warning screen draws correctly in the reference renderer; the Bink movies play but show black
+- Milestone: 2 - title screen headless; scripts/pad/boot.txt skips the movies, passes the title and saves a new profile over the live 3D city; no trap in 170 s
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
-- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (058f3a3 = fork main 26f372b + SetViewport(NULL); not yet on fork main)
+- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (81598bb = fork main 26f372b + SetViewport(NULL) + a reference renderer fix; not yet on fork main)
 
 ## Log
+
+### 2026-11-11 - Movies, title screen, a saved profile over the 3D city
+
+The Bink quads' vertex program passes the vertex's w of 0 through; both renderers clamp it to 5.4e-20, which the
+reference renderer then clipped (near_w 1e-6) while the GPU renderers keep it (their clip is w > 0). SDK 81598bb: a
+triangle whose corners share one w is drawn at w = 1 in the reference renderer (x and y are screen positions already;
+w only steers interpolation).
+
+Evidence: scripts/harness.sh 170 (no pad): warning, THQ, Juice Games and the intro CGI play in pictures, hub_01.bik at
+127 s, PRESS START over it at frame 9606, no trap. scripts/pad/boot.txt (START every 300 vblanks from 600): the movies
+skip, the title passes, a profile is made and saved: "Save Successful" over the live city at frame 3606.
+
+Next: the menus to a race (Arcade or Custom Race), then a smoke pad script (scripts/game.env SMOKE_PAD) and a first
+Windows build.
 
 ### 2026-11-11 - The warning screen draws
 
