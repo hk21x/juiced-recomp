@@ -13,6 +13,33 @@ BinkWait                       = 0x246290  # 0x1035F4 and 0x103601 loop on it; r
 BinkNextFrame                  = 0x246D70  # 0x1035D6 and 0x103615, after the frame is decoded; ret 4
 D3DDevice_SetTile              = 0x2AD8D0  # (index ecx, tile eax): stores 24 bytes at +0x1AC0 + 0x18 * index, then programs the GPU's tile registers (0x2B2376)
 D3DDevice_SelectVertexShaderDirect = 0x2AF740  # (attribute format ecx, slot eax): 0x2AF75D copies the 0x100 byte format into the library's own shader 0x2BD420 (+0x14), 0x2AF75F selects 0x2BD421 at the slot; NULL takes 0x2AF768
+D3DDevice_SetRenderState_Simple = 0x2A9B60  # ecx the method header, edx the value: 0x2A9B75 and 0x2A9B78 push both; 414 callers (the game's 0x140E45 passes 0x40358, the colour mask), InitDefaultState's simple states
+# the complex render states, from the library's own table of setters at 0x2B86A8 (entry = state * 4), which
+# D3D_InitDefaultState calls with one stack argument (0x2AA866 pushes it, 0x2AA867 calls); the entries the scan found (ZEnable 143, CullMode 147,
+# StencilEnable 144, ...) agree with it. TextureFactor 0x2A9530 also: pushes 16 dwords to 0xA60 unless a pixel shader
+# (+0x784) is set, stores state 148 at 0x2BC5D8, ret 4 (as True Crime's 0x2B9FD0); fonts were alpha tested away by a
+# texture factor of 0
+D3DDevice_SetRenderState_VertexBlend                 = 0x2A9AE0  # state 137
+D3DDevice_SetRenderState_FillMode                    = 0x2A9A10  # state 139
+D3DDevice_SetRenderState_BackFillMode                = 0x2A9A60  # state 140
+D3DDevice_SetRenderState_TwoSidedLighting            = 0x2A9A80  # state 141
+D3DDevice_SetRenderState_NormalizeNormals            = 0x2A9310  # state 142
+D3DDevice_SetRenderState_FrontFace                   = 0x2A92C0  # state 146
+D3DDevice_SetRenderState_TextureFactor               = 0x2A9530  # state 148
+D3DDevice_SetRenderState_LogicOp                     = 0x2A99B0  # state 150
+D3DDevice_SetRenderState_EdgeAntiAlias               = 0x2A9160  # state 151
+D3DDevice_SetRenderState_MultiSampleAntiAlias        = 0x2A9930  # state 152
+D3DDevice_SetRenderState_MultiSampleMask             = 0x2A9970  # state 153
+D3DDevice_SetRenderState_MultiSampleMode             = 0x2A98D0  # state 154
+D3DDevice_SetRenderState_MultiSampleRenderTargetMode = 0x2A9900  # state 155
+D3DDevice_SetRenderState_ShadowFunc                  = 0x2A91A0  # state 156
+D3DDevice_SetRenderState_SampleAlpha                 = 0x2A9990  # state 158
+D3DDevice_SetRenderState_YuvEnable                   = 0x2A96A0  # state 160
+D3DDevice_SetRenderState_OcclusionCullEnable         = 0x2A96E0  # state 161
+D3DDevice_SetRenderState_StencilCullEnable           = 0x2A9750  # state 162
+D3DDevice_SetRenderState_RopZCmpAlwaysRead           = 0x2A97C0  # state 163
+D3DDevice_SetRenderState_RopZRead                    = 0x2A97E0  # state 164
+D3DDevice_SetRenderState_DoNotCullUncompressed       = 0x2A9800  # state 165
 D3D_InitDefaultState           = 0x2AA7F0  # loops over a table of 20 (state, value) at 0x2B8BE0, simple states (below 0x5C) through 0x2A9B60, deferred by the dirty flags (0x3106C0), complex through 0x2B86A8; then the 11 texture stage defaults at 0x2B8B88
 
 [data]

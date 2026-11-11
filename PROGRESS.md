@@ -3,12 +3,31 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
-- Milestone: 1 - boots: 100 s headless without a trap, the THQ, Juice Games and intro Bink movies play; every frame black in the reference renderer
+- Milestone: 1 - boots: 100 s headless without a trap; the warning screen draws correctly in the reference renderer; the Bink movies play but show black
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
-- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (bb0e1c0 = fork main 26f372b + SetViewport(NULL); not yet on fork main)
+- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (058f3a3 = fork main 26f372b + SetViewport(NULL); not yet on fork main)
 
 ## Log
+
+### 2026-11-11 - The warning screen draws
+
+Three missing names made every frame black, found from the reference renderer's draw lists (CAP, REF_DRAWLOG):
+- D3DDevice_SetRenderState_Simple 0x2A9B60 (ecx header, edx value, 414 callers): without it no simple state (colour
+  mask, blend, depth function) reached the renderer, so every draw had a colour mask of 0.
+- SelectVertexShaderDirect 0x2AF740: the game draws everything with its own vertex programs and direct attribute
+  formats; without it the renderer had no vertex declaration.
+- The complex render state setters, all named from the library's table at 0x2B86A8 (state * 4; the scan's finds
+  agree with it). TextureFactor 0x2A9530 was the one that mattered: the font combines texture with TFACTOR, which was 0,
+  so the alpha test dropped every glyph.
+
+SDK: a carry-over of the last vertex's attributes into the registers (xemu does this: pgraph_update_inline_value) was
+tried and reverted; nothing here needs it yet (FINDINGS).
+
+Evidence: scripts/harness.sh 16 REF=301: the WARNING screen with the Juice Games and THQ logos and all three lines of
+text (captures/1111-2129-ref_00301.png).
+
+Next: the Bink movies (a 640x480 YUY2 texture, format 0x24) draw black; then the title screen after the intro.
 
 ### 2026-11-11 - Boots through the logo movies headless; frames black
 
