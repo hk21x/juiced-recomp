@@ -3,12 +3,38 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
-- Milestone: 2 - title screen headless; scripts/pad/boot.txt skips the movies, passes the title and saves a new profile over the live 3D city; no trap in 170 s
+- Milestone: 3 - a race headless: scripts/pad/race.txt drives race 1 (Arcade, Novice, San Ricardo route 1) at full throttle; SMOKE OK (916 draws a frame). Windows: builds and boots (windows-vm, 13ff78b; WARP only, no picture there)
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
-- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (81598bb = fork main 26f372b + SetViewport(NULL) + a reference renderer fix; not yet on fork main)
+- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (6a39c37 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, handle reuse, a DSOUND setter; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-11 - A race, the smoke test, the first Windows build
+
+Menus (live, `cmd` presses and `snap`): Save Successful -> A -> main menu (Career, Arcade, Custom Race, Multiplay, Xbox
+Live, Options, Extras) -> Arcade -> Novice series -> race 1. scripts/pad/race.txt does it from boot and holds RT.
+
+Three stops on the way into the race:
+- IDirectSoundBuffer_SetRolloffFactor (0x2781EB, .XTLID 0xB007A between SetRolloffCurve and SetVelocity) ran its
+  console code on a host buffer: segfault in 0x277AD4. SDK: hosted as a no op, as SetDopplerFactor.
+- A hang at frame 5520: XACT's track change (0x2A072E) stops the cue, closes the track's file (0x2A0054) and lets the
+  next one start, but the old stream's WMA streamer (0x28365B, ReadFile 0x1AF1BC / GetOverlappedResult 0x1AF6F7) reads
+  the closed handle once more. The read failed (C0000008), the streamer marked the end of the file at 0x160000 of a 3 MB
+  track, and the decoder asked for the bytes past it for good (the fetch 0x2835F4 returns 0 past the end). On the
+  console the next file opened takes the freed handle number, so that read succeeds. SDK: GameInfo::handle_reuse (on
+  for Juiced) gives freed numbers back, last freed first (XBE_HANDLE_REUSE overrides).
+- 0x5D780 is reached only through a pointer and follows a jump table: added as a [[function]].
+
+Evidence: scripts/smoke.sh: SMOKE OK, race 916 draws a frame over the last 300 frames, no traps. REF frames: the grid
+with HUD (frame 9600), lap 1 at 134 mph in 5th (frame 10800). Windows (windows-vm): 13ff78b builds clean and boots 103 s
+without an error on WARP (0.6 frames a second, no picture or audio there).
+
+Known: some textures (shop windows, the car's reflection) show coloured noise in the reference renderer; check on a GPU.
+Bink movies' own loop waits on BinkWait (0x103550), so GameInfo::bink_frame_hold may want to be off: check movie speed.
+
+Next: a Windows build with these on Harry's PC; then 60 frames a second and modern controller / keyboard prompts
+(Harry's priorities).
 
 ### 2026-11-11 - Movies, title screen, a saved profile over the 3D city
 

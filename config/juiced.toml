@@ -8,6 +8,7 @@ includes = ["game.toml"]
 # returns nothing, as True Crime's 0x2BD910 does; callers include the resource free 0x2AC520
 D3D_BlockOnResource            = 0x2AE9B0
 D3DResource_IsBusy             = 0
+IDirectSoundBuffer_SetRolloffFactor = 0x2781EB  # .XTLID 0xB007A, between SetRolloffCurve 0xB0079 and SetVelocity 0xB007B (0x278192); (this, float, apply) as SetDopplerFactor 0x2781C7; ret 0xC
 # Bink (2002): the game's movie step 0x103550 polls BinkWait until 0, then BinkDoFrame (0x103769) and BinkNextFrame
 BinkWait                       = 0x246290  # 0x1035F4 and 0x103601 loop on it; ret 4
 BinkNextFrame                  = 0x246D70  # 0x1035D6 and 0x103615, after the frame is decoded; ret 4
@@ -76,3 +77,6 @@ D3D_MakeRequestedSpace = ["stack", "eax"]       # (minimum, requested): 0x2AFE97
 # from the stack (passed to 0x2B4310), the out pointer in ecx; ret 4. LTCG dropped the first three, which the host
 # does not read: edx, ebx and esi only fill their places
 Direct3D_CreateDevice = ["edx", "ebx", "esi", "eax", "stack", "ecx"]
+
+[[function]]  # reached only through a pointer (game 0x18CB0F calls it, from the race start); it follows a jump table, so
+at = 0x5D780  # the analysis took it for data: sub esp, 0x13C

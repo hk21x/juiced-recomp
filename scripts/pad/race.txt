@@ -1,0 +1,17 @@
+# boot.txt, then Arcade, Novice series, race 1 (San Ricardo route 1), the throttle held from the start
+600 START
+900 START
+1200 START
+1500 START
+1800 START
+2100 START
+2400 START
+2700 START
+3000 START
+# Save Successful: continue; main menu: Arcade; Novice series; race 1 (San Ricardo route 1, 3 laps)
+3900 A
+4300 DOWN
+4400 A
+4800 A
+5200 A
+6400 RT 9000

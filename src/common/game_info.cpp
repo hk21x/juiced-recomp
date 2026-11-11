@@ -20,6 +20,7 @@ const app::GameInfo app::kGame = {
     .ui = nullptr,                        // ImGui drawing each frame
     .pad = nullptr,                       // changes a polled pad
     .rumble = nullptr,                    // changes a rumble before it is set
+    .handle_reuse = true,                 // XACT reads a closed music file's handle once more (sdk app.h)
     // optional, after these: .achievements (conditions on guest memory), .same_code (other releases' xbe SHA-1s with
     // the same code), .wheel (what a steering wheel's force feedback follows)
 };
