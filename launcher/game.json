@@ -1,0 +1,12 @@
+{
+    "title": "Juiced",
+    "short": "Juiced",
+    "exe": "Juiced",
+    "xbe": "default.xbe",
+    "releases": {
+        "b38b935794b05e46b70b164acdcca9338f0b692f": "USA, Europe"
+    },
+    "repo": "https://github.com/hk21x/juiced-recomp.git",
+    "branch": "main",
+    "toolchain": "https://raw.githubusercontent.com/hk21x/juiced-recomp/main/launcher/toolchain.json"
+}

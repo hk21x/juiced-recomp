@@ -1,0 +1,11 @@
+# Hand-kept recompiler config for default.xbe, the file the build reads. config/game.toml is xbe_symbols output and
+# every scan rewrites it, so nothing is edited there: it is included here, and everything added by hand goes below.
+includes = ["game.toml"]
+
+# XDK 5849 D3D8LTCG: what the scan misses or gets wrong, each proven by the instructions given (addresses in this image)
+[symbols]
+
+[data]
+
+# argument locations of the LTCG functions, in API order, each proven by the function's own instructions and its callers
+[abi]
