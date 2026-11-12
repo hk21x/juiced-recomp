@@ -3,6 +3,7 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
+- Harry on Windows, 1d0d969: menus at 60.0 fps (host 0.6 to 0.85 ms), then a crash choosing Arcade; SDK 9ed6b2f guards the read believed at fault, not yet confirmed
 - The music freeze (Harry on Windows, 4 s into a race) is fixed in the SDK (7168ae0): not yet confirmed on Windows
 - Settings (F1 window): Modern button pictures (on), Skip intro movies (off)
 - PC settings in the game's menus: Options > PC SETTINGS (title menus and the pause menu), three pages of seven rows; headless only so far
@@ -11,9 +12,28 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Milestone: 3 - a race headless: scripts/pad/race.txt drives race 1 (Arcade, Novice, San Ricardo route 1) at full throttle; SMOKE OK (916 draws a frame). Windows: builds and boots (windows-vm, 13ff78b; WARP only, no picture there)
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
-- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
+- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (9ed6b2f: the threaded backend's freed header guard, on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-12 - Harry's Windows run of 1d0d969: a crash choosing Arcade
+
+Harry (RX 7900 XT, perf.bat): the menus at a solid 60.0 fps, host 0.6 to 0.85 ms a frame. Choosing Arcade: a black
+screen, then "exception C0000005 ... on guest thread 14, read guest 003E9C80"; guest stack 0x12DB50 (the 2D pass
+0x12DA30 after its call of D3DDevice_Clear 0x2AB9D0), 0x1288FF, 0x180889, 0x189443, 0x195F61.
+- 0x3E9C80 is past the image (ends 0x3BACE0): heap, not committed then.
+- windows-vm resolved the host frames from the PDB (publics only): the fault and the frames above it are in
+  render_thread.cpp, below the hosted Clear in d3d8.cpp. On the guest thread that file reads guest memory for a
+  Clear only in the state it sends: ThreadedBackend::Header copies each set texture, palette, vertex buffer, render
+  target and depth header (kernel::R32(header), then 12 or 20 bytes).
+- So: a header still set in a stage or stream after the game freed its heap block, read at the next Clear. The
+  console never looks at it until a draw uses it.
+SDK 9ed6b2f (fork branch juiced): Header returns none for a header whose memory is not committed, and copies 12
+bytes when the 20 would run off committed memory.
+Evidence: wincheck ok; headless with RT_THREAD=1 through Arcade into the race, no exception (it did not crash there
+before either: the freed block's page stays committed with this heap's layout); SMOKE OK (1124 draws a frame).
+Not confirmed: no source lines in the PDB, no repro here. If it crashes again the same way, ask windows-vm for a
+RelWithDebInfo build for the exact line.
 
 ### 2026-11-12 - Field of view, the keyboard's controls page, the mouse in the menus
 
