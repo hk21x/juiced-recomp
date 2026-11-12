@@ -44,6 +44,11 @@ Evidence, headless (reference renderer, frames stretched to the shown shape): OU
 and OUTPUT=3440x1440 FRAME_ASPECT_X100=239: the main menu, Choose Race (its car panel and map in place), the race:
 cars and buildings in proportion, the HUD and the map round, the map's road inside its ring (outside it before the
 viewport hook). 4:3: SMOKE OK (922 draws a frame). wincheck ok. Not seen on Windows.
+windows-vm (WARP, 3440x1440, 14451fd): no shader errors, the title as headless: logo and banners in a centred 4:3
+panel, the backdrop movie across the frame; Harry's own f6215b1 race shots are sharp (the blur fix confirmed on his GPU).
+That backdrop movie was stretched (a 4:3 picture across 21:9): widescreen.cpp now sets gpu::State::pillar_aspect 4:3
+for YUY2 (Bink) draws spanning the frame: the boot's logos and intro pillarboxed (intro_movie), the menus' backdrops
+filling the width at their shape, cropped above and below (pillar_fill), as PGR2. Headless at 239: both seen.
 Known: the menus are a 4:3 panel over the full width backdrop (the banners end at its sides; the highlight bar and
 the prompts' bar span the frame); the race HUD sits in the centred 4:3 part, beside the car at 21:9 (spreading it to
 the edges needs a hook per HUD element: gpu::State::squeeze_beyond and squeeze_shift). In Harry's fifth shot large

@@ -8,6 +8,8 @@
 //   car in a menu's panel) is a small 3D scene placed in the 2D. Its viewport is moved and narrowed as the 2D around it
 //   is, and what is drawn in it is left as drawn (gpu::State::no_squeeze): the scene keeps its shape.
 // - The speed blur's passes (src/game/blur.cpp) are full screen effects with corners inside the frame.
+// - The movies are 4:3 pictures: see PassViewport.
+#include <atomic>
 #include <cstring>
 
 #include "app/app.h"
@@ -24,6 +26,10 @@ float Squeeze() {
 }
 }  // namespace juiced
 
+namespace juiced {
+extern std::atomic<bool> intro_movie;  // the last movie opened is one of the boot's (src/common/game_info.cpp)
+}
+
 // at 0x12DB14, the pass's D3DDevice_SetViewport: [esp] its D3DVIEWPORT8 (x, y, width, height, min z, max z)
 void PassViewport(X86Context& ctx, uint8_t* /*base*/) {
     const uint32_t vp = kernel::R32(ctx.esp);
@@ -31,6 +37,12 @@ void PassViewport(X86Context& ctx, uint8_t* /*base*/) {
     const float k = juiced::Squeeze();
     const bool inset = k < 1 && w && w < 600 && x + w <= 640;
     d3d::State().no_squeeze = inset;
+    // A movie drawn across the frame (Bink's YUY2 texture, 640x480 for 4:3): the boot's logos and intro keep their
+    // shape with bars at the sides; the menus' backdrops fill the frame's width at their shape, cropped above and
+    // below, as PGR2's do (gpu::State::pillar_aspect, pillar_fill). A movie in a panel does not span the frame.
+    d3d::State().pillar_aspect = 4.0f / 3.0f;
+    d3d::State().pillar_format = 0x24;  // D3DFMT_YUY2
+    d3d::State().pillar_fill = !juiced::intro_movie.load();
     if (!inset) return;
     static const uint32_t scratch = mem::AllocSystem(24);
     std::memcpy(kernel::HostPtr(scratch), kernel::HostPtr(vp), 24);
