@@ -3,7 +3,7 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
-- Harry on Windows, 6f7d786 (3440x1440): still blurry, menus too (screenshot: the whole frame at the console's size, scaled up). SDK 4c5a099: the pass that copies the 640x960 frame into the frame buffer took averaged taps; not seen on Windows yet
+- Harry on Windows, 6f7d786 (3440x1440): still blurry, menus too (screenshot: the whole frame at the console's size, scaled up). SDK 4c5a099: the pass that copies the 640x960 frame into the frame buffer took averaged taps; sharp on windows-vm's WARP shots, Harry's look to come
 - The music freeze (Harry on Windows, 4 s into a race) is fixed in the SDK (7168ae0): not yet confirmed on Windows
 - Settings (F1 window): Modern button pictures (on), Skip intro movies (off)
 - PC settings in the game's menus: Options > PC SETTINGS (title menus and the pause menu), three pages of seven rows; headless only so far
@@ -30,6 +30,8 @@ SDK 4c5a099: gpu::ResolvesTallFrame (a target of the frame's width and twice its
 target) keeps plain taps, in both backends; the tap's own filter averages the two rows. The race's glow (640x480 into
 160x120) keeps its spread.
 Evidence: wincheck ok, SMOKE OK (977 draws a frame). The path is Windows only: not seen here.
+windows-vm, WARP at 3440x1440 (f6215b1 against 6f7d786, shots in .local/harry/): the Juiced logo's edges smeared
+before, hard with the texture's own texel steps after. Harry's own look still to come.
 Also noted, not acted on: at race load "MultiSampleMode 2 with target 004E6CB8 (640x960), not a frame buffer: drawn
 2x2 to a pixel"; the picture's size is right in Harry's shot, so left alone.
 The speed blur's half texel (blur.cpp) is unproven either way: Harry saw no difference with the setting off.
