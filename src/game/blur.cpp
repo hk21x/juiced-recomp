@@ -1,5 +1,5 @@
 // The speed blur. 0x130910 draws the frame buffer over itself six times a frame (D3DDevice_DrawVerticesUP at
-// 0x130EAC: a strip of twelve vertices of 20 bytes: x, y, colour, u, v), each pass a little larger about the screen's
+// 0x130EAC: twelve vertices of 20 bytes, a triangle list: x, y, colour, u, v), each pass a little larger about the screen's
 // centre and blended by its alpha, more with speed.
 //
 // Each vertex's u, v is its own x, y before the enlargement, in texels. The console samples a pixel at its corner, so
@@ -12,6 +12,7 @@
 #include <cstring>
 
 #include "kernel/kernel.h"
+#include "xdk/d3d8.h"
 #include "xdk/hle.h"
 
 namespace juiced {
@@ -25,6 +26,7 @@ bool SpeedBlurPass(X86Context& ctx, uint8_t* /*base*/) {
         ctx.esp += 16;
         return true;
     }
+    d3d::State().no_squeeze = true;  // a full screen effect: not the 2D the renderers squeeze (src/game/widescreen.cpp)
     if (mode && *mode == '1') return false;
     const uint32_t count = kernel::R32(ctx.esp + 4), verts = kernel::R32(ctx.esp + 8), stride = kernel::R32(ctx.esp + 12);
     if (count != 12 || stride != 20) return false;
@@ -39,3 +41,6 @@ bool SpeedBlurPass(X86Context& ctx, uint8_t* /*base*/) {
         }
     return false;
 }
+
+// at 0x130EB1, after the pass's draw
+void SpeedBlurPassDone(X86Context& /*ctx*/, uint8_t* /*base*/) { d3d::State().no_squeeze = false; }

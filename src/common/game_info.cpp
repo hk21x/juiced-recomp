@@ -128,9 +128,13 @@ const app::GameInfo app::kGame = {
     .ui = nullptr,                        // ImGui drawing each frame
     .pad = juiced::Pad,                   // RB plays White (the view), LB Black
     .rumble = nullptr,                    // changes a rumble before it is set
+    .hud_aspect = 4.0f / 3.0f,            // the 2D is laid out for 4:3 in both of the game's modes: squeezed to it
     .hide_file = juiced::HideFile,        // hides nothing: notes when a boot movie is opened (skip_intro)
     .default_keys = juiced::Keys,         // the keyboard's defaults, after the game's own layout
     .texture_bound = juiced::ButtonPictures,  // today's pad in the button pictures (src/common/buttons.cpp)
+    .auto_fills_screen = true,            // the scene cameras follow the frame's shape past 16:9 (src/game/fov.cpp)
+    .squeeze_flat_programs = true,        // the 2D's programs: (v0 + c) * c + c, no matrix
+    .line_width = 0.35f,                  // the overhead wires are line strips: fine, not a console pixel wide
     // optional, after these: .achievements (conditions on guest memory), .same_code (other releases' xbe SHA-1s with
     // the same code), .wheel (what a steering wheel's force feedback follows)
 };

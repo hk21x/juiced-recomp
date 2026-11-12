@@ -104,3 +104,13 @@ on_true = 0x95A1D
 at = 0x130EAC
 call = "SpeedBlurPass"
 on_true = 0x130EB1
+
+[[hook]]
+at = 0x130EB1
+call = "SpeedBlurPassDone"
+
+# each 2D pass's viewport (0x12DA30): a pass with a viewport of its own (the race's map) moves with the squeezed 2D
+# (src/game/widescreen.cpp)
+[[hook]]
+at = 0x12DB14
+call = "PassViewport"

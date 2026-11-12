@@ -3,7 +3,8 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
-- Harry on Windows, 6f7d786 (3440x1440): still blurry, menus too (screenshot: the whole frame at the console's size, scaled up). SDK 4c5a099: the pass that copies the 640x960 frame into the frame buffer took averaged taps; sharp on windows-vm's WARP shots, Harry's look to come
+- Harry on Windows, f6215b1 (3440x1440): "blur mostly fixed"; lines across the screen (the scene's wires, line strips a console pixel wide) and everything stretched. SDK 7c45c2e + src/game/widescreen.cpp: 4:3, 16:9 and the screen's shape, headless only so far
+- Widescreen: 3D 16:9 by the game, wider by fov.cpp; 2D squeezed to a centred 4:3 by the SDK (flat programs); the race HUD sits in that 4:3 part (not spread to the edges yet)
 - The music freeze (Harry on Windows, 4 s into a race) is fixed in the SDK (7168ae0): not yet confirmed on Windows
 - Settings (F1 window): Modern button pictures (on), Skip intro movies (off)
 - PC settings in the game's menus: Options > PC SETTINGS (title menus and the pause menu), three pages of seven rows; headless only so far
@@ -12,9 +13,41 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Milestone: 3 - a race headless: scripts/pad/race.txt drives race 1 (Arcade, Novice, San Ricardo route 1) at full throttle; SMOKE OK (916 draws a frame). Windows: builds and boots (windows-vm, 13ff78b; WARP only, no picture there)
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
-- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
+- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-12 - Widescreen (4:3, 16:9, the screen's shape) and the wires
+
+Harry at f6215b1: "Blur mostly fixed. Now some visual bugs of lines across the screen. Also, can we fix the 4:3, 16:9
+and 21:9 ratios? The game is stretched." Five shots in .local/win (3440x1440, aspect 'screen').
+
+The lines: black zigzags in the sky at the first junction. They are the scene's overhead wires: 19 line strips of 5
+vertices (prim 4) with the buildings' programs, in the 640x960 target. The renderers draw a line a console pixel
+wide (LineHlsl), which on the stretched target is 5.4 by 1.5 screen pixels; the reference renderer's 640x480 hardly
+shows them. SDK: GameInfo::line_width (console pixels, 1), Juiced 0.35.
+
+Widescreen, as designed on 2026-11-12 (below), now built:
+- 3D: the game's own 16:9 in the console's widescreen mode. Past 16:9 (src/game/fov.cpp, after the game's 0x166A20):
+  a scene camera (shape +0xC0 = 0.5625) gets tan(half angle) times frame / (16/9), its sines again, its projection
+  rebuilt (vtable +0). The vertical angle stays.
+- 2D: its programs are position = v0 * c[118] + c[119], then the viewport tail (dumped: FlatProgram true; the map's
+  and the scene's are dp4 programs, false). SDK 7c45c2e: gpu::FlatProgram (position from v0 and constants by mov, mul,
+  add, mad and an ILU mov, rcp, rcc, through registers), GameInfo::squeeze_flat_programs beside
+  squeeze_screen_programs (ScreenDraw, the programs' hud clause, the reference renderer), the reference renderer's
+  frame test taking a 960 or 1152 high target. GameInfo: hud_aspect 4:3, squeeze_flat_programs, auto_fills_screen.
+- src/game/widescreen.cpp: a pass with its own viewport (hook at 0x12DB14, the pass's SetViewport: the race's map at
+  56,324 112x112, a menu's car panel) has the viewport moved and narrowed with the 2D, its draws left as drawn
+  (new gpu::State::no_squeeze); the speed blur's passes likewise (hooks at 0x130EAC and 0x130EB1).
+- The mouse (pointer.cpp) maps into the squeezed 2D.
+Evidence, headless (reference renderer, frames stretched to the shown shape): OUTPUT=1280x720 FRAME_ASPECT_X100=178
+and OUTPUT=3440x1440 FRAME_ASPECT_X100=239: the main menu, Choose Race (its car panel and map in place), the race:
+cars and buildings in proportion, the HUD and the map round, the map's road inside its ring (outside it before the
+viewport hook). 4:3: SMOKE OK (922 draws a frame). wincheck ok. Not seen on Windows.
+Known: the menus are a 4:3 panel over the full width backdrop (the banners end at its sides; the highlight bar and
+the prompts' bar span the frame); the race HUD sits in the centred 4:3 part, beside the car at 21:9 (spreading it to
+the edges needs a hook per HUD element: gpu::State::squeeze_beyond and squeeze_shift). In Harry's fifth shot large
+orange translucent quads (sun glare?) by a building: not looked into.
 
 ### 2026-11-12 - Still blurry at 6f7d786, menus too: the resolve pass's spread taps
 

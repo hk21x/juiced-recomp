@@ -107,11 +107,13 @@ bool PointerAt(Pointer& p) {
     if (!hwnd || GetForegroundWindow() != hwnd || app::OverlayOpen() || !GetCursorPos(&c) || !ScreenToClient(hwnd, &c) ||
         !GetClientRect(hwnd, &r) || r.right <= 0 || r.bottom <= 0)
         return false;
-    // the frame in the window (bars where its shape differs); the game's 2D spans the frame
+    // the frame in the window (bars where its shape differs)
     const float window = float(r.right) / float(r.bottom), frame = app::FrameAspect() > 0 ? app::FrameAspect() : window;
     const float fw = frame < window ? frame / window : 1.0f, fh = frame > window ? window / frame : 1.0f;
     p.x = 640 * (0.5f + (float(c.x) / r.right - 0.5f) / fw);
     p.y = 480 * (0.5f + (float(c.y) / r.bottom - 0.5f) / fh);
+    // the 2D is squeezed into the frame's centred 4:3 part on a wider frame (GameInfo::hud_aspect)
+    if (frame > app::HudAspect() + 1e-3f) p.x = 320 + (p.x - 320) * frame / app::HudAspect();
     p.buttons = (GetAsyncKeyState(VK_LBUTTON) & 0x8000 ? 1u : 0u) | (GetAsyncKeyState(VK_RBUTTON) & 0x8000 ? 2u : 0u);
     return true;
 #else
