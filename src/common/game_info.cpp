@@ -15,6 +15,7 @@ namespace juiced {
 extern bool modern_buttons;  // src/common/buttons.cpp
 void MenuPointer(input::Pad& pad);  // src/common/pointer.cpp
 bool skip_intro = false;      // no logo and intro movies at the start (Pad presses START through them)
+bool speed_blur = true;       // the race's speed blur (src/game/blur.cpp)
 uint32_t fov_percent = 100;   // the race camera's field of view (src/game/fov.cpp)
 std::atomic<bool> intro_movie{false};  // the last movie opened is one of the boot's (HideFile)
 namespace {
@@ -115,7 +116,9 @@ const app::GameInfo app::kGame = {
                 {"skip_intro", &juiced::skip_intro, nullptr, "Skip intro movies",
                  "Starts without the THQ and Juice Games logos and the intro movie. Takes effect at the next start."},
                 {"fov_percent", nullptr, &juiced::fov_percent, "Field of view (%)",
-                 "50 to 150; 100 is the game's. The race camera's field of view, changed at once."}},
+                 "50 to 150; 100 is the game's. The race camera's field of view, changed at once."},
+                {"speed_blur", &juiced::speed_blur, nullptr, "Speed blur",
+                 "The blur towards the screen's edges at speed. Off, the race is drawn without it."}},
     .load = nullptr,                      // reads more from the settings file's toml::table
     .save = nullptr,                      // writes more into it
     .init = juiced::Init,                 // after the settings load: the harness's overrides

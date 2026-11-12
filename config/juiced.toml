@@ -97,3 +97,10 @@ call = "AddPcItem"
 at = 0x95736
 call = "ChoosePcItem"
 on_true = 0x95A1D
+
+# the speed blur's pass (0x130910 draws the frame over itself six times, each a little larger): its twelve vertices
+# before the draw; true leaves the draw out (src/game/blur.cpp)
+[[hook]]
+at = 0x130EAC
+call = "SpeedBlurPass"
+on_true = 0x130EB1

@@ -3,7 +3,7 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
-- Harry on Windows, 1d0d969: menus at 60.0 fps (host 0.6 to 0.85 ms), then a crash choosing Arcade; SDK 9ed6b2f guards the read believed at fault, not yet confirmed
+- Harry on Windows, 12b65c9 (3440x1440): past Arcade into a race (the 1d0d969 crash gone with SDK 9ed6b2f), the race "incredibly blurry": SDK 0de0637 (the scene target's width) and the speed blur's half texel, neither seen on Windows yet
 - The music freeze (Harry on Windows, 4 s into a race) is fixed in the SDK (7168ae0): not yet confirmed on Windows
 - Settings (F1 window): Modern button pictures (on), Skip intro movies (off)
 - PC settings in the game's menus: Options > PC SETTINGS (title menus and the pause menu), three pages of seven rows; headless only so far
@@ -12,9 +12,30 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Milestone: 3 - a race headless: scripts/pad/race.txt drives race 1 (Arcade, Novice, San Ricardo route 1) at full throttle; SMOKE OK (916 draws a frame). Windows: builds and boots (windows-vm, 13ff78b; WARP only, no picture there)
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
-- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (9ed6b2f: the threaded backend's freed header guard, on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
+- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-12 - Harry's Windows run of 12b65c9: in the race, very blurry
+
+Harry: "Game boots. However on a track it's incredibly blurry." So the Arcade crash is past (SDK 9ed6b2f). His log
+(windows-vm; 3440x1440 borderless, aspect 'screen', render 100%, MSAA off): targets made
+  640x480 colour and depth -> 3440x1440;  640x960 colour and depth -> 1920x2880;  160x120 -> 480x360.
+A race frame (CAP draw list, frame 5400): the scene's 592 draws go to the 640x960 target (viewport 640x960), one
+triangle copies it into the 640x480 frame buffer (v = 2y), then the glow (160x120, added) and six speed blur passes.
+1. The scene target is not stretched: gpu::XStretch only widens a target of the frame buffer's height, so the race's
+   3D had 1920 pixels across for a 3440 frame (0.56; 0.75 at 16:9), spread by the copy. SDK 0de0637: a target of
+   twice the frame's height and at least its shape is stretched as the frame buffer is (640x960 -> 3440x2880 there).
+   Draws into it are only squeezed where pretransformed or a title's screen programs, which Juiced has none of.
+2. The speed blur (0x130910, D3DDevice_DrawVerticesUP at 0x130EAC: 12 vertices of 20 bytes, x y colour u v, the frame
+   buffer drawn over itself six times, each larger about the centre): each u, v is the vertex's own x, y in texels,
+   so with the console's pixel corners every pass reads the frame half a texel up and left. At 640x480 that softens;
+   at a PC's size it moves the frame half a console pixel a pass. src/game/blur.cpp ([[hook]] at 0x130EAC) adds the
+   half texel; setting speed_blur (on) off leaves the passes out; JUICED_BLUR=0 none, 1 as the disc draws it.
+Evidence: SMOKE OK (925 draws a frame); wincheck ok. Headless shows neither: its renderer draws at 640x480, where
+the same race frame with the blur as the disc's, off and corrected look alike. So both are reasoned from the log and
+the draw list, not seen.
+Next: Harry's look at the rebuild; if still soft, speed_blur off tells the two apart.
 
 ### 2026-11-12 - Harry's Windows run of 1d0d969: a crash choosing Arcade
 
