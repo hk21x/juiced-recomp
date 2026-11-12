@@ -1,0 +1,11 @@
+# boot.txt, then A at Save Successful: the main menu (live work: cmd and snap)
+600 START
+900 START
+1200 START
+1500 START
+1800 START
+2100 START
+2400 START
+2700 START
+3000 START
+3900 A

@@ -1,0 +1,22 @@
+# boot.txt, the main menu, Options, Controls, controller port 1: the controls diagram
+600 START
+900 START
+1200 START
+1500 START
+1800 START
+2100 START
+2400 START
+2700 START
+3000 START
+3900 A
+# main menu: Options (5 down), Controls (2 down), controller port 1: the controls diagram (option 1) from about 5500
+4300 DOWN
+4340 DOWN
+4380 DOWN
+4420 DOWN
+4460 DOWN
+4600 A
+4900 DOWN
+4940 DOWN
+5100 A
+5300 A

@@ -3,12 +3,42 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
+- Controls: modern button pictures (setting modern_buttons, on): the prompts' A B Y and the controls page's pad; keyboard defaults (W S throttle and brake, A D steer, ...), the prompts show the keys while the keyboard plays; RB changes the view (White and Black swapped)
 - Milestone: 3 - a race headless: scripts/pad/race.txt drives race 1 (Arcade, Novice, San Ricardo route 1) at full throttle; SMOKE OK (916 draws a frame). Windows: builds and boots (windows-vm, 13ff78b; WARP only, no picture there)
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (6a39c37 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, handle reuse, a DSOUND setter; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-12 - Modern button pictures, keyboard controls
+
+Harry's priorities (via windows-vm): a race on Windows, 60 frames a second, modern controller and keyboard/mouse
+prompts. Headless the race already presents a frame each vertical blank; his perf log will say how Windows fares.
+
+The game's layouts (Options > Controls > a port, three options; option 1 the default): RT throttle, LT brake, the left
+stick steers, A parking brake, B gear up, X gear down and reverse, Y nitrous, White change view, the right stick glances
+(click: horn), Start pause, Back driver info. Black does nothing in any option.
+
+The button pictures (JUICED_PICS_LOG=1 lists every 8-bit palettised texture bound with its texels' FNV-1a and writes its
+picture): the prompts are 32x32 P8 textures with their own palettes, A D6B454E01B92FE99, B 80C366933D75C91E, Y
+2CE618996326D735 (no X prompt met); the controls page's original pad is 256x256 158A8301606FDC3E, its lines and rings
+in the picture, the labels the game's text. src/common/buttons.cpp (GameInfo::texture_bound) redraws them when bound as
+the disc has them: the prompts as dark discs with coloured letters, or with the keyboard in use the key (ENTER, BKSP,
+SHIFT); the page as today's pad (LT RT LB RB, View and Menu, the d-pad low left) with every line ending where the
+console's did, broken where two cross. 4x pictures for the renderers (gpu::SetReplacement), and the texture's own
+size into guest memory through its palette (quantised to its 256 colours). src/common/strokes.* come from True Crime.
+
+Controls (src/common/game_info.cpp): keyboard defaults W throttle, S brake, A D steer, Space parking brake (Enter in
+menus), E gear up (Backspace in menus), Q gear down, Shift nitrous, C change view, I J K L glance, H horn, Esc pause, Tab
+driver info, arrows the d-pad. The pad hook swaps White and Black, so RB (the SDK's Black) changes the view, as the page
+shows; LB has nothing. JUICED_MODERN_BUTTONS overrides the setting for the harness.
+
+Evidence: REF of the controls page (captures/1112-0011-ref_05801.png: modern pad, lines meet the labels, A OK / B BACK
+discs) and with KEYS (1112-0013: ENTER OK, BKSP BACK); SMOKE OK (970 draws a frame).
+
+Next: Harry's look on Windows; a keyboard page for the controls screen (the diagram stays the pad with the keyboard);
+other prompts with button pictures in the race or pause menu if any turn up (JUICED_PICS_LOG).
 
 ### 2026-11-11 - A race, the smoke test, the first Windows build
 
