@@ -3,6 +3,7 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
+- **Blocker: the game freezes when XACT tears down or changes a music track** (Harry on Windows: 4 s into a race; headless: a second boot as the saved profile loads). Three attempts failed; written up in the log (2026-11-12)
 - Controls: modern button pictures (setting modern_buttons, on): the prompts' A B Y and the controls page's pad; keyboard defaults (W S throttle and brake, A D steer, ...), the prompts show the keys while the keyboard plays; RB changes the view (White and Black swapped)
 - Milestone: 3 - a race headless: scripts/pad/race.txt drives race 1 (Arcade, Novice, San Ricardo route 1) at full throttle; SMOKE OK (916 draws a frame). Windows: builds and boots (windows-vm, 13ff78b; WARP only, no picture there)
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
@@ -10,6 +11,37 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (6a39c37 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, handle reuse, a DSOUND setter; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-12 - STOPPED: freeze when XACT closes a music track under its stream (three attempts)
+
+Harry's Windows run (7ced15b, log fetched from the share): menus fine, the race loads (present 2351, 44 s), frames stop
+at present 2540 (48.7 s, about 4 s in), no error; he closed it at 77 s. Not reproduced headless on a first boot (with
+RT_THREAD=1, the throttle held through the countdown too). Reproduced headless on a second boot (the profile saved,
+.local/hdd_second kept: `KEEP_HDD=1 scripts/harness.sh 60 scripts/pad/boot.txt` with that disk as .local/run/1/hdd):
+frames stop at 35 s, frame 2100, after the profile's music settings load.
+
+What happens (gdb, both cases): the main thread spins in XACT's update (game 0x19BE30 -> 0x29CF21 -> 0x2A433A ->
+0x2A2F6C -> 0x2A3C60 -> 0x2A3F27) inside the WMA decoder (0x283B07 ... 0x287EFF), its fetch 0x2835F4 asked thousands
+of times for bytes past the end of its buffer. The end: XACT's music teardown 0x29FE60 (here) or its track change
+0x2A072E (the race load) closes the track's file (0x29FEC4, 0x2A0054) while the stream is still decoded; the
+streamer's next ReadFile (0x28365B -> 0x1AF1BC) fails C0000008, it marks the end of the file (flags +0x40 bit 0x10)
+mid-packet, and the decoder waits for data that never comes. At the teardown the music player's state is 3 (+0x5C) and
+XACT's cue stop 0x29E400 is not called; the stream (0x3C5DE0, flags 0x48) stays active and keeps being decoded.
+
+Attempts:
+1. Handle reuse (GameInfo::handle_reuse, SDK 6a39c37, kept): the closed number goes to the next file opened, as on the
+   console. Got the first-boot race going headless, but here no file is opened in between: the read still fails.
+2. The fetch giving the bytes left past the end (an X86_FUNC of 0x2835F4): the decoder takes them and spins at the end.
+3. An end of stream at the packet reader's wait (hook 0x284755: E_FAIL when the buffer has ended): never reached; the
+   spinning fetches come through another of 0x283B5E's callers (0x2849C6, 0x284A83, 0x284B7B, 0x284C42 ...).
+Both experiments are removed.
+
+What I think is happening: on the console the stream is stopped before its file closes; here it is not. Candidates: a
+stop or pause that XACT leaves to DirectSound (a hosted stream reporting a state XACT does not expect: the cue is never
+seen as stopped), or the music thread (guest 5C, waiting in 0x2A01F3) running in an order the console's priorities
+would not allow. Next options: (a) follow XACT's stop/pause of a streaming cue into the hosted DSound calls it makes and
+compare with the library's own (the likely real fix); (b) keep a music file open after XACT closes it (defer the close)
+so its stream reads real data until it does stop: simple, but the teardown frees the stream's buffers right after.
 
 ### 2026-11-12 - Modern button pictures, keyboard controls
 
