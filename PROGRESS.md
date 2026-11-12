@@ -6,6 +6,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - The music freeze (Harry on Windows, 4 s into a race) is fixed in the SDK (7168ae0): not yet confirmed on Windows
 - Settings (F1 window): Modern button pictures (on), Skip intro movies (off)
 - PC settings in the game's menus: Options > PC SETTINGS (title menus and the pause menu), three pages of seven rows; headless only so far
+- Field of view (Game page of PC SETTINGS, fov_percent 50 to 150), the keyboard's own controls page, the mouse in the front end's menus (point, left click A, right click B): headless only so far
 - Controls: modern button pictures (setting modern_buttons, on): the prompts' A B Y and the controls page's pad; keyboard defaults (W S throttle and brake, A D steer, ...), the prompts show the keys while the keyboard plays; RB changes the view (White and Black swapped)
 - Milestone: 3 - a race headless: scripts/pad/race.txt drives race 1 (Arcade, Novice, San Ricardo route 1) at full throttle; SMOKE OK (916 draws a frame). Windows: builds and boots (windows-vm, 13ff78b; WARP only, no picture there)
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
@@ -13,6 +14,44 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-12 - Field of view, the keyboard's controls page, the mouse in the menus
+
+Harry: "Do 1-3" of the list offered (branch `extras`).
+
+1. Field of view. src/game/fov.cpp: the camera set-up 0x166A20 takes the vertical field of view in radians at
+   [esp+4]; an X86_FUNC scales its tangent by fov_percent for the race camera's four callers only (return addresses
+   0x1272B, 0x175B5, 0x177DE, 0x17DF0, found by scaling every caller and logging which the race used), so the menus'
+   cars and the 2D keep their shape. Setting fov_percent (50 to 150, JUICED_FOV for a run), the Game page's last row
+   FIELD OF VIEW in steps of 5. Evidence: the same race frame at 100 and 130, the wider one showing more road.
+2. The controls page with the keyboard. src/common/buttons.cpp KeysPage: while the keyboard plays
+   (input::UsingKeyboard) the page's pad picture is drawn as key caps, each at the end of its button's line, from the
+   bindings in use. Evidence: captures/1112-1347-ref_05801.png.
+3. The mouse in the menus. src/common/pointer.cpp, from the pad hook:
+   - The window showing is the last of the UI manager's stack (manager +0 to +4: "opts_bg", "opts_menu"), or the
+     message box over it (manager +0x44). The manager is each window's +0x40, taken at the pages' common open
+     0x188790 (X86_FUNC in src/game/hooks.cpp).
+   - Rows: button gadgets (type 4; the lowest one that starts above the pointer) and the items of a menu gadget
+     (type 6: items +0x11C to +0x120, current +0x13C; rows 22.3 lines apart for an item height of 0.04, from 2 below
+     the menu's top). A menu whose items lie side by side (Arcade's series, item height 0.25 in a bar 24 high) is left
+     alone.
+   - The selection is walked to the row under the pointer by presses of up and down (left and right for rows on one
+     line), 3 polls down and 5 up, only for 90 polls after the mouse last moved; a press that changes nothing stops
+     the walk for that row. Left click: A once the row is reached, or at once off the rows and on a screen with none.
+     Right click: B. Not while a window changes (manager +0xBC), not in a race (game +0x3C).
+   - Windows: the arrow shows while such a window is up (the runtime hides the cursor over the game: its WM_SETCURSOR
+     and its timer 0x5243 are answered first by a subclass of the window).
+   - Tests: JUICED_POINTER=poll:x:y:buttons,... or @file (read as the run goes), JUICED_POINTER_LOG=1.
+
+Evidence (headless, snaps, pointer from a file): the main menu's row follows the pointer (OPTIONS, ARCADE); a click
+opens Options; PC SETTINGS pointed at and clicked; its rows pointed at, a click stepping Show frame rate to ON; right
+click back to Options, to the main menu, then the quit message box, YES and NO pointed at, NO clicked; ARCADE, the
+series and the race chosen by clicks into the race. SMOKE OK (915 draws a frame); wincheck ok for the six files.
+Not done: the pause menu (in a race the pointer is off), lists that are not menus or buttons (Choose Race's list, the
+car screens: a click there is A on the current row). Nothing of this seen on Windows; the pointer's mapping there
+assumes the 2D spans the frame.
+
+Next: Harry's Windows run (the list in the entries below, plus these three).
 
 ### 2026-11-12 - PC settings in the game's own Options menu
 

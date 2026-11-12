@@ -32,6 +32,7 @@ using namespace kernel;
 
 namespace juiced {
 extern bool modern_buttons, skip_intro;  // src/common
+extern uint32_t fov_percent;
 }
 
 namespace {
@@ -208,7 +209,11 @@ const Page kPages[] = {
            s.renderer = (s.renderer + 1) % 2;
            app::Save();
        }},
-      FLAG("ALPHA TO COVERAGE", app::Get().alpha_coverage)}},
+      {"FIELD OF VIEW", [] { return std::to_string(juiced::fov_percent) + "%"; },
+       [](int d) {
+           juiced::fov_percent = uint32_t(std::clamp(int(juiced::fov_percent) + d * 5, 50, 150));
+           app::Save();
+       }}}},
 };
 constexpr int kPageCount = int(sizeof(kPages) / sizeof(kPages[0]));
 

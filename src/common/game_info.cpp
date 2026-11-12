@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <cctype>
@@ -12,7 +13,9 @@
 
 namespace juiced {
 extern bool modern_buttons;  // src/common/buttons.cpp
+void MenuPointer(input::Pad& pad);  // src/common/pointer.cpp
 bool skip_intro = false;      // no logo and intro movies at the start (Pad presses START through them)
+uint32_t fov_percent = 100;   // the race camera's field of view (src/game/fov.cpp)
 std::atomic<bool> intro_movie{false};  // the last movie opened is one of the boot's (HideFile)
 namespace {
 // keyboard (Windows virtual key codes: this file builds for the headless harness too), for the game's default layout
@@ -59,6 +62,7 @@ void Pad(int port, input::Pad& pad) {
     if (port != 0) return;
     constexpr int kBlackSlot = 4, kWhiteSlot = 5;  // Pad::analog: A B X Y Black White LT RT
     std::swap(pad.analog[kBlackSlot], pad.analog[kWhiteSlot]);
+    MenuPointer(pad);  // the mouse in the menus (src/common/pointer.cpp)
     // skip_intro: while one of the boot's movies is the last opened (HideFile), START is pressed for 3 polls in every
     // 24, as the player would to skip it; the title's movie (hub_01.bik) ends it before the title takes a press
     if (skip_intro && intro_movie.load()) {
@@ -73,6 +77,8 @@ void Init() {
     if (const char* e = std::getenv("JUICED_MODERN_BUTTONS"); e && *e) modern_buttons = *e == '1';
     if (const char* e = std::getenv("JUICED_SKIP_INTRO"); e && *e) skip_intro = *e == '1';
     if (skip_intro) LOGR("juiced: the logo and intro movies are skipped (skip_intro)");
+    if (const char* e = std::getenv("JUICED_FOV"); e && *e) fov_percent = uint32_t(std::atoi(e));
+    fov_percent = std::clamp<uint32_t>(fov_percent, 50, 150);
 }
 
 // GameInfo::hide_file, used to see the files opened: no file is hidden. While one of the boot's movies is the last
@@ -107,7 +113,9 @@ const app::GameInfo app::kGame = {
     .options = {{"modern_buttons", &juiced::modern_buttons, nullptr, "Modern button pictures",
                  "The prompts and the controls page as today's Xbox pad shows them; with the keyboard, the keys. Off, the console's."},
                 {"skip_intro", &juiced::skip_intro, nullptr, "Skip intro movies",
-                 "Starts without the THQ and Juice Games logos and the intro movie. Takes effect at the next start."}},
+                 "Starts without the THQ and Juice Games logos and the intro movie. Takes effect at the next start."},
+                {"fov_percent", nullptr, &juiced::fov_percent, "Field of view (%)",
+                 "50 to 150; 100 is the game's. The race camera's field of view, changed at once."}},
     .load = nullptr,                      // reads more from the settings file's toml::table
     .save = nullptr,                      // writes more into it
     .init = juiced::Init,                 // after the settings load: the harness's overrides

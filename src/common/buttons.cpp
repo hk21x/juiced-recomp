@@ -248,6 +248,60 @@ void PadPage(Canvas& c) {
     });
 }
 
+// a control's first key by name (its second when the first has none), "" unbound
+std::string DrivingKey(int control) {
+    std::array<uint16_t, 2> keys = input::ControlKeys(control);
+    std::string first = KeyLabel(keys[0]);
+    return first.empty() ? KeyLabel(keys[1]) : first;
+}
+
+// the controls page while the keyboard plays: the keys in the pad's place, each where its button's line ended, so the
+// game's labels around the picture name them (the page's three layouts move the labels, not the buttons)
+void KeysPage(Canvas& c) {
+    constexpr float kH = 15;  // a cap's height
+    auto cap = [&](float cx, float cy, const std::string& label) {
+        const float w = std::max(kH + 3, TextWidth(label.c_str(), kH * 0.42f) + 9);
+        Key(c, Area{cx - w / 2, cy - kH / 2, cx + w / 2, cy + kH / 2}, label.empty() ? "-" : label);
+        return w / 2;
+    };
+    std::vector<Segment> s;
+    // the triggers, above
+    for (auto [x, control] : {std::pair{89.f, input::kLT}, {171.f, input::kRT}}) {
+        cap(x, 48, DrivingKey(control));
+        s.push_back({{x, 28}, {x, 48 - kH / 2 - 1}});
+    }
+    // the face buttons and the view, to the right
+    for (auto [y, control] : {std::pair{40.f, input::kX}, {75.f, input::kY}, {95.f, input::kB}, {114.f, input::kA}, {162.f, input::kBlack}}) {
+        const float half = cap(214, y, DrivingKey(control));
+        s.push_back({{214 + half + 1, y}, {256, y}});
+    }
+    // steering, pause and driver info, to the left
+    {
+        const float a = cap(40, 99, DrivingKey(input::kLSLeft));
+        cap(40 + a + 14, 99, DrivingKey(input::kLSRight));
+        s.push_back({{16, 99}, {40 - a - 1, 99}});
+        const float p = cap(44, 137, DrivingKey(input::kStart));
+        s.push_back({{8, 137}, {44 - p - 1, 137}});
+        const float i = cap(44, 187, DrivingKey(input::kBack));
+        s.push_back({{8, 187}, {44 - i - 1, 187}});
+    }
+    // the glances (left, back, right) and under them the horn, below
+    {
+        cap(137, 190, DrivingKey(input::kRSLeft));
+        cap(161, 190, DrivingKey(input::kRSDown));
+        cap(185, 190, DrivingKey(input::kRSRight));
+        cap(161, 208, DrivingKey(input::kRThumb));
+        s.push_back({{161, 208 + kH / 2 + 1}, {161, 225}});
+    }
+    Lines(c, s);
+    Fill(c, Area{0, 92, 14, 106}, kWhite, [&](float x, float y) {
+        float l = PolygonDistance(x, y, {{1, 99}, {6, 95}, {6, 103}});
+        float r = PolygonDistance(x, y, {{13, 99}, {8, 103}, {8, 95}});
+        return std::min(l, r);
+    });
+    Text(c, "KEYBOARD", 128, 128, 9, 1.0f, Colour{200, 200, 204, 255});
+}
+
 // ---- the textures
 
 struct Look {
@@ -273,6 +327,14 @@ constexpr Known kKnown[] = {
 
 Look Wanted(Kind kind) {
     Look l;
+    if (kind == Kind::kPad && input::UsingKeyboard()) {
+        // the page's keys, named so that a changed binding draws it again
+        l.keys = true;
+        for (int control : {input::kLT, input::kRT, input::kX, input::kY, input::kB, input::kA, input::kBlack, input::kLSLeft,
+                            input::kLSRight, input::kStart, input::kBack, input::kRSLeft, input::kRSDown, input::kRSRight, input::kRThumb})
+            l.key += DrivingKey(control) + ",";
+        return l;
+    }
     if (kind != Kind::kPad && input::UsingKeyboard()) {
         int control = kind == Kind::kFaceA ? input::kA : kind == Kind::kFaceB ? input::kB : kind == Kind::kFaceX ? input::kX : input::kY;
         l.key = KeyFor(control);
@@ -292,7 +354,8 @@ std::vector<uint32_t> Draw(Kind kind, const Look& look, uint32_t size, int scale
     c.px.assign(size_t(c.size) * c.size, {0, 0, 0, 0});
     float s = float(size);
     if (kind == Kind::kPad) {
-        PadPage(c);
+        if (look.keys) KeysPage(c);
+        else PadPage(c);
     } else if (look.keys) {
         Key(c, Area{1.5f, s * 0.2f, s - 1.5f, s * 0.8f}, look.key);
     } else {
@@ -376,7 +439,7 @@ void Apply(Texture& t, const Look& look) {
     t.written = Fnv(texels, bytes);
     t.drawn = look;
     LOGI("juiced: button picture %08X (%ux%u) drawn as %s", t.data, t.size, t.size,
-         look.keys ? look.key.c_str() : look.modern ? "today's pad" : "the disc has it");
+         look.keys ? (t.kind == Kind::kPad ? "the keyboard's keys" : look.key.c_str()) : look.modern ? "today's pad" : "the disc has it");
 }
 
 bool LogPictures() {
