@@ -5,6 +5,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 ## Status
 - The music freeze (Harry on Windows, 4 s into a race) is fixed in the SDK (7168ae0): not yet confirmed on Windows
 - Settings (F1 window): Modern button pictures (on), Skip intro movies (off)
+- PC settings in the game's menus: Options > PC SETTINGS (title menus and the pause menu), three pages of seven rows; headless only so far
 - Controls: modern button pictures (setting modern_buttons, on): the prompts' A B Y and the controls page's pad; keyboard defaults (W S throttle and brake, A D steer, ...), the prompts show the keys while the keyboard plays; RB changes the view (White and Black swapped)
 - Milestone: 3 - a race headless: scripts/pad/race.txt drives race 1 (Arcade, Novice, San Ricardo route 1) at full throttle; SMOKE OK (916 draws a frame). Windows: builds and boots (windows-vm, 13ff78b; WARP only, no picture there)
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
@@ -12,6 +13,34 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-12 - PC settings in the game's own Options menu
+
+Harry asked for the PC settings as controllable items in the game's menus. src/game/pcmenu.cpp:
+- The menus are windows of gadgets from text files in ui.dat (";; Jet UI Window File": BeginButton, BeginText,
+  BeginMenu AddItem ...), each with a page object (vtable: open +0, message +4), registered by name with a UI manager
+  (0x99210 the front end, 0x99310 the pause menu; 0x18B780 registers, 0x18AE70 loads).
+- ui.dat still has the other platforms' graphics options window, opts_graphics (seven rows, RESET, DONE), and the
+  Options handler still opens it for an item "graph" (0x95736); the Xbox build removes that item (0x952F7) and has no
+  page for the window. Hooks at 0x99301 and 0x9939D register it with the Xbox Live options page's object (0x32E15C);
+  a hook at 0x9539B adds a "pc_settings" item to the Options menu as the build adds "xbox_live" (0x191C00, 0x191E60);
+  a hook at 0x95736 opens the window for it. The Xbox Live page's open 0x98D90 and message 0x98E30 are X86_FUNCs:
+  our window's rows, else the game's own (the Xbox Live options still open).
+- Rows: left/right (message types 3, 4) and A (5) step a setting, RESET_BUT is NEXT PAGE, DONE_BUT and B (0xC) go
+  back to opts_menu or opts_ingame_menu (manager +0xBC = 7, the name at +0xC0). Captions through the game's 0x195390
+  (ecx gadget + 0x10C, eax UTF-16). The two meter rows show label and value in the button; their meters are hidden
+  (gadget +0x58). Pages: Display (mode, resolution, aspect, v-sync, frame cap, show frame rate, pause in background),
+  Graphics (render scale, MSAA, edge smoothing, anisotropic, sharp 2D, world textures, sharpen), Game (modern buttons,
+  skip intro, keyboard, scaling filter, low latency, renderer, alpha to coverage), as EoN's rows.
+
+Evidence (headless, snaps): the item in Options; the page in the game's font; Aspect to 4:3, V-sync off, the cap 60 to
+144 by left/right; NEXT PAGE to Graphics; A stepping Sharpen 10 to 20%; from the pause menu in a race, B back to
+Options, the race resumed; the Xbox Live options page as before; SMOKE OK (949 draws a frame). Not seen on Windows;
+the display rows (mode, resolution) do nothing headless.
+
+Also noticed: the game writes D:\filelist.txt (the files it opened), which lands in the assets folder.
+
+Next: Harry's look on Windows.
 
 ### 2026-11-12 - Skip intro setting; the widescreen design settled, not built
 

@@ -80,3 +80,20 @@ Direct3D_CreateDevice = ["edx", "ebx", "esi", "eax", "stack", "ecx"]
 
 [[function]]  # reached only through a pointer (game 0x18CB0F calls it, from the race start); it follows a jump table, so
 at = 0x5D780  # the analysis took it for data: sub esp, 0x13C
+
+[[hook]]  # src/game/pcmenu.cpp: the PC settings window registered with the front end's options pages
+at = 0x99301
+call = "RegisterPcPage"
+
+[[hook]]  # src/game/pcmenu.cpp: and with the pause menu's
+at = 0x9939D
+call = "RegisterPcPage"
+
+[[hook]]  # src/game/pcmenu.cpp: the Options menu gets a PC SETTINGS item when it opens
+at = 0x9539B
+call = "AddPcItem"
+
+[[hook]]  # src/game/pcmenu.cpp: choosing it opens the PC settings window
+at = 0x95736
+call = "ChoosePcItem"
+on_true = 0x95A1D
