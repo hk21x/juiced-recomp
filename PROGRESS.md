@@ -3,14 +3,33 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
-- **Blocker: the game freezes when XACT tears down or changes a music track** (Harry on Windows: 4 s into a race; headless: a second boot as the saved profile loads). Three attempts failed; written up in the log (2026-11-12)
+- The music freeze (Harry on Windows, 4 s into a race) is fixed in the SDK (7168ae0): not yet confirmed on Windows
 - Controls: modern button pictures (setting modern_buttons, on): the prompts' A B Y and the controls page's pad; keyboard defaults (W S throttle and brake, A D steer, ...), the prompts show the keys while the keyboard plays; RB changes the view (White and Black swapped)
 - Milestone: 3 - a race headless: scripts/pad/race.txt drives race 1 (Arcade, Novice, San Ricardo route 1) at full throttle; SMOKE OK (916 draws a frame). Windows: builds and boots (windows-vm, 13ff78b; WARP only, no picture there)
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
-- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (6a39c37 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, handle reuse, a DSOUND setter; not yet on fork main: needs the all-games gate)
+- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-12 - The music freeze fixed: a stream's ENVELOPECOMPLETE status
+
+Cause: XACT stops a streaming cue with IDirectSoundStream_FlushEx (0x29F130, flags 1 or 5) and goes on decoding the
+stream each update (0x2A433A -> 0x2A2F6C -> 0x2A3C60) until the stream's status has DSSTREAMSTATUS_ENVELOPECOMPLETE
+(0x80000: 0x2A44D7 reads byte 2 bit 8), then clears its playing flag and calls Flush. The host's stream status had
+READY only, so a stopped music track never finished stopping: its flags stayed 0x48 (stop seen, still playing) and it
+was decoded for good. When its file was closed (the music teardown 0x29FE60 finds the player already stopped, state 3,
+and closes at once; the track change 0x2A072E the same) the streamer's read failed and the WMA decoder spun.
+
+Fix (SDK 7168ae0): a hosted stream reports ENVELOPECOMPLETE from a FlushEx until its next packet (the host flushes at
+once, so the release is over). GameInfo::handle_reuse (6a39c37) only hid the bug on the first-boot race and is removed
+from the SDK and the game.
+
+Evidence: the second-boot repro (.local/hdd_second) runs on past 35 s (frame 3960 at 69 s) with XBE_HANDLE_REUSE=0;
+the first-boot race 240 s without handle reuse and with RT_THREAD=1; a 480 s race (frame 28680, past a track's end), no
+trap; SMOKE OK (1003 draws a frame). Not yet run on Windows.
+
+Next: Harry's run on Windows (the race past its first seconds, his frame rate, the button pictures).
 
 ### 2026-11-12 - STOPPED: freeze when XACT closes a music track under its stream (three attempts)
 

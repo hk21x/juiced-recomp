@@ -84,7 +84,6 @@ const app::GameInfo app::kGame = {
     .ui = nullptr,                        // ImGui drawing each frame
     .pad = juiced::Pad,                   // RB plays White (the view), LB Black
     .rumble = nullptr,                    // changes a rumble before it is set
-    .handle_reuse = true,                 // XACT reads a closed music file's handle once more (sdk app.h)
     .default_keys = juiced::Keys,         // the keyboard's defaults, after the game's own layout
     .texture_bound = juiced::ButtonPictures,  // today's pad in the button pictures (src/common/buttons.cpp)
     // optional, after these: .achievements (conditions on guest memory), .same_code (other releases' xbe SHA-1s with
