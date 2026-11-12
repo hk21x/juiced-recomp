@@ -3,7 +3,7 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
-- Harry on Windows, 12b65c9 (3440x1440): past Arcade into a race (the 1d0d969 crash gone with SDK 9ed6b2f), the race "incredibly blurry": SDK 0de0637 (the scene target's width) and the speed blur's half texel, neither seen on Windows yet
+- Harry on Windows, 6f7d786 (3440x1440): still blurry, menus too (screenshot: the whole frame at the console's size, scaled up). SDK 4c5a099: the pass that copies the 640x960 frame into the frame buffer took averaged taps; not seen on Windows yet
 - The music freeze (Harry on Windows, 4 s into a race) is fixed in the SDK (7168ae0): not yet confirmed on Windows
 - Settings (F1 window): Modern button pictures (on), Skip intro movies (off)
 - PC settings in the game's menus: Options > PC SETTINGS (title menus and the pause menu), three pages of seven rows; headless only so far
@@ -12,9 +12,27 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Milestone: 3 - a race headless: scripts/pad/race.txt drives race 1 (Arcade, Novice, San Ricardo route 1) at full throttle; SMOKE OK (916 draws a frame). Windows: builds and boots (windows-vm, 13ff78b; WARP only, no picture there)
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
-- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
+- GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-12 - Still blurry at 6f7d786, menus too: the resolve pass's spread taps
+
+Harry: still blurry, the menus too, Speed blur no difference; his F12 shot (.local/harry/, 3440x1440): the whole
+race frame soft as a 640x480 picture scaled up, though his log has "640x960 (3440x2880 here)".
+- A menu frame (CAP, frame 2400) draws everything into the 640x960 target; one triangle (u = x, v = 2y) copies it
+  into the 640x480 frame buffer. The race does the same for its scene. So every picture goes through that pass.
+- BindTargetTexture gives a pass that shrinks a target spread taps (kTexWide: "each tap averaged over a console
+  texel", for glow chains whose upscaled taps would skip texels). 640x960 into 640x480 is "shrinking" (gh larger), so
+  each of its taps averaged 5.4 by 3 host texels: the console's resolution. 0de0637 widened that average (k follows
+  the target's width), which is why it was no better.
+SDK 4c5a099: gpu::ResolvesTallFrame (a target of the frame's width and twice its height read into a frame sized
+target) keeps plain taps, in both backends; the tap's own filter averages the two rows. The race's glow (640x480 into
+160x120) keeps its spread.
+Evidence: wincheck ok, SMOKE OK (977 draws a frame). The path is Windows only: not seen here.
+Also noted, not acted on: at race load "MultiSampleMode 2 with target 004E6CB8 (640x960), not a frame buffer: drawn
+2x2 to a pixel"; the picture's size is right in Harry's shot, so left alone.
+The speed blur's half texel (blur.cpp) is unproven either way: Harry saw no difference with the setting off.
 
 ### 2026-11-12 - Harry's Windows run of 12b65c9: in the race, very blurry
 
