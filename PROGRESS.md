@@ -4,6 +4,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
 - The music freeze (Harry on Windows, 4 s into a race) is fixed in the SDK (7168ae0): not yet confirmed on Windows
+- Settings (F1 window): Modern button pictures (on), Skip intro movies (off)
 - Controls: modern button pictures (setting modern_buttons, on): the prompts' A B Y and the controls page's pad; keyboard defaults (W S throttle and brake, A D steer, ...), the prompts show the keys while the keyboard plays; RB changes the view (White and Black swapped)
 - Milestone: 3 - a race headless: scripts/pad/race.txt drives race 1 (Arcade, Novice, San Ricardo route 1) at full throttle; SMOKE OK (916 draws a frame). Windows: builds and boots (windows-vm, 13ff78b; WARP only, no picture there)
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
@@ -11,6 +12,31 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-12 - Skip intro setting; the widescreen design settled, not built
+
+Skip intro movies (setting skip_intro, off; JUICED_SKIP_INTRO for the harness): while one of the boot's movies (THQ.bik,
+juicegames.bik, JuicedCGI_NTSC/_PAL.bik) is the last movie opened (GameInfo::hide_file used only to see the opens), the
+pad hook presses START for 3 polls in every 24, as the player would; hub_01.bik (the title's) ends it. Two other ways
+failed: the files reported missing leaves the game on a black screen waiting for a movie that never ends; jumping the
+movie step 0x103550 to its end at 0x103633 on the first step left an undecoded (green) movie up and the boot stalled.
+Evidence: no presses, the title at 16 s (the legal screens are the game's 15 s), still PRESS START at 30 s; SMOKE OK.
+
+Widescreen and ultrawide (investigated, nothing changed):
+- Cameras: the setter 0x166A20 logged. Scene cameras get aspect 0.5625 in widescreen (set by 0x197E57, 0x1272B);
+  2D and panel cameras 0.75 (some with +0x178 set: fov is a size), the cube map's 1. So a scene camera is told by its
+  0.5625, and going wider than 16:9 is: after the game's own sums, hfov = 2 atan(tan(hfov / 2) * frame / (16/9)), the
+  sine fields +0xAC and +0xB0 again, the vtable's first entry called again.
+- 2D: every pass (0x12DA30) sets its viewport (0x12DB14), clears, and pushes c22 = (2/w, -2/h) and c23 through
+  0x2AFC80 (D3DDevice_SetVertexShaderConstant1: ecx register + 96, edx four floats; not named yet) at 0x12DC5F. A
+  squeeze of those constants or viewports on the game's side cannot tell a HUD element from a full screen effect
+  (the speed blur's and fades' quads use the same programs), so it has to be per draw: the SDK's 2D squeeze
+  (gpu::ScreenDraw, ScreenExtent, DrawSpan, the shaders' hud constant) with a third program form, position =
+  (v0 + c[pre]) * c[mul] + c[add] then the viewport tail, and the 640x960 scene target accepted as a frame target
+  (the reference renderer's test wants a height of 480 or 576). Then GameInfo: squeeze_screen_programs, hud_aspect 4:3,
+  auto_fills_screen. That is shared SDK code and needs a GPU to check: for a session with Harry looking.
+
+Next: Harry's Windows run; then the widescreen work above with him.
 
 ### 2026-11-12 - Audio check, the second-boot race, reflections, widescreen findings, menus, soak
 

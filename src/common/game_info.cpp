@@ -1,13 +1,19 @@
 #include <array>
+#include <atomic>
+#include <cctype>
 #include <cstdint>
 #include <cstdlib>
+#include <string>
 #include <utility>
 
 #include "app/app.h"
 #include "core/input.h"
+#include "core/log.h"
 
 namespace juiced {
 extern bool modern_buttons;  // src/common/buttons.cpp
+bool skip_intro = false;      // no logo and intro movies at the start (Pad presses START through them)
+std::atomic<bool> intro_movie{false};  // the last movie opened is one of the boot's (HideFile)
 namespace {
 // keyboard (Windows virtual key codes: this file builds for the headless harness too), for the game's default layout
 // (Options > Controls, option 1): RT throttle, LT brake, the left stick steers, A parking brake, B gear up, X gear down
@@ -53,11 +59,36 @@ void Pad(int port, input::Pad& pad) {
     if (port != 0) return;
     constexpr int kBlackSlot = 4, kWhiteSlot = 5;  // Pad::analog: A B X Y Black White LT RT
     std::swap(pad.analog[kBlackSlot], pad.analog[kWhiteSlot]);
+    // skip_intro: while one of the boot's movies is the last opened (HideFile), START is pressed for 3 polls in every
+    // 24, as the player would to skip it; the title's movie (hub_01.bik) ends it before the title takes a press
+    if (skip_intro && intro_movie.load()) {
+        static uint32_t polls = 0;
+        if (polls++ % 24 < 3) pad.buttons |= 1u << input::kStart;
+    }
 }
 
-// after the settings load: JUICED_MODERN_BUTTONS (1 or 0) overrides the setting, for the headless harness
+// after the settings load: JUICED_MODERN_BUTTONS and JUICED_SKIP_INTRO (1 or 0) override the settings, for the
+// headless harness
 void Init() {
     if (const char* e = std::getenv("JUICED_MODERN_BUTTONS"); e && *e) modern_buttons = *e == '1';
+    if (const char* e = std::getenv("JUICED_SKIP_INTRO"); e && *e) skip_intro = *e == '1';
+    if (skip_intro) LOGR("juiced: the logo and intro movies are skipped (skip_intro)");
+}
+
+// GameInfo::hide_file, used to see the files opened: no file is hidden. While one of the boot's movies is the last
+// movie opened (D:\\movies\\THQ.bik, juicegames.bik and the intro, JuicedCGI_NTSC.bik or _PAL), intro_movie is set; with
+// skip_intro START is pressed through it (Pad)
+bool HideFile(const std::string& path) {
+    std::string n;
+    for (char c : path) n += char(std::tolower(static_cast<unsigned char>(c)));
+    if (n.size() < 4 || n.compare(n.size() - 4, 4, ".bik") != 0) return false;
+    bool intro = false;
+    for (const char* movie : {"\\thq.bik", "\\juicegames.bik", "\\juicedcgi_ntsc.bik", "\\juicedcgi_pal.bik"}) {
+        const size_t len = std::char_traits<char>::length(movie);
+        intro |= n.size() >= len && n.compare(n.size() - len, len, movie) == 0;
+    }
+    intro_movie = intro;
+    return false;
 }
 }  // namespace
 bool ButtonPictures(uint32_t header, uint32_t palette);  // src/common/buttons.cpp
@@ -74,7 +105,9 @@ const app::GameInfo app::kGame = {
     .missing = L"Put the game in the assets folder: its disc image (.iso), or default.xbe with its folders beside it.",
     .images = {{"default.xbe", "Juiced"}},  // each recompiled xbe and its exe, for title launches
     .options = {{"modern_buttons", &juiced::modern_buttons, nullptr, "Modern button pictures",
-                 "The prompts and the controls page as today's Xbox pad shows them; with the keyboard, the keys. Off, the console's."}},
+                 "The prompts and the controls page as today's Xbox pad shows them; with the keyboard, the keys. Off, the console's."},
+                {"skip_intro", &juiced::skip_intro, nullptr, "Skip intro movies",
+                 "Starts without the THQ and Juice Games logos and the intro movie. Takes effect at the next start."}},
     .load = nullptr,                      // reads more from the settings file's toml::table
     .save = nullptr,                      // writes more into it
     .init = juiced::Init,                 // after the settings load: the harness's overrides
@@ -84,6 +117,7 @@ const app::GameInfo app::kGame = {
     .ui = nullptr,                        // ImGui drawing each frame
     .pad = juiced::Pad,                   // RB plays White (the view), LB Black
     .rumble = nullptr,                    // changes a rumble before it is set
+    .hide_file = juiced::HideFile,        // hides nothing: notes when a boot movie is opened (skip_intro)
     .default_keys = juiced::Keys,         // the keyboard's defaults, after the game's own layout
     .texture_bound = juiced::ButtonPictures,  // today's pad in the button pictures (src/common/buttons.cpp)
     // optional, after these: .achievements (conditions on guest memory), .same_code (other releases' xbe SHA-1s with
