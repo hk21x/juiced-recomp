@@ -1,0 +1,13 @@
+# a second boot (a profile saved: KEEP_HDD=1): the movies skipped, the title, Profile Manager (the saved driver), Load
+# Successful, the main menu, Arcade, Novice series, race 1, the throttle held
+600 START
+900 START
+1200 START
+1500 START
+1900 START
+2300 START
+2700 DOWN
+2800 A
+3200 A
+3600 A
+4800 RT 9000

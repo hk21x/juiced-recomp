@@ -256,24 +256,25 @@ struct Look {
     bool operator==(const Look& o) const { return modern == o.modern && keys == o.keys && key == o.key; }
 };
 
-enum class Kind { kFaceA, kFaceB, kFaceY, kPad };
+enum class Kind { kFaceA, kFaceB, kFaceX, kFaceY, kPad };
 struct Known {
-    uint64_t hash;
+    uint64_t hash, palette;  // FNV-1a of its texels and of its own palette's colours
     uint32_t size;
     Kind kind;
 };
 // the disc's pictures (JUICED_PICS_LOG on the menus, the race and the controls page)
 constexpr Known kKnown[] = {
-    {0xD6B454E01B92FE99ull, 32, Kind::kFaceA},
-    {0x80C366933D75C91Eull, 32, Kind::kFaceB},
-    {0x2CE618996326D735ull, 32, Kind::kFaceY},
-    {0x158A8301606FDC3Eull, 256, Kind::kPad},
+    {0xD6B454E01B92FE99ull, 0x2E81EA7719F5C6F0ull, 32, Kind::kFaceA},
+    {0x80C366933D75C91Eull, 0x834D2B39FD26AC64ull, 32, Kind::kFaceB},
+    {0xBE010B0D0670D0F0ull, 0xBEDCB7A2AE053FAAull, 32, Kind::kFaceX},  // the Profile Manager's "X DELETE"
+    {0x2CE618996326D735ull, 0xACC212E34F794304ull, 32, Kind::kFaceY},
+    {0x158A8301606FDC3Eull, 0x03E0A61CEAFBD7DBull, 256, Kind::kPad},
 };
 
 Look Wanted(Kind kind) {
     Look l;
     if (kind != Kind::kPad && input::UsingKeyboard()) {
-        int control = kind == Kind::kFaceA ? input::kA : kind == Kind::kFaceB ? input::kB : input::kY;
+        int control = kind == Kind::kFaceA ? input::kA : kind == Kind::kFaceB ? input::kB : kind == Kind::kFaceX ? input::kX : input::kY;
         l.key = KeyFor(control);
         if (!l.key.empty()) {
             l.keys = true;
@@ -295,8 +296,8 @@ std::vector<uint32_t> Draw(Kind kind, const Look& look, uint32_t size, int scale
     } else if (look.keys) {
         Key(c, Area{1.5f, s * 0.2f, s - 1.5f, s * 0.8f}, look.key);
     } else {
-        const char* letter = kind == Kind::kFaceA ? "A" : kind == Kind::kFaceB ? "B" : "Y";
-        Colour colour = kind == Kind::kFaceA ? kGreen : kind == Kind::kFaceB ? kRed : kYellow;
+        const char* letter = kind == Kind::kFaceA ? "A" : kind == Kind::kFaceB ? "B" : kind == Kind::kFaceX ? "X" : "Y";
+        Colour colour = kind == Kind::kFaceA ? kGreen : kind == Kind::kFaceB ? kRed : kind == Kind::kFaceX ? kBlue : kYellow;
         Face(c, s / 2, s / 2, s / 2 - 2.5f, letter, colour);
     }
     std::vector<uint32_t> out(c.px.size());
@@ -386,12 +387,23 @@ bool LogPictures() {
     return on;
 }
 
+// the palette's colours hashed (D3DPalette: Common's top two bits the size code, Data physical at +4), 0 without one
+uint64_t PaletteHash(uint32_t palette) {
+    if (!palette) return 0;
+    const uint32_t entries = 256u >> (kernel::R32(palette) >> 30), data = mem::VirtualFromPhysical(kernel::R32(palette + 4));
+    if (!mem::IsCommitted(data) || !mem::IsCommitted(data + entries * 4 - 1)) return 0;
+    return Fnv(static_cast<const uint8_t*>(kernel::HostPtr(data)), entries * 4);
+}
+
 void Discover(const gpu::TextureDesc& d, uint32_t palette, uint64_t hash) {
-    static std::set<uint64_t> seen;
-    if (!seen.insert(hash).second) return;
-    LOGR("juiced: P8 %ux%u at %08X palette %08X hash %016llX", d.width, d.height, d.data, palette, (unsigned long long)hash);
-    char name[64];
-    std::snprintf(name, sizeof name, "pic_%016llX_%ux%u.bgra", (unsigned long long)hash, d.width, d.height);
+    static std::set<std::pair<uint64_t, uint64_t>> seen;
+    const uint64_t pal = PaletteHash(palette);
+    if (!seen.insert({hash, pal}).second) return;
+    LOGR("juiced: P8 %ux%u at %08X hash %016llX palette %08X hash %016llX", d.width, d.height, d.data, (unsigned long long)hash,
+         palette, (unsigned long long)pal);
+    char name[96];
+    std::snprintf(name, sizeof name, "pic_%016llX_%016llX_%ux%u.bgra", (unsigned long long)hash, (unsigned long long)pal, d.width,
+                  d.height);
     if (FILE* f = std::fopen(name, "wb")) {
         const auto* texels = static_cast<const uint8_t*>(kernel::HostPtr(d.data));
         const uint32_t colours = palette ? mem::VirtualFromPhysical(kernel::R32(palette + 4)) : 0;
@@ -427,7 +439,9 @@ bool ButtonPictures(uint32_t header, uint32_t palette) {
         const Known* known = nullptr;
         for (const Known& k : kKnown)
             if (k.hash == hash && k.size == d.width) known = &k;
-        if (!known || !palette) return false;
+        // the game binds a texture before its palette: the stage's palette is still the last texture's then, and the
+        // call that follows the palette's bind has the pair. Only that one is taken (the other's colours are not ours)
+        if (!known || !palette || PaletteHash(palette) != known->palette) return false;
         Texture t;
         t.data = d.data;
         t.size = d.width;

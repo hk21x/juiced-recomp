@@ -12,6 +12,35 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-12 - Audio check, the second-boot race, reflections, widescreen findings, menus, soak
+
+1. Audio (WAV= of a boot to race, scripts/wavstats.py): sound all the way: the movies (-23 dB RMS), menu music (-25),
+   the race (-10, clipping about 200 samples a second). The race's level comes from the game's own engine buffers, each
+   near full level (FINDINGS, Sound): for Harry's ears, not changed.
+2. scripts/pad/race2.txt: a later boot (KEEP_HDD=1 with a profile) through the Profile Manager and Load Successful to
+   Arcade race 1: Harry's path, 200 s with RT_THREAD=1, no freeze. scripts/pad/soak.py (SOAK_PAD): race 1, random
+   driving, the pause menu's Restart, again. scripts/soak.sh 12: no traps, frames to the end (frame 43020), memory flat
+   (RSS 111 MB).
+3. The coloured noise on car bodies and windows is the reference renderer drawing one frame on its own: the cube map's
+   faces are drawn a few a frame (FINDINGS). Eight frames in a row show clean reflections. Nothing to fix.
+4. Widescreen: the game's 3D is true 16:9 with the console's widescreen flag (it widens its own field of view); the
+   2D is 4:3 and so a third too wide at 16:9, as on the console. Keeping the 2D in proportion, and filling an ultrawide
+   screen, needs the SDK's 2D squeeze to recognise this game's 2D programs (scale and offset constants per viewport)
+   or a game hook on those constants, and a GPU to look at the result: not started (FINDINGS has the addresses).
+5. Menus walked live on a second boot without a trap: Xbox Live (sign-in, New Account, the dashboard question
+   answered NO), Multiplay (System Link Play, Search), Extras, Custom Race (a sprint in San Ricardo, afternoon, 4
+   cars), the pause menu and Restart. The Profile Manager's X DELETE icon is redrawn too (BE010B0D0670D0F0).
+   Button pictures now check the palette as well: the game binds a texture before its palette, so the hook saw each
+   icon with the previous texture's palette first and could have rewritten that one's colours; each known picture
+   carries its own palette's hash and is taken only with it.
+
+Evidence: SMOKE OK (914 draws a frame); the Profile Manager with X A B as today's discs (captures/1112-0924-ref_01900.png).
+Not tried: answering YES to the dashboard question, a system link game, Career beyond its first screens, the tutorial
+videos, Cheats.
+
+Next: Harry's Windows run (the race freeze, frame rate, sound level, button pictures); then the 2D proportions
+and ultrawide with him looking.
+
 ### 2026-11-12 - The music freeze fixed: a stream's ENVELOPECOMPLETE status
 
 Cause: XACT stops a streaming cue with IDirectSoundStream_FlushEx (0x29F130, flags 1 or 5) and goes on decoding the
