@@ -17,6 +17,19 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-13 - Harry on c20619d: the rev needle beside its dial, the rivals' markers
+- Harry (3440x1440): speed blur row works, pause screens fixed, HUD at the edges; the rev needle showed left of
+  its dial as it moved (screenshot); the lap number "still occasionally" flickers.
+- The needle's quad turns about the dial's middle and its corners pass the dial's rectangle (y 313 against the
+  rectangle's 316 in the first log): HudAnchor's "inside the last gadget" test, by corners with 2 pixels of slack,
+  failed then and the needle was drawn unanchored. Now by the quad's middle (and no larger than the gadget).
+- The rivals' markers (RIVAL0 to RIVAL4, triangles sliding along the bottom) were anchored in three steps; now in
+  proportion to their place, so they cross the frame's width evenly.
+- Headless 21:9: the needle in the dial. SMOKE OK.
+- The lap number: its big digit is small in some headless frames and full in others (the countdown, 5 s into the
+  race) at 16:9 and 21:9 alike, anchored or not: the game seems to animate its size. Not known what Harry sees
+  flicker; asked him.
+
 ### 2026-11-13 - The HUD at the frame's sides, the pause screens' prompt bar, the race's level, a speed blur row
 - Harry on 15c4a3a: nitro and the pause menu's flickering header both fixed. Asked for: the race HUD at the screen's
   edges, the pause menu at 21:9, the race's loudness, a speed blur row in PC SETTINGS.

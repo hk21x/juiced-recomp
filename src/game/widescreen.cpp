@@ -42,17 +42,17 @@ namespace juiced {
 uint32_t MenuManager();  // src/common/pointer.cpp
 bool HudAnchored();      // src/common/pointer.cpp: not switched off (JUICED_HUD_ANCHOR=0, tests)
 namespace {
-int g_anchor = 0;                    // -1 the left edge, 1 the right, 0 none
+float g_anchor = 0;                  // -1 the left edge, 1 the right, between them in proportion, 0 none
 float g_anchor_box[4] = {0, 0, 0, 0};  // the gadget's rectangle: left, top, right, bottom
 
 bool Mapped(uint32_t va, uint32_t bytes) { return va >= 0x10000 && mem::IsCommitted(va) && mem::IsCommitted(va + bytes - 1); }
 
 // which side a quad of x0, y0 to x1, y1 belongs to when it is one of the window's gadgets' rectangles: 2 when none
-// matches. The race's HUD (hud): by the gadget's middle. The race's other windows (the pause menu and what it opens:
+// matches (-1 the left edge, 1 the right, 0 neither). The race's HUD (hud): by the gadget's middle. The race's other windows (the pause menu and what it opens:
 // a dark strip from the left edge, the menu's panel and rows, a bar with the A and B prompts at the bottom right):
 // the bar and what lies on it go to the right edge, where the bar ends on a 4:3 frame; the rest stays (the menu in
 // the centred part, where the mouse takes it to be).
-int GadgetSide(uint32_t window, bool hud, float x0, float y0, float x1, float y1, float box[4]) {
+float GadgetSide(uint32_t window, bool hud, float x0, float y0, float x1, float y1, float box[4]) {
     const uint32_t first = kernel::R32(window + 0x5C), end = kernel::R32(window + 0x60);
     for (uint32_t at = first; first && at < end && at - first < 0x400; at += 4) {
         const uint32_t g = kernel::R32(at);
@@ -64,6 +64,9 @@ int GadgetSide(uint32_t window, bool hud, float x0, float y0, float x1, float y1
             continue;
         box[0] = gx, box[1] = gy, box[2] = gx + gw, box[3] = gy + gh;
         const float mid = gx + gw * 0.5f;
+        // the rivals' markers (RIVAL0 to RIVAL4) slide along the bottom: across the frame's width as across the
+        // 4:3 screen's, not in steps
+        if (hud && !std::memcmp(kernel::HostPtr(g + 0x38), "RIVAL", 5)) return std::clamp((mid - 320) / 320, -1.0f, 1.0f);
         if (hud) return mid < 240 ? -1 : mid > 400 ? 1 : 0;
         const uint32_t type = kernel::R32(g + 0xC);  // 2 a picture, 3 a text: nothing the mouse points at
         return (type == 2 || type == 3) && gy >= 400 && gy + gh <= 445 && gx >= 150 && gw < 500 ? 1 : 0;
@@ -71,11 +74,11 @@ int GadgetSide(uint32_t window, bool hud, float x0, float y0, float x1, float y1
     return 2;
 }
 
-void SetAnchor(int side) {
+void SetAnchor(float side) {
     g_anchor = side;
     const float k = Squeeze();
     d3d::State().squeeze_beyond = side != 0 && k < 1;
-    d3d::State().squeeze_shift = side != 0 && k < 1 ? float(side) * 320.0f * (1 - k) / k : 0.0f;
+    d3d::State().squeeze_shift = side != 0 && k < 1 ? side * 320.0f * (1 - k) / k : 0.0f;
 }
 }  // namespace
 
@@ -88,8 +91,11 @@ float AnchorShift() { return d3d::State().squeeze_beyond ? d3d::State().squeeze_
 // follows it)
 bool HudAnchor(float x0, float y0, float x1, float y1) {
     if (!HudAnchored() || Squeeze() >= 1) return false;
-    // within the gadget last matched (a dial's needle, a meter's bar): the same anchor
-    if (g_anchor && x0 >= g_anchor_box[0] - 2 && y0 >= g_anchor_box[1] - 2 && x1 <= g_anchor_box[2] + 2 && y1 <= g_anchor_box[3] + 2)
+    // about the gadget last matched (a dial's needle, a meter's bar): the same anchor. By the quad's middle: a needle
+    // turns about the dial's and its quad's corners pass the dial's rectangle (it showed beside the dial then)
+    const float mx = (x0 + x1) * 0.5f, my = (y0 + y1) * 0.5f;
+    if (g_anchor && mx >= g_anchor_box[0] && my >= g_anchor_box[1] && mx <= g_anchor_box[2] && my <= g_anchor_box[3] &&
+        x1 - x0 <= g_anchor_box[2] - g_anchor_box[0] + 8 && y1 - y0 <= g_anchor_box[3] - g_anchor_box[1] + 8)
         return true;
     // the HUD, then the windows over it from the one showing down
     const uint32_t m = MenuManager(), gm = kernel::R32(0x372B54);
@@ -100,7 +106,7 @@ bool HudAnchor(float x0, float y0, float x1, float y1) {
             const uint32_t window = kernel::R32(at - 4);
             if (!Mapped(window, 0x64)) continue;
             const bool hud = !std::strcmp(static_cast<const char*>(kernel::HostPtr(window)), "hud_race");
-            const int side = GadgetSide(window, hud, x0, y0, x1, y1, g_anchor_box);
+            const float side = GadgetSide(window, hud, x0, y0, x1, y1, g_anchor_box);
             if (side == 2) continue;
             SetAnchor(side);
             return side != 0 || hud;
