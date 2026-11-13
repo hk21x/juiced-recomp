@@ -17,6 +17,20 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-13 - The race timer: CVTSS2SI rounds as MXCSR says (SDK 2eb6014)
+- Harry on a7426b8: still happening. His 240 fps recording (.local/win, 610 frames) shows it: TIME reads 00:01:92,
+  02:17, 03:65, 03:98, then 03:02, 03:28: the seconds one ahead from .50 to .99 of every second.
+- The formatter 0x62740 ("%02d:%02d:%02d" at 0x2F708C) converts minutes, seconds and hundredths with 0x2D4B0, which
+  is CVTSS2SI eax, [esp+4]. The game's startup sets MXCSR's rounding control to truncate (0x186AA0: or 0x6000); the
+  recompiler's sse_cvt always rounded to nearest. 0x2D4B0 is the game's float to int everywhere (the glow's blend
+  constant among others), so more than the timer was a unit off.
+- SDK 2eb6014: sse_cvt(ctx, v) takes the rounding from ctx.mxcsr (CVTSS2SI, CVTPS2PI); generated code passes ctx.
+  The one-argument form stays for code generated before.
+- This also explains "01:00:00" in Harry's earlier shots (minutes rounded up from 30 s) and probably the lap digit's
+  flicker he first reported. The "HUD texts keep their own gadget's anchor" change (41c9a57) was a deduction for a
+  different mechanism; kept, it is right in itself.
+- SMOKE OK. Next: Harry's run.
+
 ### 2026-11-13 - Harry on 0d831fe: the times jump and flicker for a few ms (SDK 41c9a57)
 - Harry: needle and rivals' markers right; in a race the timings jump now and then and flicker for a few
   milliseconds.
