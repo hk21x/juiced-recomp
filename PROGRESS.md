@@ -17,6 +17,16 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-13 - The menus' header and footer bands run the frame's width
+- Harry: at 21:9 the bands stay in the 4:3 area; "anything nice we can do with those?"
+- A band is two 256x64 tiles (P8), 0 to about 323 and 320 to about 643 of 640, moving a little, drawn by the 2D quad
+  functions' D3DDevice_DrawVerticesUP calls. `[[hook]]`s at 0x12E4AB, 0x12E66A, 0x12E831, 0x12EB12, 0x12ED67 (and
+  after each): a textured 4-vertex strip from one edge of the frame to its middle is drawn unsqueezed
+  (gpu::State::no_squeeze, put back after), so each half runs from the middle to the frame's edge, its streaks wider.
+  The flame art, logo and text over them stay in proportion in the 4:3 area.
+- Evidence: headless main menu at 3440x1440 (FRAME_ASPECT_X100=239): both bands edge to edge. SMOKE OK, wincheck ok.
+  Left: the black strip behind the footer's text still ends at the 4:3 area's sides. Not seen on Windows.
+
 ### 2026-11-13 - The mouse in the pause menu
 - The pause menu's windows ('hud_pause', its message boxes, the in-race options) are in another UI manager than the
   front end's, made at the race's load; the pointer only knew the front end's (from 0x188790) and was off in a race.

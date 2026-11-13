@@ -9,7 +9,9 @@
 //   is, and what is drawn in it is left as drawn (gpu::State::no_squeeze): the scene keeps its shape.
 // - The speed blur's passes (src/game/blur.cpp) are full screen effects with corners inside the frame.
 // - The movies are 4:3 pictures: see PassViewport.
+#include <algorithm>
 #include <atomic>
+#include <cmath>
 #include <cstring>
 
 #include "app/app.h"
@@ -50,4 +52,38 @@ void PassViewport(X86Context& ctx, uint8_t* /*base*/) {
     kernel::W32(scratch, uint32_t(left + 0.5f));
     kernel::W32(scratch + 8, uint32_t(right + 0.5f) - uint32_t(left + 0.5f));
     kernel::W32(ctx.esp, scratch);
+}
+
+// at the 2D quads' D3DDevice_DrawVerticesUP calls (config/juiced.toml): the vertices' x, y are in 640x480.
+// The menus' header and footer bands are two tiles, 0 to 320 and 320 to 640: squeezed with the rest of the 2D they
+// end at the 4:3 area's sides with the backdrop beyond. A textured quad from one edge of the frame to its middle is
+// left unsqueezed instead, so the band runs the frame's whole width (its picture, streaks of colour, wider).
+namespace {
+bool g_band_was = false, g_band = false;
+}
+void BandQuad(X86Context& ctx, uint8_t* /*base*/) {
+    g_band = false;
+    if (juiced::Squeeze() >= 1 || d3d::State().no_squeeze) return;
+    // (primitive, vertices, their address, the bytes of one)
+    const uint32_t v = kernel::R32(ctx.esp + 8), stride = kernel::R32(ctx.esp + 12);
+    if (kernel::R32(ctx.esp) != 6 || kernel::R32(ctx.esp + 4) != 4 || stride < 8 || stride > 64) return;
+    float lo = 1e9f, hi = -1e9f;
+    for (uint32_t i = 0; i < 4; i++) {
+        float x;
+        std::memcpy(&x, kernel::HostPtr(v + i * stride), 4);
+        lo = std::min(lo, x), hi = std::max(hi, x);
+    }
+    // (the tiles overlap a little and move: 0 to 323.2, 320 to 643.2 in the main menu)
+    const bool left = lo <= 0.5f && lo >= -6 && std::fabs(hi - 320) <= 6;
+    const bool right = hi >= 639.5f && hi <= 646 && std::fabs(lo - 320) <= 6;
+    if (!left && !right) return;
+    g_band = true;
+    g_band_was = d3d::State().no_squeeze;
+    d3d::State().no_squeeze = true;
+}
+
+// after that draw
+void BandQuadDone(X86Context& /*ctx*/, uint8_t* /*base*/) {
+    if (g_band) d3d::State().no_squeeze = g_band_was;
+    g_band = false;
 }

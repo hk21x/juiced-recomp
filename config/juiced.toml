@@ -114,3 +114,45 @@ call = "SpeedBlurPassDone"
 [[hook]]
 at = 0x12DB14
 call = "PassViewport"
+
+# a 2D quad drawn (the D3DDevice_DrawVerticesUP of 0x12E370, 0x12E4F0, 0x12E6B0, 0x12E910 and 0x12EB60): half of a header or footer band, from an edge of the frame
+# to its middle, keeps its edge on a wide frame (src/game/widescreen.cpp)
+[[hook]]
+at = 0x12E4AB
+call = "BandQuad"
+
+[[hook]]
+at = 0x12E4B0
+call = "BandQuadDone"
+
+[[hook]]
+at = 0x12E66A
+call = "BandQuad"
+
+[[hook]]
+at = 0x12E66F
+call = "BandQuadDone"
+
+[[hook]]
+at = 0x12E831
+call = "BandQuad"
+
+[[hook]]
+at = 0x12E836
+call = "BandQuadDone"
+
+[[hook]]
+at = 0x12EB12
+call = "BandQuad"
+
+[[hook]]
+at = 0x12EB17
+call = "BandQuadDone"
+
+[[hook]]
+at = 0x12ED67
+call = "BandQuad"
+
+[[hook]]
+at = 0x12ED6C
+call = "BandQuadDone"
