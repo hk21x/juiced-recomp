@@ -17,6 +17,22 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-13 - Harry's captures of 21d3205 (F3, .local/win/1611xx): what they show so far
+- Six frames: 161100 race start, 161114 / 161133 / 161216 orange shapes, 161159 pause menu, 161228 nitrous.
+- Nitrous (161228, 1342 draws): after the resolve (draw 1204) draw 1205 adds a 160x120 buffer (0x819D0800, four taps,
+  ps 0x3C17C0, blend SRCALPHA / ONE) over the frame; 1206 writes only that buffer's alpha from the frame (blend
+  SRCALPHA / CONSTANTALPHA, colour write alpha only); then five 12-vertex lists and a 10-vertex fan draw the frame
+  over itself. Headless the same draws exist and add nothing white. Why the buffer is white on D3D12: not known.
+- Orange shapes: Harry says they are the track's turn indicators. Not tied to a draw. Ruled out: the HUD's corner
+  arrow (a 2D quad, right), the car's decal and wheel draws, the trusses' textures (small struts). The litter
+  particles (vs 0x53A681, 238 vertices, two passes) are a candidate only.
+- Wires: 19 opaque grey line strips, the one read a sagging curve of 9 points: the game's cables, not stray lines.
+  The reference renderer draws no lines at all (colour 0), so headless never showed them.
+- The pause menu's header band and panel stay in the 4:3 area at 21:9 (161159): the band hooks do not reach it.
+- A threaded draw does not copy its vertex buffer (render_thread.cpp Draw): a buffer rewritten between two draws
+  of one batch would be read late. Not shown to happen here; noted.
+- Next: a capture with XBE_CAPTURE_DRAWS=0-1500 (the target after every draw) of the orange shapes and of nitrous.
+
 ### 2026-11-13 - The menus' header and footer bands run the frame's width
 - Harry: at 21:9 the bands stay in the 4:3 area; "anything nice we can do with those?"
 - A band is two 256x64 tiles (P8), 0 to about 323 and 320 to about 643 of 640, moving a little, drawn by the 2D quad
