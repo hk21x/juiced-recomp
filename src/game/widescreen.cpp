@@ -9,9 +9,12 @@
 //   is, and what is drawn in it is left as drawn (gpu::State::no_squeeze): the scene keeps its shape.
 // - The speed blur's passes (src/game/blur.cpp) are full screen effects with corners inside the frame.
 // - The movies are 4:3 pictures: see PassViewport.
+// - The race's HUD (the window "hud_race": lap and position at the top corners, the times, the map and the dials at
+//   the bottom corners) belongs at the frame's sides, not the 4:3 part's: see HudAnchor.
 #include <algorithm>
 #include <atomic>
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
 
 #include "app/app.h"
@@ -25,6 +28,91 @@ namespace juiced {
 float Squeeze() {
     const float frame = app::FrameAspect(), hud = app::HudAspect();
     return frame > hud + 1e-3f ? hud / frame : 1.0f;
+}
+}  // namespace juiced
+
+// The race's HUD at the frame's sides. Each of the window's gadgets (pointers at +0x5C to +0x60; a gadget's name at
+// +0x38, hidden at +0x58, its rectangle x, y, width, height at +0x8C as fractions of 640x480) draws a quad of its
+// rectangle through the 2D quad calls (BandQuad) before its text, needle or meter. A quad matching a gadget in the
+// frame's left or right part sets that side as the anchor for the draws that follow, until the next quad that is
+// not inside that gadget: they are squeezed as the rest of the 2D is and moved so the 640 wide layout's edge lies on
+// the frame's edge (gpu::State::squeeze_beyond, squeeze_shift). Gadgets about the middle (messages, the countdown,
+// the split times) stay in the centred part.
+namespace juiced {
+uint32_t MenuManager();  // src/common/pointer.cpp
+bool HudAnchored();      // src/common/pointer.cpp: not switched off (JUICED_HUD_ANCHOR=0, tests)
+namespace {
+int g_anchor = 0;                    // -1 the left edge, 1 the right, 0 none
+float g_anchor_box[4] = {0, 0, 0, 0};  // the gadget's rectangle: left, top, right, bottom
+
+bool Mapped(uint32_t va, uint32_t bytes) { return va >= 0x10000 && mem::IsCommitted(va) && mem::IsCommitted(va + bytes - 1); }
+
+// which side a quad of x0, y0 to x1, y1 belongs to when it is one of the window's gadgets' rectangles: 2 when none
+// matches. The race's HUD (hud): by the gadget's middle. The race's other windows (the pause menu and what it opens:
+// a dark strip from the left edge, the menu's panel and rows, a bar with the A and B prompts at the bottom right):
+// the bar and what lies on it go to the right edge, where the bar ends on a 4:3 frame; the rest stays (the menu in
+// the centred part, where the mouse takes it to be).
+int GadgetSide(uint32_t window, bool hud, float x0, float y0, float x1, float y1, float box[4]) {
+    const uint32_t first = kernel::R32(window + 0x5C), end = kernel::R32(window + 0x60);
+    for (uint32_t at = first; first && at < end && at - first < 0x400; at += 4) {
+        const uint32_t g = kernel::R32(at);
+        if (!Mapped(g, 0x9C) || kernel::R32(g + 0x58)) continue;
+        float r[4];
+        std::memcpy(r, kernel::HostPtr(g + 0x8C), 16);
+        const float gx = r[0] * 640, gy = r[1] * 480, gw = r[2] * 640, gh = r[3] * 480;
+        if (std::fabs(gx - x0) > 1.5f || std::fabs(gy - y0) > 1.5f || std::fabs(gx + gw - x1) > 1.5f || std::fabs(gy + gh - y1) > 1.5f)
+            continue;
+        box[0] = gx, box[1] = gy, box[2] = gx + gw, box[3] = gy + gh;
+        const float mid = gx + gw * 0.5f;
+        if (hud) return mid < 240 ? -1 : mid > 400 ? 1 : 0;
+        const uint32_t type = kernel::R32(g + 0xC);  // 2 a picture, 3 a text: nothing the mouse points at
+        return (type == 2 || type == 3) && gy >= 400 && gy + gh <= 445 && gx >= 150 && gw < 500 ? 1 : 0;
+    }
+    return 2;
+}
+
+void SetAnchor(int side) {
+    g_anchor = side;
+    const float k = Squeeze();
+    d3d::State().squeeze_beyond = side != 0 && k < 1;
+    d3d::State().squeeze_shift = side != 0 && k < 1 ? float(side) * 320.0f * (1 - k) / k : 0.0f;
+}
+}  // namespace
+
+// the anchor's shift in the 640 wide layout, 0 with none
+float AnchorShift() { return d3d::State().squeeze_beyond ? d3d::State().squeeze_shift : 0.0f; }
+
+// a 2D quad from x0, y0 to x1, y1: true when it is one of the HUD's (the anchor set for it and what follows it)
+
+// a 2D quad from x0, y0 to x1, y1: true when it is anchored, or one of the HUD's (the anchor set for it and for what
+// follows it)
+bool HudAnchor(float x0, float y0, float x1, float y1) {
+    if (!HudAnchored() || Squeeze() >= 1) return false;
+    // within the gadget last matched (a dial's needle, a meter's bar): the same anchor
+    if (g_anchor && x0 >= g_anchor_box[0] - 2 && y0 >= g_anchor_box[1] - 2 && x1 <= g_anchor_box[2] + 2 && y1 <= g_anchor_box[3] + 2)
+        return true;
+    // the HUD, then the windows over it from the one showing down
+    const uint32_t m = MenuManager(), gm = kernel::R32(0x372B54);
+    const bool race = Mapped(gm, 0x40) && kernel::R32(gm + 0x3C) != 0 && Mapped(m, 0x48);
+    const uint32_t first = race ? kernel::R32(m) : 0, end = race ? kernel::R32(m + 4) : 0;
+    if (first && end > first && end - first <= 0x40) {
+        for (uint32_t at = end; at > first; at -= 4) {
+            const uint32_t window = kernel::R32(at - 4);
+            if (!Mapped(window, 0x64)) continue;
+            const bool hud = !std::strcmp(static_cast<const char*>(kernel::HostPtr(window)), "hud_race");
+            const int side = GadgetSide(window, hud, x0, y0, x1, y1, g_anchor_box);
+            if (side == 2) continue;
+            SetAnchor(side);
+            return side != 0 || hud;
+        }
+    }
+    if (g_anchor) SetAnchor(0);
+    return false;
+}
+
+// a frame ends: nothing of the next one is anchored until a HUD quad says so
+void EndAnchor() {
+    if (g_anchor || d3d::State().squeeze_beyond) SetAnchor(0);
 }
 }  // namespace juiced
 
@@ -48,7 +136,9 @@ void PassViewport(X86Context& ctx, uint8_t* /*base*/) {
     if (!inset) return;
     static const uint32_t scratch = mem::AllocSystem(24);
     std::memcpy(kernel::HostPtr(scratch), kernel::HostPtr(vp), 24);
-    const float left = 320 + (float(x) - 320) * k, right = 320 + (float(x + w) - 320) * k;
+    // (a HUD gadget's pass, the map: at the side its gadget is anchored to)
+    const float shift = juiced::AnchorShift();
+    const float left = 320 + (float(x) + shift - 320) * k, right = 320 + (float(x + w) + shift - 320) * k;
     kernel::W32(scratch, uint32_t(left + 0.5f));
     kernel::W32(scratch + 8, uint32_t(right + 0.5f) - uint32_t(left + 0.5f));
     kernel::W32(ctx.esp, scratch);
@@ -67,12 +157,14 @@ void BandQuad(X86Context& ctx, uint8_t* /*base*/) {
     // (primitive, vertices, their address, the bytes of one)
     const uint32_t v = kernel::R32(ctx.esp + 8), stride = kernel::R32(ctx.esp + 12);
     if (kernel::R32(ctx.esp) != 6 || kernel::R32(ctx.esp + 4) != 4 || stride < 8 || stride > 64) return;
-    float lo = 1e9f, hi = -1e9f;
+    float lo = 1e9f, hi = -1e9f, top = 1e9f, bottom = -1e9f;
     for (uint32_t i = 0; i < 4; i++) {
-        float x;
-        std::memcpy(&x, kernel::HostPtr(v + i * stride), 4);
-        lo = std::min(lo, x), hi = std::max(hi, x);
+        float xy[2];
+        std::memcpy(xy, kernel::HostPtr(v + i * stride), 8);
+        lo = std::min(lo, xy[0]), hi = std::max(hi, xy[0]);
+        top = std::min(top, xy[1]), bottom = std::max(bottom, xy[1]);
     }
+    if (juiced::HudAnchor(lo, top, hi, bottom)) return;
     // (the tiles overlap a little and move: 0 to 323.2, 320 to 643.2 in the main menu)
     const bool left = lo <= 0.5f && lo >= -6 && std::fabs(hi - 320) <= 6;
     const bool right = hi >= 639.5f && hi <= 646 && std::fabs(lo - 320) <= 6;
@@ -86,4 +178,11 @@ void BandQuad(X86Context& ctx, uint8_t* /*base*/) {
 void BandQuadDone(X86Context& /*ctx*/, uint8_t* /*base*/) {
     if (g_band) d3d::State().no_squeeze = g_band_was;
     g_band = false;
+}
+
+// the frame's present (0x12B9F0: the two swaps): the HUD's anchor ends with the frame
+X86_EXTERN_FUNC(__imp__sub_0012B9F0);
+X86_FUNC(sub_0012B9F0) {
+    juiced::EndAnchor();
+    __imp__sub_0012B9F0(ctx, base);
 }

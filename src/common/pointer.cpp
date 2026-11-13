@@ -211,6 +211,17 @@ void SetMenuManager(uint32_t manager) {
     if (g_manager.exchange(manager) != manager) LOGI("juiced: UI manager %08X", manager);
 }
 
+uint32_t MenuManager() { return g_manager.load(); }
+// the race's HUD and pause menu at the frame's sides on a wide frame (src/game/widescreen.cpp); JUICED_HUD_ANCHOR=0
+// leaves them in the centred 4:3 part (tests)
+bool HudAnchored() {
+    static const bool off = [] {
+        const char* e = std::getenv("JUICED_HUD_ANCHOR");
+        return e && *e == '0';
+    }();
+    return !off;
+}
+
 // GameInfo::pad, controller 1
 void MenuPointer(input::Pad& pad) {
     static Pointer last;

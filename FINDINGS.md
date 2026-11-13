@@ -33,6 +33,9 @@ game's own code and data, with its addresses).
 - **[console]** In a race the mixed output is about 15 dB above the menus' (-10 dB RMS against -25) and clips a little
   (about 200 samples a second): three or four voices each near full level (gain 0.47) plus the music. XACT sets every
   mix bin's headroom to 0 (0x29C744). Not known whether the console sounds the same: to be judged by ear on Windows.
+  The race's voices are 3D (headroom 0, about twenty at once); the menus' music is a 2D ADPCM voice and the race's
+  music a PCM stream, both with the library's 6 dB of headroom. Setting effects_percent (default 50) scales the 3D
+  voices only (GameInfo::voice_3d_level).
 
 ## Menus
 - First boot: warning, movies, title, a profile is made and saved ("Save Successful"), main menu. Later boots:

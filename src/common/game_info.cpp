@@ -17,6 +17,10 @@ void MenuPointer(input::Pad& pad);  // src/common/pointer.cpp
 bool skip_intro = false;      // no logo and intro movies at the start (Pad presses START through them)
 bool speed_blur = true;       // the race's speed blur (src/game/blur.cpp)
 uint32_t fov_percent = 100;   // the race camera's field of view (src/game/fov.cpp)
+// the level of the engines and effects (the game's 3D DirectSound voices: not the music, the menus' sounds or the
+// movies), percent. 50 is 6 dB under the disc's mix as mixed here, where a race came out about 15 dB over the menus
+// and clipped (FINDINGS, Sound); a recording of the game played has it 6 to 10 dB over
+uint32_t effects_percent = 50;
 std::atomic<bool> intro_movie{false};  // the last movie opened is one of the boot's (HideFile)
 namespace {
 // keyboard (Windows virtual key codes: this file builds for the headless harness too), for the game's default layout
@@ -80,6 +84,7 @@ void Init() {
     if (skip_intro) LOGR("juiced: the logo and intro movies are skipped (skip_intro)");
     if (const char* e = std::getenv("JUICED_FOV"); e && *e) fov_percent = uint32_t(std::atoi(e));
     fov_percent = std::clamp<uint32_t>(fov_percent, 50, 150);
+    if (const char* e = std::getenv("JUICED_EFFECTS"); e && *e) effects_percent = uint32_t(std::atoi(e));
 }
 
 // GameInfo::hide_file, used to see the files opened: no file is hidden. While one of the boot's movies is the last
@@ -118,7 +123,9 @@ const app::GameInfo app::kGame = {
                 {"fov_percent", nullptr, &juiced::fov_percent, "Field of view (%)",
                  "50 to 150; 100 is the game's. The race camera's field of view, changed at once."},
                 {"speed_blur", &juiced::speed_blur, nullptr, "Speed blur",
-                 "The blur towards the screen's edges at speed. Off, the race is drawn without it."}},
+                 "The blur towards the screen's edges at speed. Off, the race is drawn without it."},
+                {"effects_percent", nullptr, &juiced::effects_percent, "Engine and effects level (%)",
+                 "0 to 100; 100 is the disc's mix, which is far louder in a race than in the menus and clips. Music is not changed."}},
     .load = nullptr,                      // reads more from the settings file's toml::table
     .save = nullptr,                      // writes more into it
     .init = juiced::Init,                 // after the settings load: the harness's overrides
@@ -134,6 +141,7 @@ const app::GameInfo app::kGame = {
     .default_keys = juiced::Keys,         // the keyboard's defaults, after the game's own layout
     .texture_bound = juiced::ButtonPictures,  // today's pad in the button pictures (src/common/buttons.cpp)
     .auto_fills_screen = true,            // the scene cameras follow the frame's shape past 16:9 (src/game/fov.cpp)
+    .voice_3d_level = [] { return float(std::min<uint32_t>(juiced::effects_percent, 100)) / 100.0f; },  // engines and effects
     .squeeze_flat_programs = true,        // the 2D's programs: (v0 + c) * c + c, no matrix
     .line_width = 0.35f,                  // the overhead wires are line strips: fine, not a console pixel wide
     // optional, after these: .achievements (conditions on guest memory), .same_code (other releases' xbe SHA-1s with

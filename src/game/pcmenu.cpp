@@ -31,8 +31,8 @@
 using namespace kernel;
 
 namespace juiced {
-extern bool modern_buttons, skip_intro;  // src/common
-extern uint32_t fov_percent;
+extern bool modern_buttons, skip_intro, speed_blur;  // src/common
+extern uint32_t fov_percent, effects_percent;
 }
 
 namespace {
@@ -196,7 +196,20 @@ const Page kPages[] = {
      {FLAG("MODERN BUTTON PICTURES", juiced::modern_buttons),
       FLAG("SKIP INTRO MOVIES", juiced::skip_intro),
       FLAG("KEYBOARD PLAY", app::Get().keyboard),
-      {"SCALING FILTER", [] { return std::string(app::Get().scale_filter ? "SHARP" : "BILINEAR"); },
+      {"FIELD OF VIEW", [] { return std::to_string(juiced::fov_percent) + "%"; },
+       [](int d) {
+           juiced::fov_percent = uint32_t(std::clamp(int(juiced::fov_percent) + d * 5, 50, 150));
+           app::Save();
+       }},
+      FLAG("SPEED BLUR", juiced::speed_blur),
+      {"ENGINE AND EFFECTS LEVEL", [] { return std::to_string(juiced::effects_percent) + "%"; },
+       [](int d) {
+           juiced::effects_percent = uint32_t(std::clamp(int(juiced::effects_percent) + d * 10, 0, 100));
+           app::Save();
+       }}}},
+    // (rows without a label are hidden)
+    {"SYSTEM",
+     {{"SCALING FILTER", [] { return std::string(app::Get().scale_filter ? "SHARP" : "BILINEAR"); },
        [](int) {
            auto& s = app::Get();
            s.scale_filter = s.scale_filter ? 0 : 1;
@@ -207,11 +220,6 @@ const Page kPages[] = {
        [](int) {
            auto& s = app::Get();
            s.renderer = (s.renderer + 1) % 2;
-           app::Save();
-       }},
-      {"FIELD OF VIEW", [] { return std::to_string(juiced::fov_percent) + "%"; },
-       [](int d) {
-           juiced::fov_percent = uint32_t(std::clamp(int(juiced::fov_percent) + d * 5, 50, 150));
            app::Save();
        }}}},
 };
@@ -280,10 +288,40 @@ void SetCaption(X86Context& ctx, uint32_t gadget, const std::string& text) {
     }
 }
 
+// a gadget's top in the window's 480 lines (its rectangle at +0x8C: x, y, width, height as fractions of the screen)
+float TopOf(uint32_t gadget) {
+    float y;
+    std::memcpy(&y, HostPtr(gadget + 0x8C + 4), 4);
+    return y * 480;
+}
+
+// a page with fewer rows than the window has: everything in the unused rows' bands (the button, its value and
+// arrows) is hidden, and shown again when the page turns
+void HideUnusedRows(const Page& page) {
+    static std::vector<uint32_t> hidden;
+    for (uint32_t g : hidden) W32(g + kGadgetHidden, 0);
+    hidden.clear();
+    const uint32_t next_page = Find(g_window, "RESET_BUT");
+    for (int i = 0; i < kRows; i++) {
+        if (page.rows[i].label) continue;
+        const uint32_t button = Find(g_window, kSlots[i].button);
+        const uint32_t below = i + 1 < kRows ? Find(g_window, kSlots[i + 1].button) : next_page;
+        if (!button || !below) continue;
+        const float top = TopOf(button) - 2, bottom = TopOf(below) - 2;
+        EachGadget(g_window, [&](uint32_t g) {
+            if (R32(g + kGadgetHidden) || TopOf(g) < top || TopOf(g) >= bottom) return;
+            W32(g + kGadgetHidden, 1);
+            hidden.push_back(g);
+        });
+    }
+}
+
 void Show(X86Context& ctx) {
     const Page& page = kPages[g_page];
+    HideUnusedRows(page);
     for (int i = 0; i < kRows; i++) {
         const Row& row = page.rows[i];
+        if (!row.label) continue;
         if (kSlots[i].value) {
             SetCaption(ctx, Find(g_window, kSlots[i].button), row.label);
             SetCaption(ctx, Find(g_window, kSlots[i].value), row.text());
@@ -405,7 +443,7 @@ X86_FUNC(sub_00098E30) {
     } else if (type == kSelect && gadget && Named(gadget, "RESET_BUT")) {
         g_page = (g_page + 1) % kPageCount;
         Show(ctx);
-    } else if ((type == kLeft || type == kRight || type == kSelect) && row >= 0) {
+    } else if ((type == kLeft || type == kRight || type == kSelect) && row >= 0 && kPages[g_page].rows[row].label) {
         kPages[g_page].rows[row].step(type == kLeft ? -1 : 1);
         Show(ctx);
     }

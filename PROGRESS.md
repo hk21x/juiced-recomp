@@ -4,10 +4,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
 - Harry on Windows, f6215b1 (3440x1440): "blur mostly fixed"; lines across the screen (the scene's wires, line strips a console pixel wide) and everything stretched. SDK 7c45c2e + src/game/widescreen.cpp: 4:3, 16:9 and the screen's shape, headless only so far
-- Widescreen: 3D 16:9 by the game, wider by fov.cpp; 2D squeezed to a centred 4:3 by the SDK (flat programs); the race HUD sits in that 4:3 part (not spread to the edges yet)
+- Widescreen: 3D 16:9 by the game, wider by fov.cpp; 2D squeezed to a centred 4:3 by the SDK (flat programs); the race HUD and the pause screens' prompt bar anchored to the frame's sides (HudAnchor; headless only so far)
 - The music freeze (Harry on Windows, 4 s into a race) is fixed in the SDK (7168ae0): not yet confirmed on Windows
-- Settings (F1 window): Modern button pictures (on), Skip intro movies (off)
-- PC settings in the game's menus: Options > PC SETTINGS (title menus and the pause menu), three pages of seven rows; headless only so far
+- Settings (F1 window): Modern button pictures (on), Skip intro movies (off), Field of view, Speed blur (on), Engine and effects level (50%)
+- PC settings in the game's menus: Options > PC SETTINGS (title menus and the pause menu), four pages of up to seven rows; headless only so far
 - Field of view (Game page of PC SETTINGS, fov_percent 50 to 150), the keyboard's own controls page, the mouse in the front end's menus (point, left click A, right click B): headless only so far
 - Controls: modern button pictures (setting modern_buttons, on): the prompts' A B Y and the controls page's pad; keyboard defaults (W S throttle and brake, A D steer, ...), the prompts show the keys while the keyboard plays; RB changes the view (White and Black swapped)
 - Milestone: 3 - a race headless: scripts/pad/race.txt drives race 1 (Arcade, Novice, San Ricardo route 1) at full throttle; SMOKE OK (916 draws a frame). Windows: builds and boots (windows-vm, 13ff78b; WARP only, no picture there)
@@ -16,6 +16,34 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-13 - The HUD at the frame's sides, the pause screens' prompt bar, the race's level, a speed blur row
+- Harry on 15c4a3a: nitro and the pause menu's flickering header both fixed. Asked for: the race HUD at the screen's
+  edges, the pause menu at 21:9, the race's loudness, a speed blur row in PC SETTINGS.
+- HUD (src/game/widescreen.cpp, HudAnchor): the race's HUD is the window "hud_race", about 60 gadgets; each draws a
+  quad of its rectangle through the 2D quad calls before its text, needle or meter. A quad matching a gadget whose
+  middle is left of 240 or right of 400 anchors what follows to that edge of the frame
+  (gpu::State::squeeze_beyond, squeeze_shift = +-320 (1 - k) / k) until a quad outside that gadget; the map's pass
+  (PassViewport) moves with it; the present (0x12B9F0) ends it. Messages, the countdown and split times stay centred.
+  Headless at 16:9 and 21:9: laps, times and map at the left edge, position and dials at the right.
+  (The reference renderer at 21:9 draws the big lap and position digits as slivers, anchored or not; Harry's D3D12
+  capture at 21:9 has them whole.)
+- Pause screens: the menu stays in the centred part (the mouse's mapping unchanged); the bar at the bottom right
+  with the A and B prompts (pictures and texts from y 400 to 445, x from 150) goes to the right edge, where it ends
+  on a 4:3 frame. The dark strip from the left edge already reached it. First tried the pause menu's rows at the left
+  edge: its Options screens are the same template and stayed centred, so the menu jumped sideways; dropped.
+  Headless at 21:9: hud_pause and opts_ingame_menu.
+- Sound: a race's 3D voices (about twenty, engines and effects, head relative) have headroom 0 where the menus'
+  music (2D ADPCM) and the race's music (a PCM stream) have the library's 6 dB. SDK 81a5508: GameInfo::voice_3d_level.
+  Setting effects_percent (default 50, -6 dB): menus -25.6 dB RMS as before, the race -13.5 (was -9.3), clipped
+  samples in 10 s 0 to 2 (were 8651). A recording of the game played (the video Harry linked; platform unknown)
+  has its race 6 to 10 dB over its menus; ours was 15, now about 12. A guess at the level, for Harry's ears.
+- PC SETTINGS: four pages. GAME has SPEED BLUR and ENGINE AND EFFECTS LEVEL; SCALING FILTER, LOW LATENCY and
+  RENDERER moved to SYSTEM (4/4). A page's unused rows hide everything in their bands. Headless: all four pages.
+- One run of the harness crashed at boot (0.43 s, segmentation fault) right after a rebuild; two repeats and every
+  run since were fine. Not understood.
+- SMOKE OK, wincheck ok. Not seen on Windows yet.
+- Next: Harry's run. Open: the race timer at 01:00:00 in his shots, smoke.sh telling a race from a menu.
 
 ### 2026-11-13 - Nitro's white-out: the front buffer slot held the back buffer (SDK 62cffef)
 - Harry on b3f44c0: chevrons right, cables right, nitro "less overwhelming but still a very bright white", the pause
