@@ -12,6 +12,7 @@
 
 namespace juiced {
 void SetMenuWindow(uint32_t window);  // src/common/pointer.cpp
+void SetMenuManager(uint32_t manager);  // src/common/pointer.cpp
 }
 
 // the pages' common open (each page's open calls it with its window): the window showing, for the mouse in the menus
@@ -19,4 +20,12 @@ X86_EXTERN_FUNC(__imp__sub_00188790);
 X86_FUNC(sub_00188790) {
     juiced::SetMenuWindow(kernel::R32(ctx.esp + 4));
     __imp__sub_00188790(ctx, base);
+}
+
+// a page registered with a UI manager (stdcall: manager, window name, page object): the manager in use, which in a
+// race is another one (the pause menu's pages, 0x99310)
+X86_EXTERN_FUNC(__imp__sub_0018B780);
+X86_FUNC(sub_0018B780) {
+    juiced::SetMenuManager(kernel::R32(ctx.esp + 4));
+    __imp__sub_0018B780(ctx, base);
 }

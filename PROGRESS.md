@@ -17,6 +17,16 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-13 - The mouse in the pause menu
+- The pause menu's windows ('hud_pause', its message boxes, the in-race options) are in another UI manager than the
+  front end's, made at the race's load; the pointer only knew the front end's (from 0x188790) and was off in a race.
+- src/game/hooks.cpp: 0x18B780 (a page registered: manager, name, page) gives the manager in use
+  (juiced::SetMenuManager); a race registers the pause menu's pages (0x99310), the front end its own on the way back.
+  In a race the pointer works only over a window with rows, and a click off the rows is not A.
+- Evidence (headless, JUICED_POINTER=@file): the pointer over RESTART moves the highlight; a click on ABANDON RACE
+  opens "Quit race?", a click on YES returns to Arcade's race list, where the pointer's window is found again.
+  SMOKE OK; wincheck ok. Not seen on Windows.
+
 ### 2026-11-13 - Correction: c6027d4's SurfaceOf check was not at fault (SDK 6e3fac6 only removes it)
 - I blamed it for pad scripts missing the race (race2: a Lobby screen; race.txt: Career's Driver Betting). Wrong: with
   the check back and REF=5000 the race is reached. The cause is the capture rate: REF=60..150 slows the run, the

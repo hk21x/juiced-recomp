@@ -8,8 +8,8 @@
 // the message box over it (manager +0x44; the
 // manager is each window's +0x40, taken from the pages' common open 0x188790, src/game/hooks.cpp). The pointer moves
 // the selection as the d-pad would, by presses of up and down, so the game's own rules, highlights and sounds hold; it
-// only does so after the mouse has moved or clicked, so a resting mouse leaves the keyboard and the pad alone. Only
-// in the front end (the game object's +0x3C clear): a press in a race would reach the car.
+// only does so after the mouse has moved or clicked, so a resting mouse leaves the keyboard and the pad alone. In a
+// race (the game object's +0x3C set) only over a window with rows, the pause menu's: a press would reach the car.
 //
 // JUICED_POINTER=poll:x:y:buttons,... (headless): the pointer from each pad poll on, in 640x480; buttons 1 left, 2 right.
 // JUICED_POINTER_LOG=1: each window's buttons and menus in the log as the pointer meets it.
@@ -206,6 +206,10 @@ bool Places(uint32_t window, const Pointer& p, Place& under, Place& current) {
 
 // the pages' common open (src/game/hooks.cpp), for the windows' manager
 void SetMenuWindow(uint32_t window) { g_manager = kernel::R32(window + kManager); }
+// a page registered with a manager (src/game/hooks.cpp): the race's own manager, which the pause menu's windows are in
+void SetMenuManager(uint32_t manager) {
+    if (g_manager.exchange(manager) != manager) LOGI("juiced: UI manager %08X", manager);
+}
 
 // GameInfo::pad, controller 1
 void MenuPointer(input::Pad& pad) {
@@ -221,11 +225,21 @@ void MenuPointer(input::Pad& pad) {
     if (Readable(manager, 0x100) && R32(manager + 4) > R32(manager) && R32(manager + 4) - R32(manager) <= 0x40)
         window = R32(R32(manager + 4) - 4);
     if (Readable(manager, 0x100) && R32(manager + kModal)) window = R32(manager + kModal);  // a message box over it
-    if (!PointerAt(p) || !Readable(window, 0x100) || !Readable(kGame, 4) || !Readable(R32(kGame), 0x40) ||
-        R32(R32(kGame) + 0x3C)) {
+    if (!PointerAt(p) || !Readable(window, 0x100) || !Readable(kGame, 4) || !Readable(R32(kGame), 0x40)) {
         armed = 0, click = false;
         ShowArrow(false);
         return;
+    }
+    // in a race only a window with rows counts (the pause menu and what it opens): the race's own windows have
+    // none, and a press there would reach the car
+    const bool race = R32(R32(kGame) + 0x3C) != 0;
+    if (race) {
+        Place u, c;
+        if (R32(manager + kTransition) || !Places(window, p, u, c)) {
+            armed = 0, click = false, pulse = 0;
+            ShowArrow(false);
+            return;
+        }
     }
     const uint32_t pressed = p.buttons & ~last.buttons;
     if (std::fabs(p.x - last.x) + std::fabs(p.y - last.y) > 0.5f || pressed) armed = 90;
@@ -259,7 +273,7 @@ void MenuPointer(input::Pad& pad) {
     Place under, current;
     const bool any = Places(window, p, under, current);
     ShowArrow(any);
-    if ((pressed & 1) && !under.gadget) {  // off the rows, or a screen with none (a series, a car to choose): A
+    if ((pressed & 1) && !under.gadget && !race) {  // off the rows, or a screen with none (a series, a car to choose): A
         held = input::kA, pulse = 8;
         Press(pad, held);
         return;
