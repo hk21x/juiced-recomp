@@ -17,6 +17,25 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-13 - Nitro's white-out: the front buffer slot held the back buffer (SDK 62cffef)
+- Harry on b3f44c0: chevrons right, cables right, nitro "less overwhelming but still a very bright white", the pause
+  menu's header band flickers (not new).
+- The glow: draw N+1 (0x131C00) adds white where a 160x120 mask's alpha is set, then updates the mask from the
+  frame's alpha: mask = (0.70 x frame alpha)^2 + 0.65 x mask (vertex alpha at object +0x16C, blend constant
+  0x31397C). Harry's per-draw dumps had the HUD and the nitro vignette in the mask though the frame was clean
+  after its resolve.
+- Cause: the game keeps two frame-texture objects (three texture headers each, class vtable 0x313448), one made
+  from the device's back buffer slot and one from its front buffer slot, each caching that buffer's memory address,
+  and swaps the two after every Swap (0x12BAFA, device object +0x208 / +0x20C) as the library rotates the memory
+  (its Swap 0x2AB2F0 rotates Data and Lock). The SDK put the back buffer in both slots (no FrameSurfaces in the
+  5849 layout), so both objects cached one address: every other frame the glow's mask, the speed blur and the
+  nitro passes sampled the frame before, HUD and vignette included, and the mask fed on it.
+- SDK: the front slot (CDevice_FrontBuffer) holds the front buffer. Headless: the mask pass's texture 0 is the
+  frame's own memory on both parities (03D86000 / 03EB3000), before it was 03D86000 always. SMOKE OK, wincheck ok.
+  CreateDevice and Reset now log the multisample type and swap effect (Juiced: 0x11, flip).
+- Not seen on Windows yet. May also explain a faint glow on the HUD and ghosting in the speed blur.
+- Next: Harry's run; the pause menu's flickering header band; the race HUD in the 4:3 area.
+
 ### 2026-11-13 - The orange shapes: the turn indicators, drawn twice the size (SDK 915f909)
 - Harry: the orange shapes are the track's turn indicators (chevrons on the corner boards). His second captures
   (XBE_CAPTURE_DRAWS=0-1500, pulled by scp from the VM into .local/win/captures/164806) show the target after each
