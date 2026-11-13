@@ -17,6 +17,15 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-13 - d55de0f built on the new Windows VM (recomp-vm, C:\Testing\juiced-recomp)
+- The old windows-vm is gone; the new one builds in `C:\Testing\juiced-recomp` (game files from `C:\ISOs`), VS 2022
+  Build Tools 17.14 + clang, `build.bat`, no errors. WARP, about 3.7 frames/s. d55de0f had not been pushed; it is now.
+- Its shots (not seen by me, described by recomp-vm): the intro movie is a 1073x725 picture in a 1924x1061 frame =
+  640:432, the game's own top/bottom bars plus our side bars (the same headless at 16:9: 480x432 of 640x480). The
+  title at 1600x900 (`JUICED_SKIP_INTRO=1`): the backdrop movie fills the width unstretched, the 2D in a centred
+  1200x900 area. A black strip about 38 px high across the top of the title - not looked into.
+- Next: Harry's run on his GPU (4:3, 16:9, 21:9; the wires; the mouse; the HUD's place; the orange quads).
+
 ### 2026-11-12 - Widescreen (4:3, 16:9, the screen's shape) and the wires
 
 Harry at f6215b1: "Blur mostly fixed. Now some visual bugs of lines across the screen. Also, can we fix the 4:3, 16:9
