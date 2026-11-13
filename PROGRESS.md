@@ -17,6 +17,15 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-13 - Harry's Windows run of d55de0f: a crash 55 s in (the menus)
+- "exception C0000005 ... on guest thread 14, read guest 003EFB04", guest stack 0x12EB17 (after the 2D code's call of
+  D3DDevice_DrawVerticesUP 0x2ABE70, vertices on the stack), 0x12EEAC, 0x195D0F.
+- recomp-vm matched the host address against d3d8.cpp.obj: SyncDeferred, `R32(st.vb + 4)` of stream 0's vertex
+  buffer at 0x3EFB00, a page not readable (past the image: heap given back). The same kind as 1d0d969's Arcade crash.
+- SDK c6027d4: SyncDeferred leaves a stream whose header is not committed alone; SurfaceOf likewise. SMOKE OK, wincheck ok.
+  Not reproduced headless; the fix is from the dump.
+- Next: rebuild on recomp-vm, Harry's run.
+
 ### 2026-11-13 - d55de0f built on the new Windows VM (recomp-vm, C:\Testing\juiced-recomp)
 - The old windows-vm is gone; the new one builds in `C:\Testing\juiced-recomp` (game files from `C:\ISOs`), VS 2022
   Build Tools 17.14 + clang, `build.bat`, no errors. WARP, about 3.7 frames/s. d55de0f had not been pushed; it is now.
