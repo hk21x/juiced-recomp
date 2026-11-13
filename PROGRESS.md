@@ -17,6 +17,17 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-13 - Harry on 0d831fe: the times jump and flicker for a few ms (SDK 41c9a57)
+- Harry: needle and rivals' markers right; in a race the timings jump now and then and flicker for a few
+  milliseconds.
+- Likely cause (not reproduced headless): a gadget's text is pushed into the push buffer by the game itself and is
+  only read at the next library call. That is usually one of the next gadget's state setters, before the hook at its
+  quad changes the anchor; when the next gadget needs no state set, it is the quad's own draw, after the hook, and
+  the text took the next gadget's squeeze_shift for that frame.
+- SDK 41c9a57: d3d::Pending() reads what was pushed so far. SetAnchor (on a change), BandQuad and PassViewport
+  call it before changing State. SMOKE OK, wincheck ok.
+- Next: Harry's run.
+
 ### 2026-11-13 - Harry on c20619d: the rev needle beside its dial, the rivals' markers
 - Harry (3440x1440): speed blur row works, pause screens fixed, HUD at the edges; the rev needle showed left of
   its dial as it moved (screenshot); the lap number "still occasionally" flickers.

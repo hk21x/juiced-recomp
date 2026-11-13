@@ -75,6 +75,8 @@ float GadgetSide(uint32_t window, bool hud, float x0, float y0, float x1, float 
 }
 
 void SetAnchor(float side) {
+    // what the gadget before pushed itself (its text) is drawn as it was anchored
+    if (side != g_anchor) d3d::Pending();
     g_anchor = side;
     const float k = Squeeze();
     d3d::State().squeeze_beyond = side != 0 && k < 1;
@@ -132,6 +134,7 @@ void PassViewport(X86Context& ctx, uint8_t* /*base*/) {
     const uint32_t x = kernel::R32(vp), w = kernel::R32(vp + 8);
     const float k = juiced::Squeeze();
     const bool inset = k < 1 && w && w < 600 && x + w <= 640;
+    if (inset != d3d::State().no_squeeze) d3d::Pending();
     d3d::State().no_squeeze = inset;
     // A movie drawn across the frame (Bink's YUY2 texture, 640x480 for 4:3): the boot's logos and intro keep their
     // shape with bars at the sides; the menus' backdrops fill the frame's width at their shape, cropped above and
@@ -175,6 +178,7 @@ void BandQuad(X86Context& ctx, uint8_t* /*base*/) {
     const bool left = lo <= 0.5f && lo >= -6 && std::fabs(hi - 320) <= 6;
     const bool right = hi >= 639.5f && hi <= 646 && std::fabs(lo - 320) <= 6;
     if (!left && !right) return;
+    d3d::Pending();
     g_band = true;
     g_band_was = d3d::State().no_squeeze;
     d3d::State().no_squeeze = true;
