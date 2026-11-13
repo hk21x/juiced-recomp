@@ -17,6 +17,21 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-13 - The orange shapes: the turn indicators, drawn twice the size (SDK 915f909)
+- Harry: the orange shapes are the track's turn indicators (chevrons on the corner boards). His second captures
+  (XBE_CAPTURE_DRAWS=0-1500, pulled by scp from the VM into .local/win/captures/164806) show the target after each
+  draw: the sheet appears at draw 525, a 22-vertex strip with the chevron texture (512x32 DXT5), additive, drawn
+  "aa 2x2". Headless the same quad failed the depth test whole (colour 0), so the boards were blank there.
+- Cause: the glow materials set D3DRS_MULTISAMPLERENDERTARGETMODE 4X (0x2A9900) around their draws on the 640x960
+  scene target. The console's library (0x2AA390) then halves its viewport scale (device +599/+600 = 0.5) and sets
+  the viewport again, so with the hardware's two samples a pixel each way the draw lands where the others do. Ours
+  gave the programs the whole viewport in c-38/c-37 and drew 2x2 to a pixel: twice the size from the corner.
+- SDK 915f909: GameInfo::sample_scaled_viewport (Juiced sets it): UpdateViewportConstants scales by 1 / aa_x, aa_y,
+  and UpdateSampleScale refreshes them. Off for other titles (not tested against them).
+- Evidence: headless, race frame 7000: the quad now writes 1292 pixels and the corner's boards show orange
+  chevrons. SMOKE OK, wincheck ok. Not seen on Windows yet. The nitrous white-out is not explained by this (its
+  glow pass adds what these materials write into the frame's alpha): to check on the rebuild.
+
 ### 2026-11-13 - Harry's captures of 21d3205 (F3, .local/win/1611xx): what they show so far
 - Six frames: 161100 race start, 161114 / 161133 / 161216 orange shapes, 161159 pause menu, 161228 nitrous.
 - Nitrous (161228, 1342 draws): after the resolve (draw 1204) draw 1205 adds a 160x120 buffer (0x819D0800, four taps,
