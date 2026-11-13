@@ -17,6 +17,16 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-13 - c6027d4's SurfaceOf check was wrong (554d836 on Harry's PC has it)
+- Headless at 554d836 the pad scripts no longer reached the race (race2: a Lobby screen; race.txt: Career's Driver
+  Betting), yet smoke.sh said OK: those screens draw a 3D scene of about 910 draws a frame too. At 14451fd both reach
+  the race. Cause: `mem::IsCommitted(header + 19)` in SurfaceOf is false for some valid surface headers, whose data
+  then read 0. SDK 6e3fac6 takes that check out; the stream check in SyncDeferred (the crash's fix) stays.
+- Evidence: race2 and race.txt reach the race again (REF frames). SMOKE OK.
+- smoke.sh cannot tell a race from a menu over a 3D scene: to mend (a race-only draw or the game's race flag).
+- Harry's run of 554d836: no crash. Reported: title bands end at the 4:3 area; the wires and orange arrows in a
+  race; the mouse does nothing in the pause menu; nitrous puts a strong white gradient over the screen.
+
 ### 2026-11-13 - Harry's Windows run of d55de0f: a crash 55 s in (the menus)
 - "exception C0000005 ... on guest thread 14, read guest 003EFB04", guest stack 0x12EB17 (after the 2D code's call of
   D3DDevice_DrawVerticesUP 0x2ABE70, vertices on the stack), 0x12EEAC, 0x195D0F.
