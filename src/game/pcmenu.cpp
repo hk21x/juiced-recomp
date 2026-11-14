@@ -365,6 +365,23 @@ void RegisterPcPage(X86Context& ctx, uint8_t* /*base*/) {
     ctx = saved;
 }
 
+constexpr uint32_t kRemoveItem = 0x1924C0;    // edi the menu, ebx the item's name: true when it had one
+constexpr uint32_t kLiveItem = 0x2FBED8;      // "xbox_live", as the Options menu names its item
+
+// a menu's item by name, as the game removes them (0x952F7, 0x7C5F9)
+bool RemoveItem(X86Context& ctx, uint32_t menu, uint32_t name) {
+    ctx.edi = menu;
+    ctx.ebx = name;
+    return CallGuest(ctx, kRemoveItem, {}) != 0;
+}
+
+// a list's first entry gone, the rest moved up, as the game drops a backdrop row (0x7C607)
+void DropFirst(uint32_t list) {
+    const uint32_t first = R32(list + 0x11C), end = R32(list + 0x120);
+    std::memmove(HostPtr(first), HostPtr(first + 4), end - first - 4);
+    W32(list + 0x120, end - 4);
+}
+
 // at 0x9539B, the end of the Options menu's open (ebp the page: +0x10 its menu, +0x14 the rows' backdrops), after
 // the Xbox build has added its "xbox_live" item: ours, above DONE, the same way
 void AddPcItem(X86Context& ctx, uint8_t* /*base*/) {
@@ -386,13 +403,32 @@ void AddPcItem(X86Context& ctx, uint8_t* /*base*/) {
         std::memcpy(HostPtr(name), "pc_settings", 12);
     }
     X86Context saved = ctx;
+    // the Xbox build's XBOX LIVE item (Xbox Live is gone) gives its row to ours
+    const bool replaced = RemoveItem(ctx, menu, kLiveItem);
     const uint32_t count = (R32(menu + 0x120) - R32(menu + 0x11C)) / 4;
     CallGuest(ctx, kAddItem, {menu, caption, 0, name, 0, count ? count - 1 : 0});
-    if (back) {
+    if (back && !replaced) {
         uint32_t item = CallGuest(ctx, kAddTextured, {back, 0, kBackdrop, 0, 0, 0, 0, 0xFFFFFFFFu});
         if (item) W32(item + 0x54, 1);
     }
     ctx = saved;
+}
+
+// at 0x7C62E, in the main menu's open (0x7C4F0; edi its menu, esi its rows' backdrops), after the game has removed
+// its "quit" item and a backdrop row with it: the XBOX LIVE item ("online") goes the same way
+void RemoveLiveItem(X86Context& ctx, uint8_t* /*base*/) {
+    const uint32_t menu = ctx.edi, back = ctx.esi;
+    if (!menu) return;
+    X86Context saved = ctx;
+    static uint32_t name = 0;
+    if (!name) {
+        name = mem::AllocSystem(16, 16);
+        std::memcpy(HostPtr(name), "online", 7);
+    }
+    const bool removed = RemoveItem(ctx, menu, name);
+    ctx = saved;
+    if (removed && back && R32(back + 0x120) > R32(back + 0x11C)) DropFirst(back);
+    if (removed) LOGI("juiced: the main menu's XBOX LIVE item removed");
 }
 
 // at 0x95736 in the Options menu's message function, where it compares the chosen item's name (esi) with "graph"

@@ -93,6 +93,10 @@ call = "RegisterPcPage"
 at = 0x9539B
 call = "AddPcItem"
 
+[[hook]]  # src/game/pcmenu.cpp: the main menu's XBOX LIVE item removed as the menu opens
+at = 0x7C62E
+call = "RemoveLiveItem"
+
 [[hook]]  # src/game/pcmenu.cpp: choosing it opens the PC settings window
 at = 0x95736
 call = "ChoosePcItem"
