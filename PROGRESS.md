@@ -17,6 +17,21 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-14 - Smooth motion: constants that leap are not blended; the game's icon
+- Harry on Windows: the race timer no longer flickers (sse_cvt, 2eb6014). With smooth motion and the cap raised,
+  textures flickered.
+- Cause: in-between frames blended every vertex shader constant of a matched draw. XBE_INTERP_LOG's new `wrap:` lines
+  show constants past the transform that leap from step to step: c129.x 0 / 0.5 / 0.75 (an atlas cell), c132.y
+  toggling 0.4 and 1, the crowd's tints in c138. Halfway between two of them is neither, so every in-between
+  frame drew the wrong texture cell or tint.
+- SDK interp.cpp `Between`: past the 4 transform registers, a constant that changed by 0.2 or more and by at
+  least half its size takes the step's value; the rest blend as before (blend and peer paths).
+- Headless (XBE_INTERP_TEST=2): consecutive frames now come in matching pairs; no crash in 150 s. SMOKE OK.
+  Not yet seen on Windows.
+- launcher/icon.ico from Harry's picture (.local/win), corners made transparent, 16 to 256 px: the exe's and
+  the launcher's icon (CMakeLists.txt resource 1).
+- Next: Harry to check smooth motion at a raised cap.
+
 ### 2026-11-14 - Loading measured; Xbox Live entries gone; PlayStation and Switch button pictures (SDK b63a566)
 - Loading: a race loads in about 1.5 s here (245 files opened within 87.1 to 87.3 s, one 1.5 s gap in the frames);
   disc reads are not slowed for Juiced. The 25 s before the countdown is the game's track flyover ("Welcome to San
