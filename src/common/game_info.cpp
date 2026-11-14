@@ -155,6 +155,7 @@ const app::GameInfo app::kGame = {
     .default_keys = juiced::Keys,         // the keyboard's defaults, after the game's own layout
     .texture_bound = juiced::ButtonPictures,  // today's pad in the button pictures (src/common/buttons.cpp)
     .step_interpolation = [] { return juiced::smooth_motion && juiced::InRace(); },  // frames between steps, in a race
+    .interp_transform = 18,               // its programs' world-view-projection: c18 to c21 (c0 to c2 the world, c7 to c13 view and projection)
     .auto_fills_screen = true,            // the scene cameras follow the frame's shape past 16:9 (src/game/fov.cpp)
     .voice_3d_level = [] { return float(std::min<uint32_t>(juiced::effects_percent, 100)) / 100.0f; },  // engines and effects
     .squeeze_flat_programs = true,        // the 2D's programs: (v0 + c) * c + c, no matrix

@@ -17,6 +17,24 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-14 - Smooth motion: Juiced's transform is c18, not c0; matching takes the camera's move off
+- Harry on Windows (3f50b78): textures still flickered above 60. His 240 fps clip, frame by frame: a single frame differs
+  from both neighbours about a dozen times in 8.7 s. The near shop fronts drawn shifted, traffic lights and walk signs jumped
+  with a dark box round them, the crowd swapped places, a palm drawn elsewhere: copies of one mesh blended towards a
+  neighbour copy.
+- Cause: in-between frames took the first four constants (c-96 to c-93) as every program's transform. Juiced's are
+  zero; its world-view-projection is c18 to c21 (c0 to c2 the world, c7 to c9 view, c10 to c13 projection, c14 to c17
+  view-projection; dumped headless). So every draw had the same "matrix": copies of a mesh were matched in draw order,
+  the leap and turn tests never fired, and the camera's move was never found ("0 of 0" draws).
+- SDK: `GameInfo::interp_transform` (default -96, the old behaviour); a record's constants are kept turned so that
+  register is first, and put back on replay. Juiced sets 18.
+- SDK: matching runs twice: the camera's move found from the first match is taken back off the step before's
+  matrices, and each draw is matched again to the nearest copy where the camera's move puts it (XBE_INTERP_PREDICT=0
+  turns this off). XBE_INTERP_LOG logs matched draws not moving with the camera.
+- Headless (XBE_INTERP_TEST=2): the main scene nearly all matched. The draws not following the camera come from two
+  programs (76 and 54 draws a step, most likely the cars). The unmatched ones go to the small reflection targets
+  (03301F80 and on, a different one each step), drawn at the step's place. Frames in steady pairs. SMOKE OK.
+
 ### 2026-11-14 - Smooth motion: constants that leap are not blended; the game's icon
 - Harry on Windows: the race timer no longer flickers (sse_cvt, 2eb6014). With smooth motion and the cap raised,
   textures flickered.
