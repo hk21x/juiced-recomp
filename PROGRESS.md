@@ -17,6 +17,14 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-14 - Smooth motion: animation cells are not blended
+- Harry on Windows (fc4b700): "much better", but still flicker on turns 2 and 3, and the corner boards' arrows flicker.
+- The arrows run through atlas cells (c33.x 0, 0.25, 0.5, 0.75; c34 alike). The leap rule caught 0 to 0.5 but not 0.5 to
+  0.75 (less than half its size), so the in-between frame drew the arrows half a cell along.
+- SDK Between: a constant past the transform whose old and new values are both whole sixteenths takes the step's value
+  (an animation's cell or a toggle, not a smooth move). SMOKE OK; the boards were too far off in the headless run to
+  check by eye.
+
 ### 2026-11-14 - Smooth motion: Juiced's transform is c18, not c0; matching takes the camera's move off
 - Harry on Windows (3f50b78): textures still flickered above 60. His 240 fps clip, frame by frame: a single frame differs
   from both neighbours about a dozen times in 8.7 s. The near shop fronts drawn shifted, traffic lights and walk signs jumped
