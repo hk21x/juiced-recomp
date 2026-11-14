@@ -3,6 +3,7 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
+- Smooth motion above 60 (frames between steps): no noticeable flicker on Windows (Harry, e5d7ae5, 2026-11-14), 150+ frames a second
 - Harry on Windows, f6215b1 (3440x1440): "blur mostly fixed"; lines across the screen (the scene's wires, line strips a console pixel wide) and everything stretched. SDK 7c45c2e + src/game/widescreen.cpp: 4:3, 16:9 and the screen's shape, headless only so far
 - Widescreen: 3D 16:9 by the game, wider by fov.cpp; 2D squeezed to a centred 4:3 by the SDK (flat programs); the race HUD and the pause screens' prompt bar anchored to the frame's sides (HudAnchor; headless only so far)
 - The music freeze (Harry on Windows, 4 s into a race) is fixed in the SDK (7168ae0): not yet confirmed on Windows
@@ -27,7 +28,8 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   Halfway between two of those is neither, and the leap and sixteenths rules (Between) missed them.
 - SDK e199803: GameInfo::interp_blends_constant(reg); not given, as before. Juiced's (src/common/game_info.cpp) blends
   the smooth ones above; the rest take the step's value. Headless race with it: no errors; SMOKE OK; wincheck ok.
-- Next: Harry on Windows, the corner boards, no switches.
+- Harry on Windows (e5d7ae5, 22:12 build): "little to no flickering at all", over 150 frames a second. His log: 1147
+  frames for 601 steps at the 120 cap, then 1517 and 1662 for 600 (the cap raised in the run), 0 or 1 late steps of ours.
 
 ### 2026-11-14 - Smooth motion: pacing confirmed, the arrow boards still flicker (stopped again)
 - Harry's log of 3cac4da (cap 120, vertical sync off): 1144 to 1197 frames for 600 steps, 2 planned, 0 or 1 late
