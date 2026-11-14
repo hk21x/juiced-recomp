@@ -17,6 +17,18 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-14 - Smooth motion on Windows: the recordings show about 60 distinct frames a second (stopped, 3 attempts)
+- Harry (a377b97): the flicker is still at the corners, the arrow boards and turns 2 and 3. Three fixes for it
+  (animation cells, small toggles, stray copies) changed nothing he could see.
+- Both of his 240 fps clips (12-59-58 and 14-20-04), measured frame to frame (86x36 grey): three frames in four are
+  identical to the frame before. One picture a step (the HUD timer moves once each 4 frames), with now and then an odd
+  frame in between: that odd frame is the flicker. The in-between frames are mostly not reaching the screen there.
+  Headless (XBE_INTERP_TEST) draws them evenly, so this is the pacing on Windows, not the blending.
+- Not known yet: Harry's frame cap and vertical sync, and the log's "gpu: in-between frames" lines (frames for steps,
+  the title's time, the replay's time, frames planned, limit, late steps). Suspects: the late-step limit holding at
+  1 frame a step, or the sleeps between frames (Windows timer resolution) overrunning the step's time.
+- Next: Harry's log from a race with smooth motion on.
+
 ### 2026-11-14 - Smooth motion: smaller toggles held; copies that land wrong are not blended
 - Harry's 34 s clip of ece6708, 240 fps: about 60 single-frame events. The worst are the big orange arrow boards at the
   corners (the arrow layer off for one frame); some are the speed blur's own trails, not flicker.
