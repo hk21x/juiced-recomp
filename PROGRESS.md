@@ -17,6 +17,19 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-14 - Smooth motion: smaller toggles held; copies that land wrong are not blended
+- Harry's 34 s clip of ece6708, 240 fps: about 60 single-frame events. The worst are the big orange arrow boards at the
+  corners (the arrow layer off for one frame); some are the speed blur's own trails, not flicker.
+- Logged headless in a race: c93.w toggles 0 and -0.13 on scenery and crowd draws, under the 0.2 leap. kConstantLeap is now
+  0.05 (with the change at least half the value); what still blends by a large share is the light colours fading (c28,
+  c32, c37).
+- Copies: on a match among several copies of a still-scenery program (most of its draws go with the camera), the pick
+  is checked against where the camera's move puts it. More than a quarter of the screen across, or 15% in depth, and
+  another copy nearly as near: no self, and it takes the camera's move (as a piece come into view, whatever its vertex
+  count). The screen check is in the projection's own scale: Juiced's x / w is not -1 to 1. Rejected now: a few
+  draws a step, 2 to 3 times off in depth. The flyover's alike cars and anything moving clearly nearest itself are kept.
+- Headless: frames in pairs, SMOKE OK.
+
 ### 2026-11-14 - Smooth motion: animation cells are not blended
 - Harry on Windows (fc4b700): "much better", but still flicker on turns 2 and 3, and the corner boards' arrows flicker.
 - The arrows run through atlas cells (c33.x 0, 0.25, 0.5, 0.75; c34 alike). The leap rule caught 0 to 0.5 but not 0.5 to
