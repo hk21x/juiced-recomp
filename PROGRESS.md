@@ -28,7 +28,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   Options menu's "xbox_live" gives its row to PC SETTINGS (AddPcItem) instead of a sixth row. 0x372DC4, which the
   Options menu tests before adding it, is the online manager object, not a flag: left alone. Headless: main menu
   CAREER ARCADE CUSTOM RACE MULTIPLAY OPTIONS EXTRAS, the d-pad's highlight on the right rows; the race's Options
-  AUDIO GAME PC SETTINGS DONE. The footer's "Not Signed In" stays.
+  AUDIO GAME PC SETTINGS DONE. The main menu's footer line "Not Signed In" (gadgets ONLINEBOX, ONLINE,
+  ONLINEICON) is hidden at 0x7C6E6, where the game hides its GameSpy logo the same way.
+- The boot crash seen once on the 13th (0.43 s, no crash handler output): not seen in 12 boots in a row since, nor
+  in any other run tonight. Open.
 - Controllers are SDL3's already (Xbox, PlayStation, Switch pads, wheels). SDK b63a566: input::LastPadStyle, the
   kind of pad controller 1 was last played with (the harness: PAD_STYLE). With modern_buttons the prompts follow
   it: PlayStation's cross, circle, square and triangle in their colours (A, B, X, Y by place), Switch's B A Y X

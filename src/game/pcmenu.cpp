@@ -382,6 +382,15 @@ void DropFirst(uint32_t list) {
     W32(list + 0x120, end - 4);
 }
 
+// at 0x7C6E6, later in the main menu's open (ebp its window), after the game has hidden its GameSpy logo the same
+// way: the footer's Xbox Live sign-in line ("Not Signed In": its panel, text and icon, ONLINEBOX, ONLINE and
+// ONLINEICON) hidden too
+void HideSignIn(X86Context& ctx, uint8_t* /*base*/) {
+    if (!ctx.ebp) return;
+    for (const char* name : {"ONLINEBOX", "ONLINE", "ONLINEICON"})
+        if (uint32_t g = Find(ctx.ebp, name)) W32(g + kGadgetHidden, 1);
+}
+
 // at 0x9539B, the end of the Options menu's open (ebp the page: +0x10 its menu, +0x14 the rows' backdrops), after
 // the Xbox build has added its "xbox_live" item: ours, above DONE, the same way
 void AddPcItem(X86Context& ctx, uint8_t* /*base*/) {

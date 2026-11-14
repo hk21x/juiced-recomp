@@ -97,6 +97,10 @@ call = "AddPcItem"
 at = 0x7C62E
 call = "RemoveLiveItem"
 
+[[hook]]  # src/game/pcmenu.cpp: and its footer's Xbox Live sign-in line hidden
+at = 0x7C6E6
+call = "HideSignIn"
+
 [[hook]]  # src/game/pcmenu.cpp: choosing it opens the PC settings window
 at = 0x95736
 call = "ChoosePcItem"
