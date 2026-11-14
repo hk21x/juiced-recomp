@@ -38,6 +38,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   Harry on Windows: the same corner with XBE_INTERP_PIECES=0, then XBE_INTERP_PREDICT=0, to rule each in or out; a
   way to name the board's draws (a hotkey that logs the draws of one step with their textures and how each was
   blended) would let the board be found in the log.
+- Harry: XBE_INTERP_PIECES=0 flickers, XBE_INTERP_PREDICT=0 flickers. Two more test switches (SDK 4461e84):
+  XBE_INTERP_CONSTANTS=0 (every constant past the transform at the step's value) and XBE_INTERP_CAMERA_ONLY=1 (every
+  3D draw takes its target's camera move, none its own match). Headless with both: runs, SMOKE OK.
 
 ### 2026-11-14 - Smooth motion on Windows: the second frame of a step was dropped by late sleeps
 - The VM's logs of Harry's runs (a377b97; cap 120, vertical sync off): 735 to 916 frames for 560 to 601 steps, 2
