@@ -17,6 +17,15 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-14 - Smooth motion on Windows: the second frame of a step was dropped by late sleeps
+- The VM's logs of Harry's runs (a377b97; cap 120, vertical sync off): 735 to 916 frames for 560 to 601 steps, 2
+  planned a step. The second frame, timed to be done 1 ms before the title goes on, missed it when Windows' sleep
+  woke 1 to 2 ms late (timeBeginPeriod(1) is set). One frame a step or two, unevenly: the judder Harry sees as flicker
+  on the arrow boards and the crowd, and the recordings' runs of repeated frames.
+- SDK interp.cpp SleepUntil: sleeps to 1.5 ms before the time and waits out the rest.
+- Headless at FPS=120: 1200 and 1192 frames for 601 and 600 steps, none late of ours (Linux sleeps are close, so this
+  checks nothing broke; Windows is the test). SMOKE OK.
+
 ### 2026-11-14 - Smooth motion on Windows: the recordings show about 60 distinct frames a second (stopped, 3 attempts)
 - Harry (a377b97): the flicker is still at the corners, the arrow boards and turns 2 and 3. Three fixes for it
   (animation cells, small toggles, stray copies) changed nothing he could see.
