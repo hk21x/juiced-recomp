@@ -17,6 +17,28 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-14 - Smooth motion: pacing confirmed, the arrow boards still flicker (stopped again)
+- Harry's log of 3cac4da (cap 120, vertical sync off): 1144 to 1197 frames for 600 steps, 2 planned, 0 or 1 late
+  steps of ours. The pacing fix works. Harry: "still a fair bit of flickering".
+- The recordings are Mirillis Action! window captures: about 72 distinct pictures a second at uneven gaps (1 to 8
+  frames apart) while the game shows 120. They cannot count frames, so the earlier "in-between frames not reaching
+  the screen" (from the clips) was the recorder.
+- Harry's A/B: smooth motion off, the arrow boards do not flicker; smooth motion on with the speed blur off, they
+  still do. The game has no motion blur setting of its own. So it is the in-between frames, not the blur.
+- In the clip (16.2 to 16.9 s) the big orange arrow board shows, in some frames, a faint second copy of its arrows
+  offset from the board. "BRAKE NOW!" flashing red and white is the game's own.
+- Headless, logged in a race (temporary, removed): ~340 draws a step without a match. ~250 of them are in targets
+  with no camera move (six 83301F80..83351F80 targets, cube faces or reflections, and the back buffer 83D86000);
+  the scene is drawn into 01460000 (640x960), whose camera has ~180 votes. ~80 a step take a peer, few derive,
+  few are left for any other reason; small unmatched scenery draws (< kLeastVertices) are ~0.5 a step. So the
+  board's draws are matched and the fault is in how they are blended, not in the matching.
+- Headless cannot reach the boards: the race runs at about 1/30 speed (race clock 3.7 s at 118 s), and its
+  reference renderer has noise on windows. Windows is the only place to see it.
+- Five fixes in all (constant leaps, transform register, animation cells, toggles and strays, pacing). Next, from
+  Harry on Windows: the same corner with XBE_INTERP_PIECES=0, then XBE_INTERP_PREDICT=0, to rule each in or out; a
+  way to name the board's draws (a hotkey that logs the draws of one step with their textures and how each was
+  blended) would let the board be found in the log.
+
 ### 2026-11-14 - Smooth motion on Windows: the second frame of a step was dropped by late sleeps
 - The VM's logs of Harry's runs (a377b97; cap 120, vertical sync off): 735 to 916 frames for 560 to 601 steps, 2
   planned a step. The second frame, timed to be done 1 ms before the title goes on, missed it when Windows' sleep
