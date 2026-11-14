@@ -10,12 +10,23 @@
 #include "app/app.h"
 #include "core/input.h"
 #include "core/log.h"
+#include "kernel/kernel.h"
+#include "kernel/memory.h"
 
 namespace juiced {
 extern bool modern_buttons;  // src/common/buttons.cpp
 void MenuPointer(input::Pad& pad);  // src/common/pointer.cpp
 bool skip_intro = false;      // no logo and intro movies at the start (Pad presses START through them)
 bool speed_blur = true;       // the race's speed blur (src/game/blur.cpp)
+// In a race with the frame cap over 60: frames between the game's steps (sdk gpu/interp.cpp). The game times its
+// simulation by the time between frames, but the car drives differently at another rate (at 120 frames a second it
+// accelerated about 15% harder), so the game stays at 60 and the frames between are drawn from the last two steps.
+bool smooth_motion = true;
+// the game object's +0x3C is set in a race (src/common/pointer.cpp)
+bool InRace() {
+    const uint32_t game = kernel::R32(0x372B54);
+    return game >= 0x10000 && mem::IsCommitted(game + 0x3C) && kernel::R32(game + 0x3C) != 0;
+}
 uint32_t fov_percent = 100;   // the race camera's field of view (src/game/fov.cpp)
 // the level of the engines and effects (the game's 3D DirectSound voices: not the music, the menus' sounds or the
 // movies), percent. 50 is 6 dB under the disc's mix as mixed here, where a race came out about 15 dB over the menus
@@ -124,6 +135,9 @@ const app::GameInfo app::kGame = {
                  "50 to 150; 100 is the game's. The race camera's field of view, changed at once."},
                 {"speed_blur", &juiced::speed_blur, nullptr, "Speed blur",
                  "The blur towards the screen's edges at speed. Off, the race is drawn without it."},
+                {"smooth_motion", &juiced::smooth_motion, nullptr, "Smooth motion above 60",
+                 "With a frame cap over 60, races are drawn at that rate: the frames between the game's own 60 are made "
+                 "from the two before. The game itself stays at 60, as its driving needs."},
                 {"effects_percent", nullptr, &juiced::effects_percent, "Engine and effects level (%)",
                  "0 to 100; 100 is the disc's mix, which is far louder in a race than in the menus and clips. Music is not changed."}},
     .load = nullptr,                      // reads more from the settings file's toml::table
@@ -140,6 +154,7 @@ const app::GameInfo app::kGame = {
     .hide_file = juiced::HideFile,        // hides nothing: notes when a boot movie is opened (skip_intro)
     .default_keys = juiced::Keys,         // the keyboard's defaults, after the game's own layout
     .texture_bound = juiced::ButtonPictures,  // today's pad in the button pictures (src/common/buttons.cpp)
+    .step_interpolation = [] { return juiced::smooth_motion && juiced::InRace(); },  // frames between steps, in a race
     .auto_fills_screen = true,            // the scene cameras follow the frame's shape past 16:9 (src/game/fov.cpp)
     .voice_3d_level = [] { return float(std::min<uint32_t>(juiced::effects_percent, 100)) / 100.0f; },  // engines and effects
     .squeeze_flat_programs = true,        // the 2D's programs: (v0 + c) * c + c, no matrix

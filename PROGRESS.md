@@ -17,6 +17,23 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-14 - Above 60 frames a second: in-between frames in a race (SDK 18182bb)
+- Harry asked for PC quality-of-life work overnight, the frame rate first.
+- The game times its simulation by the time between frames (0x12B9F0: game +0x1C is the step's seconds from a
+  timer, +0x18 the sum; a debug flag at 0x372ED8 fixes it at 0.02). Paced by the frame cap instead of the present
+  interval (an experiment, not kept), it ran at 120 headless with game time following real time; but with the same
+  pad the car was at 94 mph at 4.95 s against 80 at 4.72 at 60, and spun at 9 s where at 60 it drove on: the
+  driving depends on the frame rate. So the game stays at 60.
+- Frames in between: the SDK's interpolator (gpu/interp.cpp, as EoN and True Crime use) replays each step with its
+  vertex constants blended from the step before. Setting smooth_motion (on; F1 window, and PC SETTINGS page 4):
+  in a race (game object +0x3C), with a frame cap over 60. Harry's cap is 60, so nothing changes until he raises it.
+  Headless FPS=120: 1197 frames for 601 steps in 10 s, all blended, a replay 1.2 ms; four frames in a row show
+  the in-between one. The glow's mask update replayed settles where it would (0.65 x old + new: the same limit).
+- The interpolator read a stream's vertex buffer header after the game had freed it, as the race loads (crash at
+  frame 6840 every time; the same stale binding as Harry's crash of the 13th). SDK 18182bb: skipped when not
+  committed.
+- SMOKE OK, wincheck ok. Next: Harry with the cap at 120 or more; loading times.
+
 ### 2026-11-13 - The race timer: CVTSS2SI rounds as MXCSR says (SDK 2eb6014)
 - Harry on a7426b8: still happening. His 240 fps recording (.local/win, 610 frames) shows it: TIME reads 00:01:92,
   02:17, 03:65, 03:98, then 03:02, 03:28: the seconds one ahead from .50 to .99 of every second.

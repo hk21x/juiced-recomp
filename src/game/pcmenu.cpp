@@ -31,7 +31,7 @@
 using namespace kernel;
 
 namespace juiced {
-extern bool modern_buttons, skip_intro, speed_blur;  // src/common
+extern bool modern_buttons, skip_intro, speed_blur, smooth_motion;  // src/common
 extern uint32_t fov_percent, effects_percent;
 }
 
@@ -221,7 +221,8 @@ const Page kPages[] = {
            auto& s = app::Get();
            s.renderer = (s.renderer + 1) % 2;
            app::Save();
-       }}}},
+       }},
+      FLAG("SMOOTH MOTION ABOVE 60", juiced::smooth_motion)}},
 };
 constexpr int kPageCount = int(sizeof(kPages) / sizeof(kPages[0]));
 
