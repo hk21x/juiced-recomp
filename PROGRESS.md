@@ -17,6 +17,18 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-14 - Smooth motion: only the smooth constants blended; the arrow boards' flicker found
+- Harry's A/B on the Release build of fb0e0da (clang 22.1.3; a Debug build at 21:29 had 32 ms steps and was rebuilt):
+  no switch, flickers; XBE_INTERP_CAMERA_ONLY=1, a crash in game code 5 s into the race (guest read out of range,
+  test switch only, not chased); XBE_INTERP_CONSTANTS=0, no noticeable flicker. So it was blending constants.
+- Logged headless (temporary): the constants blended in the in-between frames. Smooth from step to step: c0 to c17
+  (matrices), c28, c30 to c32, c37 (lights), c43, c44, c90.w (a clock), c92 to c94. Picked from a few values: c36
+  (1, 0.67, 0.5, 0.4, 0.25, 0.14 on the scenery programs), c89.y, c41.w (30, 20, 35), c88, c95, c42 (tints), c33.
+  Halfway between two of those is neither, and the leap and sixteenths rules (Between) missed them.
+- SDK e199803: GameInfo::interp_blends_constant(reg); not given, as before. Juiced's (src/common/game_info.cpp) blends
+  the smooth ones above; the rest take the step's value. Headless race with it: no errors; SMOKE OK; wincheck ok.
+- Next: Harry on Windows, the corner boards, no switches.
+
 ### 2026-11-14 - Smooth motion: pacing confirmed, the arrow boards still flicker (stopped again)
 - Harry's log of 3cac4da (cap 120, vertical sync off): 1144 to 1197 frames for 600 steps, 2 planned, 0 or 1 late
   steps of ours. The pacing fix works. Harry: "still a fair bit of flickering".

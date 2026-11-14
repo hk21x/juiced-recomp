@@ -156,6 +156,13 @@ const app::GameInfo app::kGame = {
     .texture_bound = juiced::ButtonPictures,  // today's pad in the button pictures (src/common/buttons.cpp)
     .step_interpolation = [] { return juiced::smooth_motion && juiced::InRace(); },  // frames between steps, in a race
     .interp_transform = 18,               // its programs' world-view-projection: c18 to c21 (c0 to c2 the world, c7 to c13 view and projection)
+    // the constants that move smoothly from step to step, blended: the matrices (c0 to c17), the camera's place and axes,
+    // the lights' colours, the clock; the rest (c33, c36, c41, c42, c88, c89, c95: animation frames, tints, toggles) are the
+    // step's own (logged in a race, 2026-11-14)
+    .interp_blends_constant = [](int c) {
+        return (c >= 0 && c <= 17) || c == 28 || (c >= 30 && c <= 32) || c == 37 || c == 43 || c == 44 || c == 90 ||
+               (c >= 92 && c <= 94);
+    },
     .auto_fills_screen = true,            // the scene cameras follow the frame's shape past 16:9 (src/game/fov.cpp)
     .voice_3d_level = [] { return float(std::min<uint32_t>(juiced::effects_percent, 100)) / 100.0f; },  // engines and effects
     .squeeze_flat_programs = true,        // the 2D's programs: (v0 + c) * c + c, no matrix
