@@ -18,6 +18,16 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-14 - Smooth motion: in-between frames 4 to 5 times cheaper
+- Harry's log (e5d7ae5): a replay 2.4 to 5 ms on his 5800X3D, with the title's 4 to 6 ms in a 16.7 ms step; from 90 s
+  into the race no in-between frame fit (601 frames for 601 steps). Timed headless (temporary): blending the constants
+  was three quarters of a replay (5.5 of 7.3 ms at ~1150 draws): Between for all 768 of every draw, every replay.
+- SDK: Holds() split out of Between; each matched draw keeps the list of constants that differ and are blended
+  (Rec::lerp), made once a step, and a replay blends only those; the rotated copy into the draw's registers is two
+  memcpys. Headless: a replay 1.3 to 1.8 ms at 780 to 1080 draws (was 6 to 7.5 ms at ~1150). Same values as before.
+  SMOKE OK, wincheck ok.
+- Next: Harry's log at the Unlimited cap: frames for steps, and whether late in the race still gets in-between frames.
+
 ### 2026-11-14 - Smooth motion: only the smooth constants blended; the arrow boards' flicker found
 - Harry's A/B on the Release build of fb0e0da (clang 22.1.3; a Debug build at 21:29 had 32 ms steps and was rebuilt):
   no switch, flickers; XBE_INTERP_CAMERA_ONLY=1, a crash in game code 5 s into the race (guest read out of range,
