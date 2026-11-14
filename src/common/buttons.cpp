@@ -306,11 +306,46 @@ void KeysPage(Canvas& c) {
 
 struct Look {
     bool modern = false, keys = false;
+    int style = input::kStyleXbox;  // with modern: the pad's labels
     std::string key;  // the key's name, with keys
-    bool operator==(const Look& o) const { return modern == o.modern && keys == o.keys && key == o.key; }
+    bool operator==(const Look& o) const { return modern == o.modern && keys == o.keys && style == o.style && key == o.key; }
 };
 
 enum class Kind { kFaceA, kFaceB, kFaceX, kFaceY, kPad };
+
+// PlayStation's face buttons by place (A south cross, B east circle, X west square, Y north triangle): the shape in
+// its colour on a dark disc
+void Symbol(Canvas& c, float cx, float cy, float r, Kind kind) {
+    Disc(c, cx, cy, r);
+    const float k = r * 0.48f, w = std::max(0.55f, r * 0.11f);
+    const Area a{cx - r, cy - r, cx + r, cy + r};
+    std::vector<Segment> s;
+    Colour colour = kWhite;
+    switch (kind) {
+        case Kind::kFaceA:  // cross
+            colour = {120, 160, 235, 255};
+            s = {{{cx - k, cy - k}, {cx + k, cy + k}}, {{cx - k, cy + k}, {cx + k, cy - k}}};
+            break;
+        case Kind::kFaceB:  // circle
+            Fill(c, a, {235, 90, 90, 255}, [&](float x, float y) { return std::fabs(CircleDistance(x, y, cx, cy, k * 1.02f)) - w; });
+            return;
+        case Kind::kFaceX: {  // square
+            colour = {225, 130, 200, 255};
+            const float q = k * 0.92f;
+            s = {{{cx - q, cy - q}, {cx + q, cy - q}}, {{cx + q, cy - q}, {cx + q, cy + q}},
+                 {{cx + q, cy + q}, {cx - q, cy + q}}, {{cx - q, cy + q}, {cx - q, cy - q}}};
+            break;
+        }
+        default: {  // triangle
+            colour = {70, 200, 170, 255};
+            const float t = k * 1.12f;
+            const Pt top{cx, cy - t}, left{cx - t * 0.94f, cy + t * 0.62f}, right{cx + t * 0.94f, cy + t * 0.62f};
+            s = {{top, right}, {right, left}, {left, top}};
+            break;
+        }
+    }
+    Fill(c, a, colour, [&](float x, float y) { return StrokeDistance(x, y, s, w); });
+}
 struct Known {
     uint64_t hash, palette;  // FNV-1a of its texels and of its own palette's colours
     uint32_t size;
@@ -344,6 +379,8 @@ Look Wanted(Kind kind) {
         }
     }
     l.modern = modern_buttons;
+    // the prompts follow the pad played with; the controls page stays an Xbox pad
+    if (l.modern && kind != Kind::kPad) l.style = input::LastPadStyle();
     return l;
 }
 
@@ -358,6 +395,12 @@ std::vector<uint32_t> Draw(Kind kind, const Look& look, uint32_t size, int scale
         else PadPage(c);
     } else if (look.keys) {
         Key(c, Area{1.5f, s * 0.2f, s - 1.5f, s * 0.8f}, look.key);
+    } else if (look.modern && look.style == input::kStylePlayStation) {
+        Symbol(c, s / 2, s / 2, s / 2 - 2.5f, kind);
+    } else if (look.modern && look.style == input::kStyleNintendo) {
+        // Nintendo's labels by place: B south, A east, Y west, X north, white
+        const char* letter = kind == Kind::kFaceA ? "B" : kind == Kind::kFaceB ? "A" : kind == Kind::kFaceX ? "Y" : "X";
+        Face(c, s / 2, s / 2, s / 2 - 2.5f, letter, kWhite);
     } else {
         const char* letter = kind == Kind::kFaceA ? "A" : kind == Kind::kFaceB ? "B" : kind == Kind::kFaceX ? "X" : "Y";
         Colour colour = kind == Kind::kFaceA ? kGreen : kind == Kind::kFaceB ? kRed : kind == Kind::kFaceX ? kBlue : kYellow;

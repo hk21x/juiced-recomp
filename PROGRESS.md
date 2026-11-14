@@ -17,6 +17,24 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-14 - Loading measured; Xbox Live entries gone; PlayStation and Switch button pictures (SDK b63a566)
+- Loading: a race loads in about 1.5 s here (245 files opened within 87.1 to 87.3 s, one 1.5 s gap in the frames);
+  disc reads are not slowed for Juiced. The 25 s before the countdown is the game's track flyover ("Welcome to San
+  Ricardo"), which a button skips. Nothing to change.
+- Effects detail: the shadow, reflection and glow targets (128x128, 160x120 on the console) are already drawn at the
+  render scale (3x at 1440 lines, captures of the 13th). Nothing to change.
+- Xbox Live: the main menu's item "online" (captioned XBOX LIVE at 0x7C599) is removed as the menu opens, with a
+  backdrop row, the way the game removes its "quit" (hook at 0x7C62E, the game's remove by name 0x1924C0). The
+  Options menu's "xbox_live" gives its row to PC SETTINGS (AddPcItem) instead of a sixth row. 0x372DC4, which the
+  Options menu tests before adding it, is the online manager object, not a flag: left alone. Headless: main menu
+  CAREER ARCADE CUSTOM RACE MULTIPLAY OPTIONS EXTRAS, the d-pad's highlight on the right rows; the race's Options
+  AUDIO GAME PC SETTINGS DONE. The footer's "Not Signed In" stays.
+- Controllers are SDL3's already (Xbox, PlayStation, Switch pads, wheels). SDK b63a566: input::LastPadStyle, the
+  kind of pad controller 1 was last played with (the harness: PAD_STYLE). With modern_buttons the prompts follow
+  it: PlayStation's cross, circle, square and triangle in their colours (A, B, X, Y by place), Switch's B A Y X
+  (by place). The controls page stays an Xbox pad. Headless: both, the menus' OK and BACK.
+- SMOKE OK, wincheck ok. Next: Harry's run (a PlayStation pad if he has one).
+
 ### 2026-11-14 - Above 60 frames a second: in-between frames in a race (SDK 18182bb)
 - Harry asked for PC quality-of-life work overnight, the frame rate first.
 - The game times its simulation by the time between frames (0x12B9F0: game +0x1C is the step's seconds from a
