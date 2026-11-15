@@ -28,6 +28,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Harry (40fc432): the corner arrow boards still broken. The scenery rule's dropped vertex count let the boards'
   arrows (small quads) take the camera's move; sprites (under kLeastVertices) are left as before.
 - SMOKE OK, wincheck ok.
+- Harry (d126d98, clip 12-26-44): the boards' arrows "flickering twice as fast": in the clip the chevrons switch between
+  two places and a faint offset copy from one frame to the next. c33 (the boards' atlas cell) was blended again in
+  a1979db for the buildings, which it did not fix (the unmatched scenery did): held again.
 
 ### 2026-11-15 - Smooth motion: unmatched scenery takes the camera's move
 - Harry (989aa16): the buildings still shift with the off-camera fix; with XBE_INTERP_CAMERA_ONLY=1 (no crash now) the
