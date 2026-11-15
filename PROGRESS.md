@@ -28,6 +28,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - SDK: an unmatched draw of a still program takes the camera's move whatever its vertex count, its program's share of new
   draws or its nearest matched draw (the pieces rules kept for other programs). XBE_INTERP_SCENERY=0 for the old rules.
   SMOKE OK, wincheck ok.
+- Harry (271295c): buildings and cars fine, the corner arrow boards broken again. Peers (unmatched draws of a matched
+  draw's matrix: a second pass over one surface, the arrows over the board) were given the camera's move too and lay a
+  little off the board's own blend. A peer keeps following its matched draw. SMOKE OK, wincheck ok.
 
 ### 2026-11-15 - Smooth motion: buildings off the camera's move; the camera-only crash
 - Harry: the buildings shift slightly (away from the road and back), clearest on the far left on a corner (his clip
