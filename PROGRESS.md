@@ -101,6 +101,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Harry: neither the lights' flicker nor the neon's is there with smooth motion off. To pair a burst with how each
   draw was placed, F12 with XBE_SCREENSHOT_BURST also logs the in-between table for the next 16 replays (no
   interp_table file to make by hand), and the table names riders. wincheck, SMOKE OK.
+- Harry's bursts of 173e4b7 with the table (j4.log): one rider a step on Windows, against 24 headless; the lamps'
+  glow draws were "derived" (the camera's move). A car whose move passed for the camera's (the player's, behind
+  the chase camera) was left out of the cars' moves. SDK: the nearest of the camera's and the cars' moves, a car's
+  only when twice as near (scenery keeps the camera's). Headless 25 to 60 riders a step. SMOKE OK, wincheck.
+- The step's draw count alternates (948, 996): the game's own (cube faces and the like), as the F3 captures showed.
+- README in the other ports' layout; comparison images from Harry's shots in docs/img (wipe, edges, MSAA, SMAA,
+  sharpening). The FXAA and render-scale panels only looked shifted: the start gantry's board flashes.
 - Harry's README screenshots are in .local/win (settings comparisons and play), for a README like Agent Under Fire's.
 
 ### Flicker with smooth motion: stopped after several attempts (2026-11-15)
