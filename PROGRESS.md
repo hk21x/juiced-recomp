@@ -7,7 +7,8 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   the bind memo (a9b368f) and in-between frames filling the step (interp_fill_frames, Juiced on). The GPU takes
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
 - Flicker with smooth motion (reversing and brake lights, neon, road streak): open, stopped after several attempts
-  (log, 2026-11-15). Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
+  (log, 2026-11-15). Cause narrowed: car-attached glows start each step from the wrong place (the neon's sawtooth,
+  the reversing glow below its lamps in steps with no rider). Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
 - Smooth motion above 60 (frames between steps): arrow boards, buildings, cars and brake lights right on Windows (Harry, 5591379, 2026-11-15); scenery takes the camera's move (interp_scenery_takes_camera)
 - Skip intro also skips the WARNING and legal pages (src/game/hooks.cpp; Harry, 2026-11-15)
 - Harry on Windows, f6215b1 (3440x1440): "blur mostly fixed"; lines across the screen (the scene's wires, line strips a console pixel wide) and everything stretched. SDK 7c45c2e + src/game/widescreen.cpp: 4:3, 16:9 and the screen's shape, headless only so far
@@ -114,6 +115,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   dark in the first frame too. With constants held the neon still flickered (Harry), so its place, not its colour:
   the in-between frames start it from somewhere else, perhaps another draw of the step before. Not yet found which
   draw it is (no cyan texture: probably tinted). The reversing lights sit on their lamps in that burst.
+- Correction: the reversing lights are not right in 22-01-01. Cropped (760x160 at 1340,960): frames 1 to 8 on the
+  lamps, 9 to 12 hanging below them, back by 13. The table for those frames (j5.log, replays 2927 to 2940): the
+  steps whose lights sit right had 3 riders, the step whose lights hang had none (the glows took the camera's
+  move). Which draws become riders changes from step to step (once a 654-vertex mesh), so the rule is not a
+  steady test of "on a car". Stopped here (past three attempts on this problem). Next idea: tie a glow to a car by
+  its matrix (the car draw's matrix inverse times the glow's the same in both steps: rigidly attached), not by
+  its own match. Harry: buildings still steady with riders on.
 - Harry's README screenshots are in .local/win (settings comparisons and play), for a README like Agent Under Fire's.
 
 ### Flicker with smooth motion: stopped after several attempts (2026-11-15)
