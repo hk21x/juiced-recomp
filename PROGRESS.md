@@ -34,6 +34,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - SDK: XBE_INTERP_FILL=1 (a test, off by default) puts the frames closer together when they would not all fit. They
   are still placed at their own times along the step. Headless at 240: 1619 frames per 10 s against 1309, no more
   late steps of ours. SMOKE OK, wincheck. Next: Harry at 240 with it, the fps and whether the motion stays even.
+- Harry's run of 73e8707 with XBE_INTERP_FILL=1 (cap 240, render 100): still 180. 2 to 5 late steps of ours in
+  10 s (0 without it). frame_seconds_ follows the render thread: batches 5.1 ms a frame (host 4.2: draw 2.45,
+  present 1.7, swap 1.56; waiting for record 1.0). So the render thread is the limit again. Swap was 0.9 ms at
+  render_percent 50 (the 17:30 run), so part of it is GPU back-pressure. FILL stays off.
+  Next: render_percent 50 with the memo fix.
 
 ### 2026-11-15 - Higher frame rates: measuring a replay on Windows
 - The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a
