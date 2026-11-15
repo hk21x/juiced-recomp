@@ -44,6 +44,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   of ours). Harry saw no difference in jerkiness. Task Manager: no core full, GPU 10%.
 - SDK: GameInfo::interp_fill_frames (default off; XBE_INTERP_FILL=0/1 overrides), Juiced on. SMOKE OK, wincheck.
   Next: full resolution. There the render thread takes 5.1 ms a frame, swap 1.56 ms of it.
+- Harry, 682ffbf: half resolution 230 to 240 fps ("over 200"); full resolution (render scale 3.00) still 180, swap
+  1.58 ms of a 4.2 ms render thread (draw 1.86). The swap waits on the GPU, though Task Manager shows it mostly idle.
+- SDK: XBE_PERF times each submitted list on the GPU (timestamp lists sent before and after it) and logs
+  "perf: GPU per frame". wincheck (it caught a member used from the free LogPerf), SMOKE OK.
+- Harry: flicker on the roads and on the rear lights while driving. Captures: XBE_CAPTURE_DIR with
+  XBE_CAPTURE_FRAMES=12, F3 while it flickers (consecutive frames, in-between ones among them).
 
 ### 2026-11-15 - Higher frame rates: measuring a replay on Windows
 - The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a
