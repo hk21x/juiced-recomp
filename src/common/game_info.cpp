@@ -176,7 +176,8 @@ const app::GameInfo app::kGame = {
                (c >= 92 && c <= 94);
     },
     .interp_scenery_takes_camera = true,
-    .interp_skip_still_targets = true,    // its cube faces and small passes drawn once a step, not in every in-between frame  // its buildings shook a little with any of their draws blended from its own match
+    .interp_skip_still_targets = true,    // its cube faces and small passes drawn once a step, not in every in-between frame
+    .interp_fill_frames = true,           // its own drawing takes 4 ms of a step: at 240 the 4th frame fits only closer together
     .auto_fills_screen = true,            // the scene cameras follow the frame's shape past 16:9 (src/game/fov.cpp)
     .voice_3d_level = [] { return float(std::min<uint32_t>(juiced::effects_percent, 100)) / 100.0f; },  // engines and effects
     .squeeze_flat_programs = true,        // the 2D's programs: (v0 + c) * c + c, no matrix

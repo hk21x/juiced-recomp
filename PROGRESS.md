@@ -39,6 +39,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   present 1.7, swap 1.56; waiting for record 1.0). So the render thread is the limit again. Swap was 0.9 ms at
   render_percent 50 (the 17:30 run), so part of it is GPU back-pressure. FILL stays off.
   Next: render_percent 50 with the memo fix.
+- Render 50% without fill: still 180, though the render thread takes 3.4 ms a frame (host 2.8, swap 0.64), so the
+  pacing alone held it. Render 50% with XBE_INTERP_FILL=1: 230 to 240 fps (2321 frames for 601 steps, 0 late steps
+  of ours). Harry saw no difference in jerkiness. Task Manager: no core full, GPU 10%.
+- SDK: GameInfo::interp_fill_frames (default off; XBE_INTERP_FILL=0/1 overrides), Juiced on. SMOKE OK, wincheck.
+  Next: full resolution. There the render thread takes 5.1 ms a frame, swap 1.56 ms of it.
 
 ### 2026-11-15 - Higher frame rates: measuring a replay on Windows
 - The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a
