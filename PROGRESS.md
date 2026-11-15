@@ -18,6 +18,20 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-15 - Smooth motion: buildings off the camera's move; the camera-only crash
+- Harry: the buildings shift slightly (away from the road and back), clearest on the far left on a corner (his clip
+  11-09-36, 2 to 4 s); with smooth motion off, none. Still there with XBE_INTERP_CONSTANTS=0, PREDICT=0, PIECES=0,
+  with c33 blended again (a1979db) and without the replay speed-up (4143711). Every step of that run was blended.
+- Correctly matched still scenery cannot move against itself (each one's blend is the camera's move applied to it), so
+  it is wrong matches. Headless (temporary log): matched draws of still scenery programs whose own move is not the
+  camera's, their in-between place against the camera's: most within 0.1% of the screen, but near the race ~9% at 1%
+  to over 3% (35 to 100+ pixels at 3440), mostly programs 014307F1, 01066B51, 010E0BD1.
+- SDK a903c86: such a draw (still program, off the camera's move by more than kOffCamera = 0.25% of the screen at
+  halfway) takes the camera's move like scenery come into view (derived), before peers are found.
+  XBE_INTERP_OFF_CAMERA=0 turns it off. Headless: 48 to 1503 a 10 s.
+- The XBE_INTERP_CAMERA_ONLY crash (twice on Windows): it ran after peers were found, and a peer whose matched draw lost
+  its match read before_[-1]. Moved before the peers. SMOKE OK, wincheck ok.
+
 ### 2026-11-14 - Smooth motion: in-between frames 4 to 5 times cheaper
 - Harry's log (e5d7ae5): a replay 2.4 to 5 ms on his 5800X3D, with the title's 4 to 6 ms in a 16.7 ms step; from 90 s
   into the race no in-between frame fit (601 frames for 601 steps). Timed headless (temporary): blending the constants
