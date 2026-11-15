@@ -1,3 +1,4 @@
+#include <cmath>
 #include <algorithm>
 #include <array>
 #include <atomic>
@@ -157,10 +158,12 @@ const app::GameInfo app::kGame = {
     .step_interpolation = [] { return juiced::smooth_motion && juiced::InRace(); },  // frames between steps, in a race
     .interp_transform = 18,               // its programs' world-view-projection: c18 to c21 (c0 to c2 the world, c7 to c13 view and projection)
     // the constants that move smoothly from step to step, blended: the matrices (c0 to c17), the camera's place and axes,
-    // the lights' colours, the clock; the rest (c33, c36, c41, c42, c88, c89, c95: animation frames, tints, toggles) are the
-    // step's own (logged in a race, 2026-11-14). c33 blended, the corner boards' arrows flickered twice as fast (Harry,
-    // 2026-11-15); the buildings' shift it was tried for was unmatched scenery left at the step's place (gpu/interp.cpp)
-    .interp_blends_constant = [](int c) {
+    // the lights' colours, the clock; the rest (c36, c41, c42, c88, c89, c95: animation frames, tints, toggles) are the
+    // step's own (logged in a race, 2026-11-14). c33 is both: it creeps on the buildings' program (1.2061 to 1.2063 a step;
+    // held, the buildings popped at each step) and jumps between the corner boards' arrow frames (blended, they flickered
+    // twice as fast; Harry, 2026-11-15): blended only when it moves less than a hundredth
+    .interp_blends_constant = [](int c, float was, float now) {
+        if (c == 33) return std::fabs(now - was) < 0.01f;
         return (c >= 0 && c <= 17) || c == 28 || (c >= 30 && c <= 32) || c == 37 || c == 43 || c == 44 || c == 90 ||
                (c >= 92 && c <= 94);
     },

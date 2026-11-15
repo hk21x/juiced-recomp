@@ -31,6 +31,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Harry (d126d98, clip 12-26-44): the boards' arrows "flickering twice as fast": in the clip the chevrons switch between
   two places and a faint offset copy from one frame to the next. c33 (the boards' atlas cell) was blended again in
   a1979db for the buildings, which it did not fix (the unmatched scenery did): held again.
+- Harry (d66d805): the boards fixed, some building pop back. c33 is both: creeping on the buildings' program and
+  jumping between the boards' arrow frames. interp_blends_constant now takes the two values (SDK); Juiced blends c33
+  only when it moves less than 0.01. SMOKE OK, wincheck ok.
 
 ### 2026-11-15 - Smooth motion: unmatched scenery takes the camera's move
 - Harry (989aa16): the buildings still shift with the off-camera fix; with XBE_INTERP_CAMERA_ONLY=1 (no crash now) the
