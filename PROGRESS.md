@@ -66,6 +66,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   wait, written once the last is done (screenshots\burst HH-MM-SS\NN.png). XBE_INTERP_CONST_LOG=1 logs the blended
   constants by program and register every 10 s. JUICED_HOLD="a-b,c" holds registers at the step's value (a test).
   wincheck, SMOKE OK. Next: Harry's bursts of the flicker, then JUICED_HOLD halves on Windows.
+- Harry's bursts of b1e011b (7, 16 frames each, .local/win/bursts). The first, reversing: the white reversing-light
+  glow sits off the lamp in some frames (13, 16 by the lamp's edge), so it is placed wrongly, not blended wrongly.
+  The lamps' glow program is "still" (most of its draws go with the camera), so with interp_scenery_takes_camera
+  every draw of it took the camera's move. c4e0dce saved only those with a car's exact matrix.
+- SDK: a still program's draw whose own match moved like a moving program's draw (same target, same_move), not like
+  the camera, takes that draw's move ("riders"; XBE_INTERP_RIDERS=0 turns it off). Headless: about 24 a step
+  (14837 in 600 steps). SMOKE OK, wincheck. Next: Harry, whether the reversing, brake and neon lights hold steady.
 
 ### 2026-11-15 - Higher frame rates: measuring a replay on Windows
 - The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a
