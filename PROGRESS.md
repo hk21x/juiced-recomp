@@ -73,6 +73,14 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - SDK: a still program's draw whose own match moved like a moving program's draw (same target, same_move), not like
   the camera, takes that draw's move ("riders"; XBE_INTERP_RIDERS=0 turns it off). Headless: about 24 a step
   (14837 in 600 steps). SMOKE OK, wincheck. Next: Harry, whether the reversing, brake and neon lights hold steady.
+- Harry's bursts of 235d903: the neon (20-54-37) and the road (20-54-53, 8 frames: the game was closed before the
+  rest were written). By the race timer (the HUD is the step's own), the neon glow under the car is large for two
+  steps, then small for three; the pale streak on the road beside the car is there for two steps and gone the
+  next. Within a step they hold. So the game draws them differently from step to step: not a misplaced in-between
+  frame. Guess: the glows fade by visibility tests, and with the replays' work queued ahead of a result, the title
+  finds it not yet written. SDK: XBE_PERF logs how many presents a result takes to be written;
+  XBE_INTERP_REPORTS=1 (a test) waits for the GPU before a step's replays when the step asked for results.
+  wincheck, SMOKE OK.
 
 ### 2026-11-15 - Higher frame rates: measuring a replay on Windows
 - The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a
