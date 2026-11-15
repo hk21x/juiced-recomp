@@ -108,6 +108,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - The step's draw count alternates (948, 996): the game's own (cube faces and the like), as the F3 captures showed.
 - README in the other ports' layout; comparison images from Harry's shots in docs/img (wipe, edges, MSAA, SMAA,
   sharpening). The FXAA and render-scale panels only looked shifted: the start gantry's board flashes.
+- Harry's bursts of dd0b70f (j5.log): 22-01-01 reversing, 22-01-13 neon, 22-01-36 smooth motion off. The cyan
+  under the car (600x70 at 1450,1270, g+b-2r): smooth motion off steady 35 to 47; on, a sawtooth each step, about
+  0 to 10 in a step's first frame rising to 50 to 54 in its last, back at the next (frames 9 and 15). The exhaust is
+  dark in the first frame too. With constants held the neon still flickered (Harry), so its place, not its colour:
+  the in-between frames start it from somewhere else, perhaps another draw of the step before. Not yet found which
+  draw it is (no cyan texture: probably tinted). The reversing lights sit on their lamps in that burst.
 - Harry's README screenshots are in .local/win (settings comparisons and play), for a README like Agent Under Fire's.
 
 ### Flicker with smooth motion: stopped after several attempts (2026-11-15)
