@@ -97,6 +97,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   longer run "22-200" flickered too, once he had reversed for long enough. So the bisect's answers were not
   repeatable: whether it flickers depends on how long and where he reverses, not on these switches alone.
 
+### 2026-11-15 - F12's burst logs the in-between table too
+- Harry: neither the lights' flicker nor the neon's is there with smooth motion off. To pair a burst with how each
+  draw was placed, F12 with XBE_SCREENSHOT_BURST also logs the in-between table for the next 16 replays (no
+  interp_table file to make by hand), and the table names riders. wincheck, SMOKE OK.
+- Harry's README screenshots are in .local/win (settings comparisons and play), for a README like Agent Under Fire's.
+
 ### Flicker with smooth motion: stopped after several attempts (2026-11-15)
 What flickers, only with smooth motion: the cars' reversing and brake lights, the neon under the cars, a pale
 streak on the road beside the car. Tried:
