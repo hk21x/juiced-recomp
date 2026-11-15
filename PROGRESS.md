@@ -29,6 +29,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Harry (8da4c0a): "textures shifting again", the buildings shift slightly; at cap 120, 240 and Unlimited with
   vertical sync alike. His log: a replay still 2.6 ms on his machine (the constants were not his cost; the draws are).
   The change gives the same values as far as read, but reverted (SDK 8f55ad4) to test it.
+- Harry (4143711, the speed-up reverted, cap 120): the buildings still shift. So it came with e5d7ae5's held constants:
+  of those, only c33.x changes smoothly on the buildings' program (00CAEAF1: 1.20613 to 1.2063 a step). c33 is
+  blended again (src/common/game_info.cpp); the boards' atlas cells in it (0, 0.25, 0.5, 0.75) are held by the
+  sixteenths rule. The speed-up stays out for now (2.6 ms a replay on Harry's machine either way).
 
 ### 2026-11-14 - Smooth motion: only the smooth constants blended; the arrow boards' flicker found
 - Harry's A/B on the Release build of fb0e0da (clang 22.1.3; a Debug build at 21:29 had 32 ms steps and was rebuilt):

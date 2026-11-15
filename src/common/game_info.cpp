@@ -157,10 +157,11 @@ const app::GameInfo app::kGame = {
     .step_interpolation = [] { return juiced::smooth_motion && juiced::InRace(); },  // frames between steps, in a race
     .interp_transform = 18,               // its programs' world-view-projection: c18 to c21 (c0 to c2 the world, c7 to c13 view and projection)
     // the constants that move smoothly from step to step, blended: the matrices (c0 to c17), the camera's place and axes,
-    // the lights' colours, the clock; the rest (c33, c36, c41, c42, c88, c89, c95: animation frames, tints, toggles) are the
-    // step's own (logged in a race, 2026-11-14)
+    // the lights' colours, the clock, c33 (smooth on the buildings' program; held, the buildings shifted slightly, Harry
+    // 2026-11-15; the boards' atlas cells in it are whole sixteenths, held by Between); the rest (c36, c41, c42, c88, c89,
+    // c95: animation frames, tints, toggles) are the step's own (logged in a race, 2026-11-14)
     .interp_blends_constant = [](int c) {
-        return (c >= 0 && c <= 17) || c == 28 || (c >= 30 && c <= 32) || c == 37 || c == 43 || c == 44 || c == 90 ||
+        return (c >= 0 && c <= 17) || c == 28 || (c >= 30 && c <= 33) || c == 37 || c == 43 || c == 44 || c == 90 ||
                (c >= 92 && c <= 94);
     },
     .auto_fills_screen = true,            // the scene cameras follow the frame's shape past 16:9 (src/game/fov.cpp)
