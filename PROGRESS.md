@@ -52,6 +52,20 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   XBE_CAPTURE_FRAMES=12, F3 while it flickers (consecutive frames, in-between ones among them).
 - Harry's timing run of 08f7bdf: no GPU line and no failure logged (setup failed silently). SDK: each setup step logs
   its failure.
+- Harry's run of 4efbf30: the timer works (100 MHz ticks). GPU per frame 2.8 ms at 180 fps, 2.2 ms in a stretch
+  that held 230 to 240 at full resolution. A 240 frame has 4.17 ms, so the GPU is not the limit; the swap's wait is
+  something else (presentation).
+- The F3 captures (four of 12 frames) cannot show it: a captured frame takes about 0.1 s, so smooth motion stops
+  and none of them is an in-between frame. They show the game swapping its 640x480 target between 83D86000 and
+  83EB3000 each frame and drawing one cube face a frame; both are the game's own.
+- Flicker (neon, rear and brake lights, floors): Harry, only with smooth motion on; still there with
+  XBE_INTERP_SKIP_STILL=0, and with that and XBE_INTERP_FILL=0. Headless (bsn.sh: 8 frames braking) shows speckle
+  and brightness changes, but they appear with smooth motion off too, so headless is no test for it.
+  XBE_INTERP_CONSTANTS=0 seemed to steady the lights headless, but on the same uncertain grounds.
+- Tools: SDK XBE_SCREENSHOT_BURST=N, F12 takes N frames as shown, each copied to its own read-back buffer with no
+  wait, written once the last is done (screenshots\burst HH-MM-SS\NN.png). XBE_INTERP_CONST_LOG=1 logs the blended
+  constants by program and register every 10 s. JUICED_HOLD="a-b,c" holds registers at the step's value (a test).
+  wincheck, SMOKE OK. Next: Harry's bursts of the flicker, then JUICED_HOLD halves on Windows.
 
 ### 2026-11-15 - Higher frame rates: measuring a replay on Windows
 - The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a

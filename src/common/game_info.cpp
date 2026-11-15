@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "app/app.h"
 #include "core/input.h"
@@ -163,6 +164,24 @@ const app::GameInfo app::kGame = {
     // held, the buildings popped at each step) and jumps between the corner boards' arrow frames (blended, they flickered
     // twice as fast; Harry, 2026-11-15): blended only when it moves less than a hundredth
     .interp_blends_constant = [](int c, float was, float now) {
+        // JUICED_HOLD (a test): registers held at the step's value, as "a-b,c,...", whatever the rules below say
+        static const std::vector<std::pair<int, int>> hold = [] {
+            std::vector<std::pair<int, int>> v;
+            const char* e = std::getenv("JUICED_HOLD");
+            for (const char* p = e; p && *p;) {
+                char* end = nullptr;
+                const int a = int(std::strtol(p, &end, 10));
+                int b = a;
+                if (*end == '-') b = int(std::strtol(end + 1, &end, 10));
+                v.push_back({a, b});
+                p = *end == ',' ? end + 1 : end;
+                if (end == p && *p) break;
+            }
+            if (!v.empty()) LOGR("juiced: JUICED_HOLD=%s holds those registers at the step's value", e);
+            return v;
+        }();
+        for (const auto& [a, b] : hold)
+            if (c >= a && c <= b) return false;
         if (c == 33) {
             // JUICED_C33 (a test): 0 held, 1 blended, unset as below
             static const int mode = [] {
