@@ -81,6 +81,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   finds it not yet written. SDK: XBE_PERF logs how many presents a result takes to be written;
   XBE_INTERP_REPORTS=1 (a test) waits for the GPU before a step's replays when the step asked for results.
   wincheck, SMOKE OK.
+- Harry's runs of 84bee25: no better with XBE_INTERP_REPORTS=1, "probably worse" (its wait made steps late: one
+  burst has 7 frames of one step). The game asks for only 0.3 visibility results a frame, written 1.9 presents
+  later without the switch and 0 with it. So the visibility tests are not the cause. Bursts 21-14-38/52/55.
+  Next, with switches already in the build: XBE_INTERP_CONSTANTS=0 and XBE_INTERP_CAMERA_ONLY=0, one at a time.
+  The flicker counts as a problem that has survived several attempts; if these settle nothing, write it up.
 
 ### 2026-11-15 - Higher frame rates: measuring a replay on Windows
 - The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a
