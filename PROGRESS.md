@@ -18,6 +18,17 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-15 - Skip intro skips the WARNING and legal pages; the boards' sprites
+- Harry: skip intro should skip the THQ pages at launch. Two pages before the movies, both timed, START not cutting
+  them: "disclaimer" (the driving WARNING page, update 0x7A830) and "legals" (the legal page, update 0x7AAE0), screen
+  classes registered in 0x7F370. Each counts down page + 0xC by the frame's time; at below 0 the first goes to legals
+  and legals to the movies (legals also on a press once most of its time is gone).
+- src/game/hooks.cpp: with skip_intro, both updates start with the countdown at -0.001. Headless: the title's movie
+  opened at 1.7 s from launch (was 13 to 17 s), the title screen up at 4 s.
+- Harry (40fc432): the corner arrow boards still broken. The scenery rule's dropped vertex count let the boards'
+  arrows (small quads) take the camera's move; sprites (under kLeastVertices) are left as before.
+- SMOKE OK, wincheck ok.
+
 ### 2026-11-15 - Smooth motion: unmatched scenery takes the camera's move
 - Harry (989aa16): the buildings still shift with the off-camera fix; with XBE_INTERP_CAMERA_ONLY=1 (no crash now) the
   background is steady and the cars flicker a little. So it is how scenery draws are matched or left.
