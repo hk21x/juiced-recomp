@@ -23,6 +23,15 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a
   replay's time in the renderer's Draw (the threaded backend's capture: state deltas, header copies), and the d3d12
   perf lines give the title thread's recording time. Next: Harry's log with XBE_PERF=1 at the Unlimited cap.
+- Harry's XBE_PERF run (cap 240, 3440x1440): 150 to 180 fps; a replay 1.5 to 1.9 ms (was 2.4 to 2.6); the title
+  thread's recording 1.2 ms a frame. The render thread is what holds it: host 5 to 6 ms a frame, draw 3.1 (bind 2.1,
+  consts 0.8, tables 0.3, geometry 0.25), present 1.0 to 1.5. Task Manager: GPU about half busy, no core full.
+  (His render_percent 50 run still had 100 in the log.)
+- SDK: GameInfo::interp_skip_still_targets (Juiced on; XBE_INTERP_SKIP_STILL=0/1): a target whose draws a replay would
+  repeat (no camera move of its own, nothing sampled that was drawn this step, nothing copied in, not read between its
+  draws, its depth buffer only theirs, not the shown picture) is left out of the replays; the step's picture stays.
+  Juiced's cube faces (the car's reflections, now at the step's rate) and small passes: headless 33 to 38% of the
+  records. SMOKE OK, wincheck ok.
 
 ### 2026-11-15 - Draw distance: looked at, not changed
 - Harry: lap number and pop-in seem fixed; can the draw distance be raised? The race camera's planes (projection
