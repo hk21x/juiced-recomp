@@ -163,7 +163,15 @@ const app::GameInfo app::kGame = {
     // held, the buildings popped at each step) and jumps between the corner boards' arrow frames (blended, they flickered
     // twice as fast; Harry, 2026-11-15): blended only when it moves less than a hundredth
     .interp_blends_constant = [](int c, float was, float now) {
-        if (c == 33) return std::fabs(now - was) < 0.01f;
+        if (c == 33) {
+            // JUICED_C33 (a test): 0 held, 1 blended, unset as below
+            static const int mode = [] {
+                const char* e = std::getenv("JUICED_C33");
+                return e && *e ? std::atoi(e) : -1;
+            }();
+            if (mode >= 0) return mode == 1;
+            return std::fabs(now - was) < 0.01f;
+        }
         return (c >= 0 && c <= 17) || c == 28 || (c >= 30 && c <= 32) || c == 37 || c == 43 || c == 44 || c == 90 ||
                (c >= 92 && c <= 94);
     },

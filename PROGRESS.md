@@ -34,6 +34,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Harry (d66d805): the boards fixed, some building pop back. c33 is both: creeping on the buildings' program and
   jumping between the boards' arrow frames. interp_blends_constant now takes the two values (SDK); Juiced blends c33
   only when it moves less than 0.01. SMOKE OK, wincheck ok.
+- Harry (fc6b6a9): WARNING and legal pages gone, boards clean, the buildings shaking again. Since 271295c (buildings
+  fine): c33 by size, peers and sprites out of the scenery rule. Test switches for each: JUICED_C33 (0 held, 1
+  blended), XBE_INTERP_SCENERY_PEERS=1, XBE_INTERP_SCENERY_SPRITES=1.
 
 ### 2026-11-15 - Smooth motion: unmatched scenery takes the camera's move
 - Harry (989aa16): the buildings still shift with the off-camera fix; with XBE_INTERP_CAMERA_ONLY=1 (no crash now) the
