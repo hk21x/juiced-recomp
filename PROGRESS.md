@@ -18,6 +18,17 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-15 - Smooth motion: unmatched scenery takes the camera's move
+- Harry (989aa16): the buildings still shift with the off-camera fix; with XBE_INTERP_CAMERA_ONLY=1 (no crash now) the
+  background is steady and the cars flicker a little. So it is how scenery draws are matched or left.
+- Headless (temporary log), each 3D draw's halfway place against the camera's move, by how it is drawn, near the race:
+  matched draws of still programs ~0.1% off; unmatched draws of still programs left at the step's place 6057 of 7416
+  off by more than 0.25% of the screen (about 10 a step; programs 005D1841, 00D3E7E1, 01430E51, 00E41971, 00CAECD1,
+  00CAEAF1); the large "other" counts are the cars' programs (010E1AA1, 014308E1, 010E1BD1).
+- SDK: an unmatched draw of a still program takes the camera's move whatever its vertex count, its program's share of new
+  draws or its nearest matched draw (the pieces rules kept for other programs). XBE_INTERP_SCENERY=0 for the old rules.
+  SMOKE OK, wincheck ok.
+
 ### 2026-11-15 - Smooth motion: buildings off the camera's move; the camera-only crash
 - Harry: the buildings shift slightly (away from the road and back), clearest on the far left on a corner (his clip
   11-09-36, 2 to 4 s); with smooth motion off, none. Still there with XBE_INTERP_CONSTANTS=0, PREDICT=0, PIECES=0,
