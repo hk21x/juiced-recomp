@@ -3,6 +3,11 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
+- Higher frame rates: 230 to 240 fps at a 240 cap at half render scale, 180 to 240 at full (Harry, 682ffbf on);
+  the bind memo (a9b368f) and in-between frames filling the step (interp_fill_frames, Juiced on). The GPU takes
+  2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
+- Flicker with smooth motion (reversing and brake lights, neon, road streak): open, stopped after several attempts
+  (log, 2026-11-15). Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
 - Smooth motion above 60 (frames between steps): arrow boards, buildings, cars and brake lights right on Windows (Harry, 5591379, 2026-11-15); scenery takes the camera's move (interp_scenery_takes_camera)
 - Skip intro also skips the WARNING and legal pages (src/game/hooks.cpp; Harry, 2026-11-15)
 - Harry on Windows, f6215b1 (3440x1440): "blur mostly fixed"; lines across the screen (the scene's wires, line strips a console pixel wide) and everything stretched. SDK 7c45c2e + src/game/widescreen.cpp: 4:3, 16:9 and the screen's shape, headless only so far
@@ -86,6 +91,29 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   later without the switch and 0 with it. So the visibility tests are not the cause. Bursts 21-14-38/52/55.
   Next, with switches already in the build: XBE_INTERP_CONSTANTS=0 and XBE_INTERP_CAMERA_ONLY=0, one at a time.
   The flicker counts as a problem that has survived several attempts; if these settle nothing, write it up.
+- Harry, with switches only (no build): XBE_INTERP_CONSTANTS=0 seemed to end the lights' and reversing lights'
+  flicker, not the neon's; XBE_INTERP_CAMERA_ONLY=0 much worse. JUICED_HOLD="0-17": worse (reversing lights and
+  buildings). "22-200": better. Then neither "28-33", "37-44", "90-92", "93-94" nor "28-44" helped, and on a
+  longer run "22-200" flickered too, once he had reversed for long enough. So the bisect's answers were not
+  repeatable: whether it flickers depends on how long and where he reverses, not on these switches alone.
+
+### Flicker with smooth motion: stopped after several attempts (2026-11-15)
+What flickers, only with smooth motion: the cars' reversing and brake lights, the neon under the cars, a pale
+streak on the road beside the car. Tried:
+1. Bisecting the day's changes (Harry): not XBE_INTERP_SKIP_STILL, not XBE_INTERP_FILL; not the d3d12 bind memo
+   (headless, with the other renderer, shows its own speckle with smooth motion off too, so headless is no test).
+2. "Riders" (SDK 186800f): a glow program's draw whose own match moved like a car's takes the car's move. In the
+   first F12 burst the reversing-light glow sat off the lamp in some frames. Not confirmed fixed; it still
+   flickers after reversing for a while.
+3. Visibility-test timing (XBE_INTERP_REPORTS): 0.3 results a frame; written at once, no change.
+4. Holding constants (JUICED_HOLD bisect): answers not repeatable (above).
+The neon and road changes fall on step boundaries by the race timer: the game draws them differently from step to
+step, and the in-between frames show each step's way faithfully. Something in the game takes a different path
+every other step or so; with smooth motion's extra frames between, that may read as flicker.
+Next, if picked up: the interp_table file (a file named interp_table in the exe's folder logs the next 8 replays'
+draws and how each was blended), made while reversing, with an F12 burst at the same moment. That names the
+reversing-light draws and their mode (camera, rider, blend, step). Then compare with smooth motion off: an F12
+burst with smooth motion off, to see whether the neon changes step to step there too.
 
 ### 2026-11-15 - Higher frame rates: measuring a replay on Windows
 - The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a
