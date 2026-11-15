@@ -27,6 +27,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - The stage memo had 0 hits in a race (2700 full binds a frame; the menus hit it): a palette left set on the stages
   turned it off, though only P8 textures read one. SDK a9b368f counts the palette only for P8 (same binds, all games).
   wincheck and SMOKE OK. Next: Harry's log, whether stages show memo hits and 240.
+- Harry's two runs of 663c622 (cap 240): the memo hits (1318 last, 658 memo, 661 full a frame), bind 1.9 -> 1.2 ms,
+  host 4.0 -> 3.3 ms; still 180. The render thread is no longer the limit: the pacing is. The title's own drawing
+  takes 4.1 ms of the 16.7 ms step, so the frames fit in about 10.6 ms; at the 240 spacing (4.17 ms) the 4th
+  would start at 12.5 ms, so it is dropped (4 planned, 3 shown).
+- SDK: XBE_INTERP_FILL=1 (a test, off by default) puts the frames closer together when they would not all fit. They
+  are still placed at their own times along the step. Headless at 240: 1619 frames per 10 s against 1309, no more
+  late steps of ours. SMOKE OK, wincheck. Next: Harry at 240 with it, the fps and whether the motion stays even.
 
 ### 2026-11-15 - Higher frame rates: measuring a replay on Windows
 - The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a
