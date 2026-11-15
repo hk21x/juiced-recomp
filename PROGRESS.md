@@ -3,7 +3,8 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
-- Smooth motion above 60 (frames between steps): no noticeable flicker on Windows (Harry, e5d7ae5, 2026-11-14), 150+ frames a second
+- Smooth motion above 60 (frames between steps): arrow boards, buildings, cars and brake lights right on Windows (Harry, 5591379, 2026-11-15); scenery takes the camera's move (interp_scenery_takes_camera)
+- Skip intro also skips the WARNING and legal pages (src/game/hooks.cpp; Harry, 2026-11-15)
 - Harry on Windows, f6215b1 (3440x1440): "blur mostly fixed"; lines across the screen (the scene's wires, line strips a console pixel wide) and everything stretched. SDK 7c45c2e + src/game/widescreen.cpp: 4:3, 16:9 and the screen's shape, headless only so far
 - Widescreen: 3D 16:9 by the game, wider by fov.cpp; 2D squeezed to a centred 4:3 by the SDK (flat programs); the race HUD and the pause screens' prompt bar anchored to the frame's sides (HudAnchor; headless only so far)
 - The music freeze (Harry on Windows, 4 s into a race) is fixed in the SDK (7168ae0): not yet confirmed on Windows
@@ -48,6 +49,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   four unlit; XBE_INTERP_CONSTANTS=0 the same; XBE_INTERP_CAMERA_ONLY=0 all lit. The lit lights are drawn by a still
   program (the lamps' glow) with the car's matrix, and took the camera's move. A still program's draw sharing its
   matrix with a draw of another program keeps its own: all four lit. SMOKE OK, wincheck ok.
+- Harry (5591379): brake lights fixed.
+- Open: the replay speed-up (c6f23f8, reverted in 8f55ad4 while the buildings were tested) was not the cause and can
+  come back; on Harry's machine the replay's time is the draws (2.6 ms), the next thing for higher frame rates.
 
 ### 2026-11-15 - Smooth motion: unmatched scenery takes the camera's move
 - Harry (989aa16): the buildings still shift with the off-camera fix; with XBE_INTERP_CAMERA_ONLY=1 (no crash now) the
