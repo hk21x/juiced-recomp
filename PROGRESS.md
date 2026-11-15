@@ -50,6 +50,8 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   "perf: GPU per frame". wincheck (it caught a member used from the free LogPerf), SMOKE OK.
 - Harry: flicker on the roads and on the rear lights while driving. Captures: XBE_CAPTURE_DIR with
   XBE_CAPTURE_FRAMES=12, F3 while it flickers (consecutive frames, in-between ones among them).
+- Harry's timing run of 08f7bdf: no GPU line and no failure logged (setup failed silently). SDK: each setup step logs
+  its failure.
 
 ### 2026-11-15 - Higher frame rates: measuring a replay on Windows
 - The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a
