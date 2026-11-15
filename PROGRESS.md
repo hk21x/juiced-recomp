@@ -19,6 +19,15 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-15 - Draw distance: looked at, not changed
+- Harry: lap number and pop-in seem fixed; can the draw distance be raised? The race camera's planes (projection
+  0x15CB10: near camera + 0xB8, far + 0xBC): near 0.01, far 2,000,000, so the far plane is not what limits the view.
+- The xbe has "Region2Object static occlusion policy" (precomputed visibility by region) and a script command
+  LOD_OFF_MUL (table at 0x3304D8, handler 0x11FED0: object + 0x134 = its value); the scripts set it to 1 on many
+  objects. Scaled 3x and 4x by a temporary hook: no clear change in draws or the start's picture (the flyby's camera
+  differs between runs). Where + 0x134 is read for LOD was not found (the one multiply by it, 0xA91D0, is a sound's
+  volume). Nothing changed.
+
 ### 2026-11-15 - Skip intro skips the WARNING and legal pages; the boards' sprites
 - Harry: skip intro should skip the THQ pages at launch. Two pages before the movies, both timed, START not cutting
   them: "disclaimer" (the driving WARNING page, update 0x7A830) and "legals" (the legal page, update 0x7AAE0), screen
