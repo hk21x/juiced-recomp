@@ -122,6 +122,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   steady test of "on a car". Stopped here (past three attempts on this problem). Next idea: tie a glow to a car by
   its matrix (the car draw's matrix inverse times the glow's the same in both steps: rigidly attached), not by
   its own match. Harry: buildings still steady with riders on.
+- Harry asked to try the attachment idea (2026-11-15). SDK: a still program's draw goes with a car when the car
+  draw's matrix inverse times its own (the car's world inverse times its world) is rigid (last row 0 0 0 1, axes
+  0.5 to 2 long) and its place within kOnCar = 300 units, and it has at most 96 vertices; no own match needed.
+  Headless (XBE_INTERP_LOG histogram of still draws' nearest rigid place on a car): 0 (same matrix) or 100 to 300
+  for a few a step, 1000 and more for scenery, nothing between 0.5 and 30, so the units look like centimetres.
+  About 1.3 a step headless (no brake or reversing lights lit there). XBE_INTERP_ON_CAR=N tries another distance,
+  XBE_INTERP_RIDERS=0 turns it off. SMOKE OK, wincheck. Next: Harry's bursts reversing and of the neon.
 - Harry's README screenshots are in .local/win (settings comparisons and play), for a README like Agent Under Fire's.
 
 ### Flicker with smooth motion: stopped after several attempts (2026-11-15)
