@@ -31,7 +31,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   repeat (no camera move of its own, nothing sampled that was drawn this step, nothing copied in, not read between its
   draws, its depth buffer only theirs, not the shown picture) is left out of the replays; the step's picture stays.
   Juiced's cube faces (the car's reflections, now at the step's rate) and small passes: headless 33 to 38% of the
-  records. SMOKE OK, wincheck ok.
+  records. 6f5e9c8 (SDK 3390bc4) did not build: a brace left over from taking out a temporary log, pushed because the
+  smoke test's failure was lost in a pipe (smoke.sh | tail) and main was fast-forwarded on it. Fixed in the next
+  commit; SMOKE OK (exit status checked), wincheck ok.
 
 ### 2026-11-15 - Draw distance: looked at, not changed
 - Harry: lap number and pop-in seem fixed; can the draw distance be raised? The race camera's planes (projection
