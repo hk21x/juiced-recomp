@@ -19,6 +19,15 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-15 - Higher frame rates: whole frames a step; the bind memo
+- Harry's run of 74bfe9c (cap 240, render_percent 50): about 180 fps, a little neon flicker he thinks was there
+  before. The log's fps sits on multiples of 60 (120.0, 180.0): the pacing draws whole frames a step, 3 now, and a
+  4th needs the render thread under about 4.1 ms a frame (batches 4.26). Host draw fell 3.1 -> 2.9 ms, bind 2.1 -> 1.9;
+  250 records a step left out of the replays.
+- The stage memo had 0 hits in a race (2700 full binds a frame; the menus hit it): a palette left set on the stages
+  turned it off, though only P8 textures read one. SDK a9b368f counts the palette only for P8 (same binds, all games).
+  wincheck and SMOKE OK. Next: Harry's log, whether stages show memo hits and 240.
+
 ### 2026-11-15 - Higher frame rates: measuring a replay on Windows
 - The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a
   replay's time in the renderer's Draw (the threaded backend's capture: state deltas, header copies), and the d3d12
