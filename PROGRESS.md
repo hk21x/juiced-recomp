@@ -19,6 +19,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Log
 
+### 2026-11-15 - Higher frame rates: measuring a replay on Windows
+- The replay speed-up (c6f23f8) is back: it was not the buildings' cause. With XBE_PERF the 10 s line also gives a
+  replay's time in the renderer's Draw (the threaded backend's capture: state deltas, header copies), and the d3d12
+  perf lines give the title thread's recording time. Next: Harry's log with XBE_PERF=1 at the Unlimited cap.
+
 ### 2026-11-15 - Draw distance: looked at, not changed
 - Harry: lap number and pop-in seem fixed; can the draw distance be raised? The race camera's planes (projection
   0x15CB10: near camera + 0xB8, far + 0xBC): near 0.01, far 2,000,000, so the far plane is not what limits the view.
