@@ -26,7 +26,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   (Rec::lerp), made once a step, and a replay blends only those; the rotated copy into the draw's registers is two
   memcpys. Headless: a replay 1.3 to 1.8 ms at 780 to 1080 draws (was 6 to 7.5 ms at ~1150). Same values as before.
   SMOKE OK, wincheck ok.
-- Next: Harry's log at the Unlimited cap: frames for steps, and whether late in the race still gets in-between frames.
+- Harry (8da4c0a): "textures shifting again", the buildings shift slightly; at cap 120, 240 and Unlimited with
+  vertical sync alike. His log: a replay still 2.6 ms on his machine (the constants were not his cost; the draws are).
+  The change gives the same values as far as read, but reverted (SDK 8f55ad4) to test it.
 
 ### 2026-11-14 - Smooth motion: only the smooth constants blended; the arrow boards' flicker found
 - Harry's A/B on the Release build of fb0e0da (clang 22.1.3; a Debug build at 21:29 had 32 ms steps and was rebuilt):
