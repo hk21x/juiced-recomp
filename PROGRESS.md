@@ -41,6 +41,8 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   flicker; all three (as 271295c), both flicker. So 271295c's steady buildings were not these rules. What is known:
   XBE_INTERP_CAMERA_ONLY=1, the buildings steady. Split: =2 only still programs' draws take the camera's move (matched
   or not, peers, sprites), =3 only the other programs'. Headless =2 runs; SMOKE OK, wincheck ok.
+- Harry: =2 the buildings stable; =3 a shaky car. SDK: GameInfo::interp_scenery_takes_camera (default off, other games
+  as before) makes =2 the default; Juiced sets it. XBE_INTERP_CAMERA_ONLY=0 turns it off. SMOKE OK, wincheck ok.
 
 ### 2026-11-15 - Smooth motion: unmatched scenery takes the camera's move
 - Harry (989aa16): the buildings still shift with the off-camera fix; with XBE_INTERP_CAMERA_ONLY=1 (no crash now) the
