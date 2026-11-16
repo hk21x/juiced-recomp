@@ -8,7 +8,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
 - Flicker with smooth motion: the neon (SDK 10b8559) and brake lights (SDK 73fa544) fixed, Harry confirmed. Barriers:
   SDK 80d4525, a draw of the camera's own matrix is scenery whatever its program; waiting for Harry. People at the
-  start: the frames' timing, not their blending; XBE_INTERP_EVEN=1 (SDK 0a651fe) to compare (log, 2026-11-16).
+  start: the frames' timing, not their blending; XBE_INTERP_EVEN=1 (SDK 0a651fe) worse; needs more frames a step (log, 2026-11-16).
   Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
 - Night races: the spoiler's top speckles on Windows (smooth motion off too); the body near black on top, also on
   GPU-VM's Intel Arc (2026-11-16); open
@@ -44,7 +44,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   twice as the eye follows the pan.
 - SDK 0a651fe: XBE_INTERP_EVEN=1 shows only as many frames as fit evenly spaced along the step (on this load one, at
   even 18 ms), to compare by eye with the bunched frames. Headless runs skip the pacing (XBE_INTERP_TEST); smoke OK.
-- Next: Harry compares the fly-by with XBE_INTERP_EVEN=1, without it, and with smooth motion off. The lasting cure is
+- Harry: XBE_INTERP_EVEN=1 worse (one frame a step at this load), as it was no better. Even spacing is not it; more
+  frames a step are. Next: his XBE_INTERP_LOG run for the pacing figures (the free span, a replay's time).
+- Was next: Harry compares the fly-by with XBE_INTERP_EVEN=1, without it, and with smooth motion off. The lasting cure is
   more time free in a step (the XBE_PERF slowdown), or replays that do not wait for the title's drawing.
 
 ### 2026-11-16 - Smooth motion: the barriers' pieces taken for moving things now and then
