@@ -6,9 +6,8 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Higher frame rates: 230 to 240 fps at a 240 cap at half render scale, 180 to 240 at full (Harry, 682ffbf on);
   the bind memo (a9b368f) and in-between frames filling the step (interp_fill_frames, Juiced on). The GPU takes
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
-- Flicker with smooth motion (brake lights, neon): SDK 94f1eb6 (derived draws' constants from their own match) made no
-  difference (Harry's burst 14-19-01). The neon builds up over about 8 frames (about two steps) and drops; the brake
-  light only at the top. Open (log, 2026-11-16).
+- Flicker with smooth motion (brake lights, neon): SDK 10b8559, the neon and shadow laid on the road afresh each step
+  take the car's move (interp_rebuilt_on_car); steady through each step headless. Waiting for Harry (log, 2026-11-16).
   Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
 - Night races: the spoiler's top speckles on Windows (smooth motion off too); the body near black on top, also on
   GPU-VM's Intel Arc (2026-11-16); open
@@ -29,6 +28,21 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-16 - Smooth motion flicker: the neon and shadow are laid afresh each step
+- Reproduced headless: race.txt, XBE_INTERP_TEST=4, SNAP_FRAMES=16. The glow under the car (g+b-2r over
+  240x60+200+400) by frame: 8 13 24 33 | 8 8 8 54 | 8 8 8 59: whole only in the step's own frame.
+- PROBES at 300,850 and REF_DRAWLOG: the shadow (texture 0045E7E0) and the neon after it are drawn by the lamps' glow
+  program with the camera's matrix alone, their vertex count changing each step (21, 15, 27): the title lays them on
+  the road at the car's new place each step. In the in-between frames their box grew from rows 541-714 to 565-878
+  over the step: drawn where the car would be at the step's end, under its body, then back. (Depth was ruled out by
+  a run that turned it off, but that run named a handle of an earlier run: handles change between runs.)
+- SDK 10b8559: a draw of 96 vertices or fewer, its matrix the camera's alone (a car's world taken off it leaves its
+  origin far from the car), its vertices new this step (no match, or its match's bytes differ), whose vertices'
+  middle lies on a car, takes that car's move. GameInfo::interp_rebuilt_on_car (Juiced on); XBE_INTERP_REBUILT=0/1.
+- Headless after: 41 41 41 41 | 11 12 10 9 | 27 24 23 25, steady within each step; brake lights in all 16 frames;
+  about 2.5 such draws a step. SMOKE OK (851 draws), wincheck ok.
+- Next: Harry's bursts with smooth motion on.
 
 ### 2026-11-16 - Smooth motion flicker: 94f1eb6 changed nothing
 - Harry on 1e6bc6c, smooth on, cap 240 (bursts 14-19-01 brake, 14-19-20/21 neon; .local/win/j1419.log; about 3.6
