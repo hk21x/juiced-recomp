@@ -8,7 +8,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
 - Flicker with smooth motion: the neon (SDK 10b8559) and brake lights (SDK 73fa544) fixed, Harry confirmed. Barriers:
   SDK 80d4525, a draw of the camera's own matrix is scenery whatever its program; waiting for Harry. People at the
-  start: not yet looked into (log, 2026-11-16).
+  start: the frames' timing, not their blending; XBE_INTERP_EVEN=1 (SDK 0a651fe) to compare (log, 2026-11-16).
   Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
 - Night races: the spoiler's top speckles on Windows (smooth motion off too); the body near black on top, also on
   GPU-VM's Intel Arc (2026-11-16); open
@@ -29,6 +29,23 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-16 - Smooth motion: the people at the start flicker from the frames' timing
+- Harry's bursts 20-33-45 to 20-34-11 (the opening fly-by past the stadium steps) and his video (1 to 2 s, 240 fps):
+  the man in blue tracked against a kerb light moves too little within a step and catches up between steps (once
+  14 px where the light moved 4). The people's draws all take the camera's move (derived, why 1); none is left out
+  (the in-between table now also lists the draws left out of the replays: those are the cube faces and small passes).
+- Not a wrong match: a headless check (removed again) of every draw given the camera's move found no own match with
+  another world in 674 sampled steps.
+- The video's frame to frame changes repeat every 4 frames (one step): ~2200, ~700, ~1100, ~0, the same in every band
+  of the screen (no tearing). His log: the replays at alpha 0.06 and 0.25, 3 ms apart, then nothing for 15 ms
+  (vsync off; 1137 to 1857 frames for 460 to 600 steps every 10 s). The title's own drawing takes ~12 of the 18 ms
+  step, and the frames that fit after it come bunched: thin bright things against a dark ground (the crowd) are seen
+  twice as the eye follows the pan.
+- SDK 0a651fe: XBE_INTERP_EVEN=1 shows only as many frames as fit evenly spaced along the step (on this load one, at
+  even 18 ms), to compare by eye with the bunched frames. Headless runs skip the pacing (XBE_INTERP_TEST); smoke OK.
+- Next: Harry compares the fly-by with XBE_INTERP_EVEN=1, without it, and with smooth motion off. The lasting cure is
+  more time free in a step (the XBE_PERF slowdown), or replays that do not wait for the title's drawing.
 
 ### 2026-11-16 - Smooth motion: the barriers' pieces taken for moving things now and then
 - Harry: the brake light fix (fef220b) works.
