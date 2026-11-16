@@ -6,9 +6,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Higher frame rates: 230 to 240 fps at a 240 cap at half render scale, 180 to 240 at full (Harry, 682ffbf on);
   the bind memo (a9b368f) and in-between frames filling the step (interp_fill_frames, Juiced on). The GPU takes
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
-- Flicker with smooth motion: the neon fixed (SDK 10b8559, Harry confirmed). Brake lights: SDK 73fa544, a lit lamp
-  without a match keeps its car's move (interp_peers_on_cars); waiting for Harry. Open from his video of b7b94ea: the
-  barriers' green lights build up over each step (the neon's pattern), people flickering at the start (log, 2026-11-16).
+- Flicker with smooth motion: the neon (SDK 10b8559) and brake lights (SDK 73fa544) fixed, Harry confirmed. Barriers:
+  SDK 80d4525, a draw of the camera's own matrix is scenery whatever its program; waiting for Harry. People at the
+  start: not yet looked into (log, 2026-11-16).
   Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
 - Night races: the spoiler's top speckles on Windows (smooth motion off too); the body near black on top, also on
   GPU-VM's Intel Arc (2026-11-16); open
@@ -29,6 +29,21 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-16 - Smooth motion: the barriers' pieces taken for moving things now and then
+- Harry: the brake light fix (fef220b) works.
+- Barriers (his video, 27 to 31 s): the green lamps are painted in the barrier pieces' texture (header 0069BA60; found by
+  100 PROBES along the kerb, keeping green writes). XBE_INTERP_WATCH now takes t<texture>, stable between runs.
+- In the scene target (01460000) the pieces were given the camera's move in most steps, but blended from their own
+  matches in single steps now and then (and through the start). Their program draws moving things too: with few
+  pieces in view (7 matched, 3 with the camera) it fell under half and was not still for that step.
+- Tried and taken out: counting the share again after the predicted matching, and keeping a program still for 30
+  steps on a quarter; neither changed the single-step flips (the program's share was 1 in 6 then).
+- SDK 80d4525: a draw whose matrix is that of a matched draw going with its target's camera (the view and projection
+  alone) is scenery whatever its program (camera_only 2, Juiced). Watch after: the pieces of that matrix take the
+  camera's move every step; pieces with a world of their own still blend from their own matches. Not measurable
+  headless (the barrier is never in the same place twice); SMOKE OK (908 draws), wincheck ok.
+- Next: Harry's check at turn two; the people at the start (the same stretch where the program was not still).
 
 ### 2026-11-16 - Smooth motion: brake lights that lose their match
 - Harry on b7b94ea: the neon fixed; brake lights still "deforming" as they come on (his video, juiced-video.mp4 on
