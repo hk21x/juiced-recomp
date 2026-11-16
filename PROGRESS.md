@@ -8,7 +8,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
 - Flicker with smooth motion: the neon (SDK 10b8559) and brake lights (SDK 73fa544) fixed, Harry confirmed. Barriers:
   SDK 80d4525, a draw of the camera's own matrix is scenery whatever its program; waiting for Harry. People at the
-  start: the frames' timing, not their blending; XBE_INTERP_EVEN=1 (SDK 0a651fe) worse; needs more frames a step (log, 2026-11-16).
+  start: the frames' timing, not their blending; SDK 9a36fbb, unmatched draws blend the camera constants they share with a matched one; waiting for Harry (log, 2026-11-16).
   Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
 - Night races: the spoiler's top speckles on Windows (smooth motion off too); the body near black on top, also on
   GPU-VM's Intel Arc (2026-11-16); open
@@ -29,6 +29,17 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-16 - Smooth motion: the crowd held at the step's place (camera constants not blended)
+- Harry: the fly-by looks fine with smooth motion off. His XBE_INTERP_LOG run (fly-by stretch): the title 4.4 ms of
+  a 16.7 ms step, matching 1.8, a frame 2.1 (replay and present), 3 frames a step; and ~600 draws a step without a
+  match. A still program's draw without a match takes the camera's move for the transform (c18 to c21) only: its
+  constants past it stay at the step's (own = -1). The crowd, placed through the view and projection (c7 to c13, as
+  the comment on interp_transform has it), stood still within a step and jumped between: the burst's measurement.
+- SDK 9a36fbb, GameInfo::interp_shared_constants (Juiced on; XBE_INTERP_SHARED=0/1): such a draw blends each constant
+  equal to a matched camera-moved draw's of its target as that draw does. Headless: 900 to 9800 draws in 600 steps
+  (a crowd's worth a step); smoke OK, wincheck OK.
+- Next: Harry's fly-by with it, and XBE_INTERP_SHARED=0 to compare. XBE_INTERP_EVEN stays a test only.
 
 ### 2026-11-16 - Smooth motion: the people at the start flicker from the frames' timing
 - Harry's bursts 20-33-45 to 20-34-11 (the opening fly-by past the stadium steps) and his video (1 to 2 s, 240 fps):
