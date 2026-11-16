@@ -6,9 +6,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Higher frame rates: 230 to 240 fps at a 240 cap at half render scale, 180 to 240 at full (Harry, 682ffbf on);
   the bind memo (a9b368f) and in-between frames filling the step (interp_fill_frames, Juiced on). The GPU takes
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
-- Flicker with smooth motion (reversing and brake lights, neon, road streak): open, stopped after several attempts
-  (log, 2026-11-15). Cause narrowed: car-attached glows start each step from the wrong place (the neon's sawtooth,
-  the reversing glow below its lamps in steps with no rider). Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
+- Flicker with smooth motion (brake lights, neon): SDK 94f1eb6, draws given the camera's move blend their constants
+  from their own match (the neon's light in the road's constants ran a step ahead); waiting for Harry's burst.
+  Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
+- Night races: the spoiler's top speckles on Windows (smooth motion off too); open (log, 2026-11-16)
 - Smooth motion above 60 (frames between steps): arrow boards, buildings, cars and brake lights right on Windows (Harry, 5591379, 2026-11-15); scenery takes the camera's move (interp_scenery_takes_camera)
 - Skip intro also skips the WARNING and legal pages (src/game/hooks.cpp; Harry, 2026-11-15)
 - Harry on Windows, f6215b1 (3440x1440): "blur mostly fixed"; lines across the screen (the scene's wires, line strips a console pixel wide) and everything stretched. SDK 7c45c2e + src/game/widescreen.cpp: 4:3, 16:9 and the screen's shape, headless only so far
@@ -24,6 +25,23 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-16 - Smooth motion: derived draws' constants; night car shading looked at
+- Harry's burst 09-06-57 (4a240df, smooth on): brake lights only in the last frames of a step, the neon dark at a
+  step's start and bright at its end. His XBE_INTERP_LOG run shows riders working (540 to 980 in 600 steps), so the
+  rider test is not what fails here. Reading: the neon is drawn by the road under the car, its place in constants; a
+  draw given the camera's move took the step's constants, so the light ran a step ahead of the blended car.
+- SDK 94f1eb6: such a draw (not a rider) blends its constants past the transform from its own match, under the same
+  hold rules (GameInfo::interp_blends_constant). XBE_INTERP_OWN_CONSTANTS=0 turns it off. SMOKE OK, wincheck ok, a
+  headless race at FPS=120 with XBE_INTERP_TEST=2 runs clean. Not yet seen on Windows.
+- Night (career's first race, Harry's burst 09-02-59, smooth off): the spoiler's top speckles in rainbow colours.
+  Headless the CPU renderer speckles the whole car (its own fault as well, so not a test of it). What the car's
+  draws bind: a 32x32 cube, two 256x512 P8 textures (the car's livery and the track's tree sheet, unswizzled from a
+  memory dump), the reflection cube (rendered each frame into six 128x128 faces), and a 160x128 screen space texture
+  (818A4800, 4 by 7.5 scene pixels a texel of the 640x960 scene) that is all zeros: nothing in the logged frames
+  draws into it; the same memory is a 640x480 surface whose header (0x3C1760) looks like one of D3D's frame buffers.
+  Guess, not confirmed: the speckle is noisy P8 texels through the wrong palette. Next: the wing's draw on Windows.
+- The scene target is 640x960 (TRACE and PROBES take its coordinates: screen y times 2).
 
 ### 2026-11-15 - Higher frame rates: whole frames a step; the bind memo
 - Harry's run of 74bfe9c (cap 240, render_percent 50): about 180 fps, a little neon flicker he thinks was there
