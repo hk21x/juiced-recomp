@@ -6,8 +6,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Higher frame rates: 230 to 240 fps at a 240 cap at half render scale, 180 to 240 at full (Harry, 682ffbf on);
   the bind memo (a9b368f) and in-between frames filling the step (interp_fill_frames, Juiced on). The GPU takes
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
-- Flicker with smooth motion (brake lights, neon): SDK 94f1eb6, draws given the camera's move blend their constants
-  from their own match (the neon's light in the road's constants ran a step ahead); waiting for Harry's burst.
+- Flicker with smooth motion (brake lights, neon): SDK 94f1eb6 (derived draws' constants from their own match) made no
+  difference (Harry's burst 14-19-01). The neon builds up over about 8 frames (about two steps) and drops; the brake
+  light only at the top. Open (log, 2026-11-16).
   Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
 - Night races: the spoiler's top speckles on Windows (smooth motion off too); the body near black on top, also on
   GPU-VM's Intel Arc (2026-11-16); open
@@ -28,6 +29,15 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-16 - Smooth motion flicker: 94f1eb6 changed nothing
+- Harry on 1e6bc6c, smooth on, cap 240 (bursts 14-19-01 brake, 14-19-20/21 neon; .local/win/j1419.log; about 3.6
+  frames a step): "lights and neons the same". Burst 14-19-01, red over 720x160+1240+880 and the neon (g+b-2r) over
+  720x120+1240+1120, frames 01-16: red 0 x8, 28, 49, 0 x6; neon 18 34 6 7 11 18 29 43 58 64 6 7 12 22 38 56.
+- The cycle covers about 8 frames, roughly two steps, not one: something the game does every other step, stretched
+  by the in-between frames, more likely than the constants of one step (what 94f1eb6 changed).
+- Next: a race headless with XBE_INTERP_TEST and the reference renderer, the neon's draws and their constants
+  logged for consecutive steps, to see what alternates.
 
 ### 2026-11-16 - GPU-VM: the night car, and why smooth motion shows one frame a step there
 - New Windows test VM, GPU-VM (Intel Arc A750, D3D12 on hardware; Ryzen 5 5600G, 6 threads). Built b7eedd3 cleanly;
