@@ -198,6 +198,7 @@ const app::GameInfo app::kGame = {
     .interp_skip_still_targets = true,    // its cube faces and small passes drawn once a step, not in every in-between frame
     .interp_fill_frames = true,           // its own drawing takes 4 ms of a step: at 240 the 4th frame fits only closer together
     .interp_rebuilt_on_car = true,        // the neon and shadow under the cars: laid on the road afresh each step
+    .interp_peers_on_cars = true,         // the brake lights lit as the brakes come on: with the car's body
     .auto_fills_screen = true,            // the scene cameras follow the frame's shape past 16:9 (src/game/fov.cpp)
     .voice_3d_level = [] { return float(std::min<uint32_t>(juiced::effects_percent, 100)) / 100.0f; },  // engines and effects
     .squeeze_flat_programs = true,        // the 2D's programs: (v0 + c) * c + c, no matrix

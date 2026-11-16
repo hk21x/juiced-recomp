@@ -6,8 +6,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Higher frame rates: 230 to 240 fps at a 240 cap at half render scale, 180 to 240 at full (Harry, 682ffbf on);
   the bind memo (a9b368f) and in-between frames filling the step (interp_fill_frames, Juiced on). The GPU takes
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
-- Flicker with smooth motion (brake lights, neon): SDK 10b8559, the neon and shadow laid on the road afresh each step
-  take the car's move (interp_rebuilt_on_car); steady through each step headless. Waiting for Harry (log, 2026-11-16).
+- Flicker with smooth motion: the neon fixed (SDK 10b8559, Harry confirmed). Brake lights: SDK 73fa544, a lit lamp
+  without a match keeps its car's move (interp_peers_on_cars); waiting for Harry. Open from his video of b7b94ea: the
+  barriers' green lights build up over each step (the neon's pattern), people flickering at the start (log, 2026-11-16).
   Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
 - Night races: the spoiler's top speckles on Windows (smooth motion off too); the body near black on top, also on
   GPU-VM's Intel Arc (2026-11-16); open
@@ -28,6 +29,23 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-16 - Smooth motion: brake lights that lose their match
+- Harry on b7b94ea: the neon fixed; brake lights still "deforming" as they come on (his video, juiced-video.mp4 on
+  recomp-vm, 240 fps: 17 to 19 s, the lamps per 4 frames 0, partial, lit, lit while braking began); floor and barriers
+  at 27 to 31 s; people at the start, 1 to 2 s. His bursts 15-56-53 to 15-57-44: the lamps steady in those.
+- Headless (race.txt braking at vblank 9400, brake.txt in the scratchpad; XBE_INTERP_TEST=4, SNAP_FRAMES=32): the same
+  pattern, 0 0 177 292 in most steps. The lamp is program 00569DC1 (also the street lamps', so a still program),
+  21 vertices. A first try (an unmatched draw whose peer is a car kept off the camera's move) changed nothing.
+- New XBE_INTERP_WATCH=<program>: each step's handling of its small draws, without the reference renderer. Over a race:
+  2304 blended, 14 with no match and no peer (drawn at the step's place, ahead of the blended body), 2 refitted to the
+  camera's move as wrongly matched scenery, 2 given the camera's move through a peer.
+- SDK 73fa544: a draw of 96 vertices or fewer whose matrix is rigid on a car (car_move_of, a rider's test) takes the
+  car's move when it has no match, and is not refitted. GameInfo::interp_peers_on_cars (Juiced on). Watch after: 2176
+  blended, 17 riding their car, 5 at the step's place, 3 the camera's move (steps whose car body had no match either).
+  32 frames braking: lit in all (237 to 274). SMOKE OK (818 draws), wincheck ok.
+- Next: Harry's check; the barriers' green lights (the neon's sawtooth: 4 5 5 7 7 7 7 8 | 6 4 5 5 ... in his video,
+  also in the first headless snaps of the day); people at the start.
 
 ### 2026-11-16 - Smooth motion flicker: the neon and shadow are laid afresh each step
 - Reproduced headless: race.txt, XBE_INTERP_TEST=4, SNAP_FRAMES=16. The glow under the car (g+b-2r over
