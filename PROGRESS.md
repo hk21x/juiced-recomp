@@ -8,7 +8,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
 - Flicker with smooth motion: the neon (SDK 10b8559) and brake lights (SDK 73fa544) fixed, Harry confirmed. Barriers:
   SDK 80d4525, a draw of the camera's own matrix is scenery whatever its program; waiting for Harry. People at the
-  start: the frames' timing, not their blending; SDK 9a36fbb, unmatched draws blend the camera constants they share with a matched one; waiting for Harry (log, 2026-11-16).
+  start: the frames' timing, not their blending; the crowd's program (0103EC41) uses its own view-projection c14 to c17; SDK dae938a moves it with the camera; waiting for Harry (log, 2026-11-16).
   Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
 - Night races: the spoiler's top speckles on Windows (smooth motion off too); the body near black on top, also on
   GPU-VM's Intel Arc (2026-11-16); open
@@ -29,6 +29,20 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-16 - Smooth motion: the crowd's own view-projection (c14 to c17)
+- Harry: 9a36fbb made no difference (XBE_INTERP_SHARED=0 and 1 alike).
+- GPU-VM, XBE_SKIP_VS by halves through the fly-by (.local/gpuvm/skip.sh, screenshots 6 s after the last menu key):
+  the crowd vanishes with shaders B519967C5DCDE32A and C5E5CF9C82007BAC hidden, program 0103EC41 (the first draws
+  of the main pass in Harry's burst table). Their dumped HLSL: world from c0 to c2 (c[96] to c[98]), then the
+  position through c14 to c17 (c[110] to c[113]), not the transform c18 to c21.
+- Those rows were blended a constant at a time, and Holds kept any that changed by 0.05 and by half at the step's
+  value: in the fly-by's turn, rotation entries crossing zero. Part of the matrix blended, part held, the people
+  shook against the steps.
+- SDK dae938a, GameInfo::interp_view_projection (Juiced 14; XBE_INTERP_VP=<reg> or -1): a draw given a move (camera's,
+  a car's, any of the derived paths) takes it for those rows as for its transform (Rec::move), and the rows are never
+  held as leaps. Headless engaged, smoke OK, wincheck OK. 9a36fbb stays (harmless; it had nothing to share here).
+- Next: Harry's fly-by; XBE_INTERP_VP=-1 to compare.
 
 ### 2026-11-16 - Smooth motion: the crowd held at the step's place (camera constants not blended)
 - Harry: the fly-by looks fine with smooth motion off. His XBE_INTERP_LOG run (fly-by stretch): the title 4.4 ms of
