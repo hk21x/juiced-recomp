@@ -9,7 +9,10 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Flicker with smooth motion (brake lights, neon): SDK 94f1eb6, draws given the camera's move blend their constants
   from their own match (the neon's light in the road's constants ran a step ahead); waiting for Harry's burst.
   Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
-- Night races: the spoiler's top speckles on Windows (smooth motion off too); open (log, 2026-11-16)
+- Night races: the spoiler's top speckles on Windows (smooth motion off too); the body near black on top, also on
+  GPU-VM's Intel Arc (2026-11-16); open
+- GPU-VM (Intel Arc A750, 6 thread Ryzen 5600G): no in-between frames at 1080p; the step's CPU time leaves no room for
+  a second frame (log, 2026-11-16). Smooth-motion tests stay on Harry's PC
 - Smooth motion above 60 (frames between steps): arrow boards, buildings, cars and brake lights right on Windows (Harry, 5591379, 2026-11-15); scenery takes the camera's move (interp_scenery_takes_camera)
 - Skip intro also skips the WARNING and legal pages (src/game/hooks.cpp; Harry, 2026-11-15)
 - Harry on Windows, f6215b1 (3440x1440): "blur mostly fixed"; lines across the screen (the scene's wires, line strips a console pixel wide) and everything stretched. SDK 7c45c2e + src/game/widescreen.cpp: 4:3, 16:9 and the screen's shape, headless only so far
@@ -25,6 +28,22 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 ## Log
+
+### 2026-11-16 - GPU-VM: the night car, and why smooth motion shows one frame a step there
+- New Windows test VM, GPU-VM (Intel Arc A750, D3D12 on hardware; Ryzen 5 5600G, 6 threads). Built b7eedd3 cleanly;
+  the game is started on the logged-in desktop by a scheduled task (/IT) and driven by key presses (keybd_event).
+  A disconnected RDP session locks the desktop and takes no keys: `tscon 2 /dest:console` keeps it active.
+- Career night race (Driver Betting, T.K.): the Eclipse's roof, rear window and upper body near black, as Harry
+  reported. On a second GPU vendor too, so the port's data more likely than a driver. The wing was solid black, not
+  speckled, in that one shot.
+- Smooth motion there: 600 frames for 600 steps whatever the screen (RDP 32 Hz, the Arc at 60 or 120 Hz, borderless
+  or fullscreen); present 0.44 ms, no wait. SDK 68988be adds to XBE_INTERP_LOG's 10 s report the span, a frame's time
+  and the frames cut. At 120 Hz, 1080p: the title 6.8 ms, matching 2.0, a replay 3.4; span 4.07 + replay 3.44 = 7.5
+  ms for the frames, the second begun at 5.38 ms with a frame taking 3.43, so cut in 534 of 600 steps. The step needs
+  about 17.6 ms of CPU (title, matching, two replays, the 2 ms margin) for 16.7: the VM's CPU, not the GPU or the screen.
+- XBE_PERF=1 in a race there: 7.6 fps, binds 127 ms a frame and about 4300 texture entries made a frame (60 without
+  it). Not looked into yet.
+- Next: the night car's darkening (the 160x128 screen-space texture 818A4800 every car draw samples, all zeros).
 
 ### 2026-11-16 - Smooth motion: derived draws' constants; night car shading looked at
 - Harry's burst 09-06-57 (4a240df, smooth on): brake lights only in the last frames of a step, the neon dark at a
