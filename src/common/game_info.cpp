@@ -159,6 +159,7 @@ const app::GameInfo app::kGame = {
     .step_interpolation = [] { return juiced::smooth_motion && juiced::InRace(); },  // frames between steps, in a race
     .interp_transform = 18,               // its programs' world-view-projection: c18 to c21 (c0 to c2 the world, c7 to c13 view and projection)
     .interp_view_projection = 14,         // c14 to c17: the crowd's program places its people through the world and these (dumped HLSL)
+    .interp_world = 0,                    // c0 to c2: a draw whose world is the step before's is still (the buildings' shift)
     // the constants that move smoothly from step to step, blended: the matrices (c0 to c17), the camera's place and axes,
     // the lights' colours, the clock; the rest (c36, c41, c42, c88, c89, c95: animation frames, tints, toggles) are the
     // step's own (logged in a race, 2026-11-14). c33 is both: it creeps on the buildings' program (1.2061 to 1.2063 a step;

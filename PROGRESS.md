@@ -14,6 +14,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   GPU-VM's Intel Arc (2026-11-16); open
 - GPU-VM (Intel Arc A750, 6 thread Ryzen 5600G): no in-between frames at 1080p; the step's CPU time leaves no room for
   a second frame (log, 2026-11-16). Smooth-motion tests stay on Harry's PC
+- Buildings shifting with smooth motion (Harry, 4e394c5): still things are now told by their world (c0 to c2) and moved by the game's own view-projections (interp_world); measured headless, waiting for Harry (log, 2026-11-17)
 - Smooth motion above 60 (frames between steps): arrow boards, buildings, cars and brake lights right on Windows (Harry, 5591379, 2026-11-15); scenery takes the camera's move (interp_scenery_takes_camera)
 - Skip intro also skips the WARNING and legal pages (src/game/hooks.cpp; Harry, 2026-11-15)
 - Harry on Windows, f6215b1 (3440x1440): "blur mostly fixed"; lines across the screen (the scene's wires, line strips a console pixel wide) and everything stretched. SDK 7c45c2e + src/game/widescreen.cpp: 4:3, 16:9 and the screen's shape, headless only so far
@@ -31,6 +32,31 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 
 
+
+## 2026-11-17 - the buildings' shift: still things by their world, moved by the game's own matrices
+Harry on 4e394c5: the buildings shift again. Every earlier attempt reviewed (a903c86 off-camera refit, 4940fba scenery
+takes the camera's move, c33, 80d4525 camera matrices; steady at 5591379 on the 15th, lost again by the 16th's changes).
+All of them guess what is still (a program's share of camera-moved draws, vertex counts, nearness among copies) and
+move it by a camera move voted from other draws' matrices: each fix moved the wrong guesses elsewhere.
+- New XBE_INTERP_TRUTH=<world register> (headless race, XBE_INTERP_TEST=2): every draw whose world (c0 to c2) the step
+  before held too, its in-between place against its world through the view-projection (c14 to c17) blended between the
+  two steps. Path 1 (the transform c18 to c21) within 0.01% for nearly all; path 2 (world then view-projection) more
+  than 0.2% of the half screen off for 1100 to 6400 draws in 10 s, some by whole screens.
+- The dumped programs (AUDIT=1): five of 46 place their vertices through c0 to c2 and c14 to c17 (one mixes c14, c15
+  with c20, c21), not the transform. 94f1eb6 (the 16th) blends a camera-moved draw's constants from its own match, the
+  world among them; among a street's repeated fronts that match is a neighbour as often as its self, so those programs'
+  draws slid a front along and back each step. dae938a/58ae4cd then moved their view-projection by the voted move.
+- SDK: GameInfo::interp_world (Juiced 0; XBE_INTERP_WORLD=-1 the old way). (1) Among like draws of the step before, one
+  holding the very same world is the draw's self, whatever is nearer. (2) A draw given the camera's move takes its
+  self's transform and view-projection as the game had them; one come into view its world through the view-projection
+  before (found from the draws with a self, per target); the voted move is no longer used for any of them (0 in the
+  log's count). (3) Its world stays the step's. (4) A draw left at the step's place, or matched to another than its
+  self, whose world the step before held is still too (small pieces and sprites, 1900 in 10 s). (5) One with a self is
+  never taken for a car's rider. (6) World rows are not held as leaps.
+- After: path 2 over 0.2%: 0, 0 in the first 20 s (was 1124, 5257); what remains later is the neon and shadow laid on
+  the cars (meant to move) and path 1 differences of near pieces that are the game's own float rounding.
+  SDK 6e11b7d. SMOKE OK (872 draws), wincheck ok. Next: Harry on the buildings, the crowd (its world was blended from neighbours
+  too) and the arrow boards, brake lights and neon (unchanged rules, to be confirmed not regressed).
 
 ## 2026-11-17 - the evening race's device loss: a sampler's LOD bias of -21.5
 Reproduced on GPU-VM (Arcade, Novice series, race 4: West Anderson route 1 reversed, evening): the same device loss on
