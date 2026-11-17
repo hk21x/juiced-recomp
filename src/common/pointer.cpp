@@ -126,10 +126,90 @@ bool PointerAt(Pointer& p) {
 // its half second timer kCursorTimer, sdk/runtime/app/main.cpp)
 WNDPROC g_proc = nullptr;
 std::atomic<bool> g_arrow{false};
+
+// The pointer's own picture, in the menus' colours (the logo's yellow running to the bands' orange, a dark edge and a
+// soft shadow), drawn here: an arrow of `size` pixels, its tip the hot spot. Made for the window's height (32 at 1080
+// lines) and again when that changes; Windows' arrow when it cannot be made.
+HCURSOR MenuCursor(HWND hwnd) {
+    static HCURSOR cursor = nullptr;
+    static int made = 0;
+    RECT r;
+    int size = 32;
+    if (GetClientRect(hwnd, &r) && r.bottom > 0) size = std::clamp(int(r.bottom * 32 / 1080), 24, 96);
+    if (cursor && made == size) return cursor;
+    // the arrow's outline in a unit square: tip, down the left edge, the notch, the tail, back up the right edge
+    static const float kShape[7][2] = {{0.06f, 0.04f}, {0.06f, 0.80f}, {0.25f, 0.63f}, {0.39f, 0.93f},
+                                       {0.52f, 0.87f}, {0.38f, 0.58f}, {0.64f, 0.58f}};
+    const auto inside = [](float x, float y) {
+        bool in = false;
+        for (int i = 0, j = 6; i < 7; j = i++) {
+            const float xi = kShape[i][0], yi = kShape[i][1], xj = kShape[j][0], yj = kShape[j][1];
+            if ((yi > y) != (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) in = !in;
+        }
+        return in;
+    };
+    const auto distance = [](float x, float y) {  // to the outline
+        float best = 1e9f;
+        for (int i = 0, j = 6; i < 7; j = i++) {
+            const float ax = kShape[j][0], ay = kShape[j][1], bx = kShape[i][0] - ax, by = kShape[i][1] - ay;
+            const float t = std::clamp(((x - ax) * bx + (y - ay) * by) / (bx * bx + by * by), 0.0f, 1.0f);
+            best = std::min(best, std::hypot(x - ax - bx * t, y - ay - by * t));
+        }
+        return best;
+    };
+    BITMAPV5HEADER bi{};
+    bi.bV5Size = sizeof bi;
+    bi.bV5Width = size, bi.bV5Height = -size, bi.bV5Planes = 1, bi.bV5BitCount = 32, bi.bV5Compression = BI_BITFIELDS;
+    bi.bV5RedMask = 0x00FF0000, bi.bV5GreenMask = 0x0000FF00, bi.bV5BlueMask = 0x000000FF, bi.bV5AlphaMask = 0xFF000000;
+    void* bits = nullptr;
+    HDC dc = GetDC(nullptr);
+    HBITMAP color = CreateDIBSection(dc, reinterpret_cast<BITMAPINFO*>(&bi), DIB_RGB_COLORS, &bits, nullptr, 0);
+    ReleaseDC(nullptr, dc);
+    HBITMAP mask = CreateBitmap(size, size, 1, 1, nullptr);
+    HCURSOR next = nullptr;
+    if (color && mask && bits) {
+        auto* px = static_cast<uint32_t*>(bits);
+        const float edge = 0.045f, shadow = 0.05f;
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++) {
+                float fill = 0, line = 0, shade = 0;  // 4 by 4 samples
+                for (int sy = 0; sy < 4; sy++)
+                    for (int sx = 0; sx < 4; sx++) {
+                        const float u = (x + (sx + 0.5f) / 4) / size, v = (y + (sy + 0.5f) / 4) / size;
+                        const bool in = inside(u, v);
+                        const float d = distance(u, v);
+                        if (in && d > edge * 0.5f) fill += 1;
+                        else if (d <= edge * (in ? 0.5f : 0.6f)) line += 1;
+                        if (inside(u - shadow, v - shadow) || distance(u - shadow, v - shadow) < edge) shade += 1;
+                    }
+                fill /= 16, line /= 16, shade /= 16;
+                const float t = std::clamp(float(y) / size / 0.9f, 0.0f, 1.0f);  // yellow at the tip, orange at the tail
+                const float r = 255, g = 222 - 110 * t, b = 20 - 20 * t;
+                const float a = std::min(1.0f, fill + line + 0.45f * shade * (1 - fill - line));
+                const float cr = a > 0 ? (fill * r + line * 24) / a : 0, cg = a > 0 ? (fill * g + line * 16) / a : 0,
+                            cb = a > 0 ? (fill * b + line * 40) / a : 0;
+                px[y * size + x] = uint32_t(a * 255 + 0.5f) << 24 | uint32_t(cr + 0.5f) << 16 | uint32_t(cg + 0.5f) << 8 |
+                                   uint32_t(cb + 0.5f);
+            }
+        ICONINFO info{};
+        info.fIcon = FALSE;
+        info.xHotspot = DWORD(0.06f * size), info.yHotspot = DWORD(0.04f * size);
+        info.hbmMask = mask, info.hbmColor = color;
+        next = reinterpret_cast<HCURSOR>(CreateIconIndirect(&info));
+    }
+    if (color) DeleteObject(color);
+    if (mask) DeleteObject(mask);
+    if (!next) return cursor ? cursor : LoadCursorW(nullptr, reinterpret_cast<LPCWSTR>(IDC_ARROW));
+    if (cursor) DestroyCursor(cursor);
+    cursor = next, made = size;
+    LOGI("juiced: the menu pointer's picture made, %d pixels", size);
+    return cursor;
+}
+
 LRESULT CALLBACK PointerProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
     if (g_arrow.load() && !app::OverlayOpen()) {
         if (msg == WM_SETCURSOR && LOWORD(lp) == HTCLIENT) {
-            SetCursor(LoadCursorW(nullptr, reinterpret_cast<LPCWSTR>(IDC_ARROW)));
+            SetCursor(MenuCursor(hwnd));
             return TRUE;
         }
         if (msg == WM_TIMER && wp == kCursorTimerId) return 0;

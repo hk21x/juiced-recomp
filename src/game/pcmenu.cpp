@@ -129,7 +129,7 @@ const Page kPages[] = {
            app::Save();
            app::ApplyDisplay();
        }},
-      {"ASPECT (NEXT START)", [] { return std::string(kAspects[app::Get().aspect % 4]); },
+      {"ASPECT", [] { return std::string(kAspects[app::Get().aspect % 4]); },
        [](int d) {
            auto& s = app::Get();
            s.aspect = (s.aspect % 4 + uint32_t(d + 4)) % 4;

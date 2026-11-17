@@ -203,6 +203,7 @@ const app::GameInfo app::kGame = {
     .interp_peers_on_cars = true,         // the brake lights lit as the brakes come on: with the car's body
     .interp_shared_constants = true,      // the crowd without a match: the camera's view and projection (c7 to c13) blended
     .auto_fills_screen = true,            // the scene cameras follow the frame's shape past 16:9 (src/game/fov.cpp)
+    .aspect_live = true,                  // every aspect choice at once: the game stays in its widescreen mode, fov.cpp shapes its views
     .voice_3d_level = [] { return float(std::min<uint32_t>(juiced::effects_percent, 100)) / 100.0f; },  // engines and effects
     .squeeze_flat_programs = true,        // the 2D's programs: (v0 + c) * c + c, no matrix
     .line_width = 0.35f,                  // the overhead wires are line strips: fine, not a console pixel wide

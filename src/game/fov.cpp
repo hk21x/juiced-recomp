@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <unordered_set>
 
 #include "app/app.h"
 #include "kernel/kernel.h"
@@ -17,6 +18,22 @@
 
 namespace juiced {
 extern uint32_t fov_percent;  // src/common/game_info.cpp
+}
+
+namespace {
+// the scene cameras narrowed to 4:3 (below): their angle is the game's 4:3 one already
+std::unordered_set<uint32_t> g_narrowed;
+}  // namespace
+
+// a camera's horizontal angle as the game's 4:3 mode has it: in widescreen mode the stored angle times 0.75. A camera
+// narrowed to 4:3 holds that angle itself
+X86_EXTERN_FUNC(__imp__sub_00166B30);
+X86_FUNC(sub_00166B30) {
+    const bool narrowed = g_narrowed.count(ctx.ecx) != 0;
+    const uint32_t flag = kernel::R32(0x372EE4);
+    if (narrowed) kernel::W32(0x372EE4, 0);
+    __imp__sub_00166B30(ctx, base);
+    if (narrowed) kernel::W32(0x372EE4, flag);
 }
 
 X86_EXTERN_FUNC(__imp__sub_00166A20);
@@ -34,6 +51,7 @@ X86_FUNC(sub_00166A20) {
         }
     }
     const uint32_t camera = ctx.ecx;
+    const uint32_t asked_vertical = kernel::R32(ctx.esp + 8);  // the vertical angle, or the game's "derive it" (0x3134D0)
     __imp__sub_00166A20(ctx, base);
     // Wider than 16:9 (the aspect setting filling an ultrawide screen: app::FrameAspect). In the console's widescreen
     // mode (0x372EE4) the game widens a scene camera to 16:9 itself: its horizontal angle times 1.333, its shape (+0xC0,
@@ -52,7 +70,34 @@ X86_FUNC(sub_00166A20) {
         std::memcpy(&v, &f, 4);
         kernel::W32(va, v);
     };
-    if (frame > 16.0f / 9.0f + 0.01f && kernel::R32(0x372EE4) && std::fabs(f32(camera + 0xC0) - 0.5625f) < 0.001f) {
+    // Narrower than 16:9 (the aspect setting at 4:3, applied at once: GameInfo::aspect_live keeps the game in its
+    // widescreen mode whatever the choice). The scene camera gets the angles the game's 4:3 mode gives it: the
+    // horizontal one without the widescreen factor (0x313634, 1.333), the vertical one derived for a 4:3 shape without
+    // the widescreen 1.15 (0x3317B4); one asked for outright stays, and a camera that takes it in proportion
+    // (+0x178) takes 0.75 of the horizontal angle. Up to 16:9 the horizontal tangent grows with the frame from there.
+    const bool scene = kernel::R32(0x372EE4) && std::fabs(f32(camera + 0xC0) - 0.5625f) < 0.001f;
+    if (scene && frame < 16.0f / 9.0f - 0.01f) {
+        const float factor = f32(0x313634), angle = f32(camera + 0xA8);
+        if (factor > 1.0f && angle > 0.01f && angle < 3.1f) {
+            const float base_angle = angle / factor;
+            const float wide = std::min(2.0f * std::atan(std::tan(base_angle * 0.5f) * frame / (4.0f / 3.0f)), 3.1f);
+            const float sine = std::sin(wide);
+            w32(camera + 0xA8, wide);
+            w32(camera + 0xAC, sine);
+            w32(camera + 0xB0, sine * sine * f32(0x3134A8));
+            if (asked_vertical == kernel::R32(0x3134D0))
+                w32(camera + 0xB4, kernel::R32(camera + 0x178) ? base_angle * 0.75f
+                                                                 : 2.0f * std::atan(std::tan(base_angle * 0.5f) * 0.75f));
+            g_narrowed.insert(camera);
+            const uint32_t saved = ctx.ecx;
+            ctx.ecx = camera;
+            kernel::CallGuest(ctx, kernel::R32(kernel::R32(camera)), nullptr, 0);
+            ctx.ecx = saved;
+        }
+        return;
+    }
+    g_narrowed.erase(camera);
+    if (frame > 16.0f / 9.0f + 0.01f && scene) {
         const float angle = f32(camera + 0xA8);
         if (angle > 0.01f && angle < 3.0f) {
             const float wide = std::min(2.0f * std::atan(std::tan(angle * 0.5f) * frame / (16.0f / 9.0f)), 3.1f);

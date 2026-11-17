@@ -28,6 +28,13 @@ A launcher, as the other ports have, will come with the first release. Until the
 **You need:** Windows 10 or 11, 64 bit, a GPU with Direct3D 12, and your own copy of the game (an `.iso` image of
 your disc, or a folder with its files).
 
+**Minimum spec:** any 64 bit processor from the last ten years and a Direct3D 12 graphics card run the game at its own
+60 frames a second. Frame rates above 60 (Smooth motion) need more: the frames in between are drawn in the time the
+game leaves free in each of its 60 steps a second, so they depend on one fast processor core more than on the
+graphics card. As a guide from our own machines: a Ryzen 7 5800X3D shows 180 to 240 frames a second at 3440x1440; a
+Ryzen 5 5600G (in a virtual machine, with an Intel Arc A750) has no time left for extra frames at 1080p and stays at
+60. When there is no room, the game just runs at 60: nothing breaks.
+
 ## Screenshots
 
 <p align="center">
