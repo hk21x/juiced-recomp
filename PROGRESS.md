@@ -30,6 +30,15 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 
 
+
+## 2026-11-17 - the evening race still loses the device: not the kept pipelines
+Harry on edd3b96: the same freeze, with an empty pipelinecache.bin (0 kept). Device lost 21.6 s in, reason 887A0001
+(an invalid call), DRED: every list finished; seen at the next pipeline made. In both his logs it follows the same
+loading: a format 6 128x128 cube (816B8000 / 832F4A00), seven 128x128 colour targets (384x384 here) and textures
+82460800 .. 81EE2000, and the last list draws into one of those targets. The kept-pipeline refusal in the first log was
+a symptom (the device already gone). SDK 1a1a325 stays (a sound key) but was not the cause. GPU-VM has no debug layer
+(Graphics Tools not installed; installing needs an elevated session). Next: Harry with smooth motion off, his route to
+the evening race, and XBE_D3D12_DEBUG=1 where Graphics Tools are installed.
 ## 2026-11-17 - the evening race froze: a kept pipeline built from other bytecode
 Harry on 14e12c1: the game froze launching an evening Arcade race. His log: "the driver refused a kept pipeline", then
 9 ms later the device lost making a pipeline (reason 887A0001, DRED: every list finished) and every pipeline after
