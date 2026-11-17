@@ -58,6 +58,11 @@ move it by a camera move voted from other draws' matrices: each fix moved the wr
   SDK 6e11b7d. SMOKE OK (872 draws), wincheck ok. Next: Harry on the buildings, the crowd (its world was blended from neighbours
   too) and the arrow boards, brake lights and neon (unchanged rules, to be confirmed not regressed).
 
+- Harry on 3d58754: a freeze, then a crash 30 s into the race: C0000005 in the in-between code (dump symbolized with
+  the PDB), a wild read. Rule (4) gave up the match of a draw others followed as peers; a follower then read
+  before_[-1] (the camera-only crash of the 15th again; headless reads slack and survives). SDK c5998d3: a follower of
+  such a draw goes as it does. SMOKE OK (870 draws), wincheck ok. Checked on GPU-VM's Windows build before Harry's.
+
 ## 2026-11-17 - the evening race's device loss: a sampler's LOD bias of -21.5
 Reproduced on GPU-VM (Arcade, Novice series, race 4: West Anderson route 1 reversed, evening): the same device loss on
 the Arc. SDK f8f8ddc (XBE_D3D12_CHECK=1: the device asked after each view, sampler and placed resource) named
