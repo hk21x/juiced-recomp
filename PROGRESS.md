@@ -33,6 +33,18 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 
 
+## 2026-11-17 - The menus at 4:3 on a wide screen, a blurred copy at the sides
+Harry: what looked stretched was the menus' backdrop and their bands with the button bar (the bands' tiles ran the
+frame's width unsqueezed, the backdrop movie filled it cropped 1.75 times). Asked with a mock-up; his choice: the
+whole menu at its true 4:3 in the middle, a blurred, dimmed copy filling the sides.
+- SDK (GameInfo::frame_aspect, bars_backdrop): the title names the frame's shape for now; the d3d12 presenter, when
+  asked, shrinks the frame to 64x36 at 0.45 of its level and draws that across the window under the frame. Juiced:
+  4:3 whenever it is not in a race and the setting is wider; a race takes the setting's shape, the HUD at the sides.
+- The first Windows build failed: a variable named small, a macro of the Windows SDK's rpcndr.h that the mingw
+  headers of wincheck do not define. Renamed (SDK, second commit).
+- GPU-VM, a 1920x800 window, aspect screen: the main menu 4:3 with blurred sides, race 1 across the window. SMOKE OK
+  (869 draws), wincheck ok. d3d11 has no backdrop (black bars there). Next: Harry on his 3440x1440 screen.
+
 ## 2026-11-17 - Achievements: a first set on the player's race record
 The player's race record found from the results page's code (0x63640: the time it prints is [car + 0x494] + 0xF8) and
 memory dumps of Arcade's sprint mid-race and on the results page (4th, then 2nd with gear changes): the place, the
