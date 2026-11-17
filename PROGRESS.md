@@ -33,6 +33,24 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 
 
+## 2026-11-17 - Harry's pass on b839d5e; the aspect setting at once, a styled pointer, minimum spec
+Harry: buildings much better, the fly-by's crowd better; night car shading looks fixed; PC SETTINGS fine; the music
+freeze seems fixed; the evening race fixed; the mouse works but wants a pointer of its own. Open from him: the Showoff
+neon flickers (not reproduced: steady headless at 4 frames a step straight and turning, and parked on GPU-VM; paused);
+the intro and menu movies on a 21:9 screen (GPU-VM in a 1920x800 window shows the boot pages and logos 4:3 in the
+middle and the menus' movie filling the width, cropped 1.75 times; which of the two he means to change is asked).
+- The aspect setting applies at once (SDK 167e22d, GameInfo::aspect_live): the console always reports a widescreen TV
+  and FrameAspect follows the setting; src/game/fov.cpp gives a scene camera the game's own 4:3 angles when the frame
+  is 4:3 (the horizontal one without 0x313634's 1.333, the vertical derived for 0.75 without 0x3317B4's 1.15) and
+  0x166B30 (the 4:3 angle's getter) knows such a camera. The flag 0x372EE4 has eleven readers (shapes set as scenes are
+  made, tuning constants), so flipping it live was not the way. Headless: a race switched 16:9 to 4:3 by the harness's
+  new frame_aspect file, no errors; GPU-VM: PC SETTINGS > ASPECT from FILL to 4:3 to 16:9 in a 21:9 window, each at once.
+- The menus' pointer: an arrow drawn in code (the logo's yellow to the bands' orange, a dark edge, a shadow), sized to
+  the window, in place of Windows' (src/common/pointer.cpp). Not yet seen on Windows (wincheck only).
+- README: minimum spec. SMOKE OK (915 draws), wincheck ok.
+- Achievements: started. The save is E:\UDATA\545100ef\<id>\juicey.dat (51049 bytes, plain); a driver's stats page
+  (0xDB100) reads races, wins and time at +0xB0, +0xB4, +0xB8 of a driver object. The memory map is the next step.
+
 ## 2026-11-17 - the buildings' shift: still things by their world, moved by the game's own matrices
 Harry on 4e394c5: the buildings shift again. Every earlier attempt reviewed (a903c86 off-camera refit, 4940fba scenery
 takes the camera's move, c33, 80d4525 camera matrices; steady at 5591379 on the 15th, lost again by the 16th's changes).
