@@ -24,6 +24,7 @@ bool speed_blur = true;       // the race's speed blur (src/game/blur.cpp)
 // simulation by the time between frames, but the car drives differently at another rate (at 120 frames a second it
 // accelerated about 15% harder), so the game stays at 60 and the frames between are drawn from the last two steps.
 bool smooth_motion = true;
+std::atomic<bool> menus_narrowed{false};  // the frame is 4:3 for the menus on a wider setting (GameInfo::frame_aspect)
 // the game object's +0x3C is set in a race (src/common/pointer.cpp)
 bool InRace() {
     const uint32_t game = kernel::R32(0x372B54);
@@ -208,6 +209,15 @@ const app::GameInfo app::kGame = {
     .interp_shared_constants = true,      // the crowd without a match: the camera's view and projection (c7 to c13) blended
     .auto_fills_screen = true,            // the scene cameras follow the frame's shape past 16:9 (src/game/fov.cpp)
     .aspect_live = true,                  // every aspect choice at once: the game stays in its widescreen mode, fov.cpp shapes its views
+    // the menus (the title, the front end, the boot's movies) are laid out for 4:3: shown so, in the middle, whatever
+    // the setting, their bands, button bar and backdrop movie unstretched, with a blurred copy behind at the sides;
+    // a race takes the setting's shape (Harry, 2026-11-17)
+    .frame_aspect = [](float chosen) {
+        const bool menus = chosen > 4.0f / 3.0f + 1e-3f && !juiced::InRace();
+        juiced::menus_narrowed = menus;
+        return menus ? 4.0f / 3.0f : chosen;
+    },
+    .bars_backdrop = [] { return juiced::menus_narrowed.load(); },
     .voice_3d_level = [] { return float(std::min<uint32_t>(juiced::effects_percent, 100)) / 100.0f; },  // engines and effects
     .squeeze_flat_programs = true,        // the 2D's programs: (v0 + c) * c + c, no matrix
     .line_width = 0.35f,                  // the overhead wires are line strips: fine, not a console pixel wide
