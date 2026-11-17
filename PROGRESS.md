@@ -29,6 +29,15 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
 
+
+## 2026-11-17 - the evening race froze: a kept pipeline built from other bytecode
+Harry on 14e12c1: the game froze launching an evening Arcade race. His log: "the driver refused a kept pipeline", then
+9 ms later the device lost making a pipeline (reason 887A0001, DRED: every list finished) and every pipeline after
+failed. The kept pipelines (pipelinecache.bin) were keyed by the console program's hash and the state, not the HLSL it is
+translated to, which SDK changes since his last evening race had changed; the driver was handed a blob for other
+bytecode and lost the device rather than refusing it. SDK 1a1a325: the key takes the VS, PS and GS bytecode's hash;
+magic XBEPSO3 drops the old file. Also SDK 659c3bd: XBE_INTERP_VPCHECK (the crowd's fix checked on GPU-VM: rider and
+camera-moved draws agree with matched ones, mean 0.05%). Smoke, wincheck OK.
 ## 2026-11-17 - the crowd's view-projection: the camera's move, never a car's
 Harry on dae938a: the people flicker less but still some. GPU-VM (XBE_INTERP_TEST=4, interp_table through the fly-by;
 the crowd's program was handle 00EA96E1, shaders B519967C5DCDE32A and C5E5CF9C82007BAC): of 6915 crowd draws, 774
