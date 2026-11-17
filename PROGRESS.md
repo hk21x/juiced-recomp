@@ -31,6 +31,14 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 
 
+
+## 2026-11-17 - the evening race's device loss: a sampler's LOD bias of -21.5
+Reproduced on GPU-VM (Arcade, Novice series, race 4: West Anderson route 1 reversed, evening): the same device loss on
+the Arc. SDK f8f8ddc (XBE_D3D12_CHECK=1: the device asked after each view, sampler and placed resource) named
+CreateSampler; the draw before the loss in every log samples with bias -21.5, and D3D12 takes -16 to 15.99.
+SDK cba107a: StageSampler clamps the bias (NaN to 0). GPU-VM: race 4 loads and runs, no device loss. Smoke OK, wincheck OK.
+Next: Harry on the evening race.
+
 ## 2026-11-17 - the evening race still loses the device: not the kept pipelines
 Harry on edd3b96: the same freeze, with an empty pipelinecache.bin (0 kept). Device lost 21.6 s in, reason 887A0001
 (an invalid call), DRED: every list finished; seen at the next pipeline made. In both his logs it follows the same
