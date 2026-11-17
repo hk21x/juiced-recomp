@@ -33,6 +33,14 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 
 
 
+## 2026-11-17 - Achievements: a first set on the player's race record
+The player's race record found from the results page's code (0x63640: the time it prints is [car + 0x494] + 0xF8) and
+memory dumps of Arcade's sprint mid-race and on the results page (4th, then 2nd with gear changes): the place, the
+finishing place, the finished flag, the time; the setup's kind 5 for a circuit, 6 for a sprint (ACHIEVEMENTS.md).
+Six achievements (src/game/achievement_set.cpp). Headless: 4th unlocks finish_race alone, 2nd finish_race and podium,
+the smoke test's unfinished circuit nothing. SMOKE OK (914 draws), wincheck ok. No headless run has won a race: the win
+conditions are unproven until one does. Next: the career's map (cash, respect, cars), Arcade's unlocks, Showoff's score.
+
 ## 2026-11-17 - Harry's pass on b839d5e; the aspect setting at once, a styled pointer, minimum spec
 Harry: buildings much better, the fly-by's crowd better; night car shading looks fixed; PC SETTINGS fine; the music
 freeze seems fixed; the evening race fixed; the mouse works but wants a pointer of its own. Open from him: the Showoff

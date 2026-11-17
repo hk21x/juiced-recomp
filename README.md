@@ -61,6 +61,8 @@ are there too.
 - **Modern button pictures** - Prompts and the controls page show today's Xbox pad; on keyboard, your keys.
 - **PC Settings** - In the game's own menus: Options > PC SETTINGS on the title menus and the pause menu.
 - **Mouse in the menus** - Point at an item and click to select it; right click goes back.
+- **Achievements** - A first set for race results (finishing, the podium, wins by race type, a ten second
+  sprint), kept in `achievements.toml` beside the game. More, for the career, will follow.
 - **Screenshots** - F12 saves the frame as a full resolution PNG in the `screenshots` folder beside the game, without
   the settings window.
 - **Sharp 2D** - Text and HUD pictures enlarged with sharp edges.

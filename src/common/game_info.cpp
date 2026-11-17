@@ -98,6 +98,8 @@ void Init() {
     if (const char* e = std::getenv("JUICED_FOV"); e && *e) fov_percent = uint32_t(std::atoi(e));
     fov_percent = std::clamp<uint32_t>(fov_percent, 50, 150);
     if (const char* e = std::getenv("JUICED_EFFECTS"); e && *e) effects_percent = uint32_t(std::atoi(e));
+    for (const achievements::Def& d : app::kGame.achievements)
+        if (std::string e = achievements::Check(d.condition); !e.empty()) LOGE("juiced: achievement %s: %s", d.id, e.c_str());
 }
 
 // GameInfo::hide_file, used to see the files opened: no file is hidden. While one of the boot's movies is the last
@@ -117,6 +119,7 @@ bool HideFile(const std::string& path) {
 }
 }  // namespace
 bool ButtonPictures(uint32_t header, uint32_t palette);  // src/common/buttons.cpp
+std::vector<achievements::Def> AchievementSet();    // src/game/achievement_set.cpp
 }  // namespace juiced
 
 // what the runtime asks of the game; strings must be set, hooks may stay null
@@ -151,6 +154,7 @@ const app::GameInfo app::kGame = {
     .ui = nullptr,                        // ImGui drawing each frame
     .pad = juiced::Pad,                   // RB plays White (the view), LB Black
     .rumble = nullptr,                    // changes a rumble before it is set
+    .achievements = juiced::AchievementSet(),  // conditions on the player's race record (src/game/achievement_set.cpp)
     .hud_aspect = 4.0f / 3.0f,            // the 2D is laid out for 4:3 in both of the game's modes: squeezed to it
     .sample_scaled_viewport = true,       // the glow materials' draws (4X asked on the scene target) land where the rest do
     .hide_file = juiced::HideFile,        // hides nothing: notes when a boot movie is opened (skip_intro)
