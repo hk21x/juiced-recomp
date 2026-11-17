@@ -8,7 +8,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
 - Flicker with smooth motion: the neon (SDK 10b8559) and brake lights (SDK 73fa544) fixed, Harry confirmed. Barriers:
   SDK 80d4525, a draw of the camera's own matrix is scenery whatever its program; waiting for Harry. People at the
-  start: the frames' timing, not their blending; the crowd's program (0103EC41) uses its own view-projection c14 to c17; SDK dae938a moves it with the camera; waiting for Harry (log, 2026-11-16).
+  start: the frames' timing, not their blending; the crowd's program uses its own view-projection c14 to c17; SDK dae938a moves it with the camera (better, Harry); SDK 58ae4cd gives it the camera's move where a car's was taken; waiting for Harry (log, 2026-11-17).
   Tools: XBE_SCREENSHOT_BURST + F12, JUICED_HOLD, XBE_INTERP_CONST_LOG, interp_table
 - Night races: the spoiler's top speckles on Windows (smooth motion off too); the body near black on top, also on
   GPU-VM's Intel Arc (2026-11-16); open
@@ -28,6 +28,15 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+
+## 2026-11-17 - the crowd's view-projection: the camera's move, never a car's
+Harry on dae938a: the people flicker less but still some. GPU-VM (XBE_INTERP_TEST=4, interp_table through the fly-by;
+the crowd's program was handle 00EA96E1, shaders B519967C5DCDE32A and C5E5CF9C82007BAC): of 6915 crowd draws, 774
+matched, 4029 given the camera's move, 369 taken for riders (a car's move), the rest at the step. The program never
+reads the transform (c18 to c21); what is there is whatever the draw before left, now and then a car's, so the rider
+rule matched it to a car and dae938a put that car's move on the crowd's view-projection. SDK 58ae4cd: every draw given
+another's move takes its target's camera move for its own view-projection. Headless TEST=4 to the race, smoke and
+wincheck OK. Next: Harry on the fly-by; XBE_INTERP_VP=-1 turns it all off.
 ## Log
 
 ### 2026-11-16 - Smooth motion: the crowd's own view-projection (c14 to c17)
