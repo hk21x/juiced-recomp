@@ -8,5 +8,6 @@
     },
     "repo": "https://github.com/hk21x/juiced-recomp.git",
     "branch": "main",
-    "toolchain": "https://raw.githubusercontent.com/hk21x/juiced-recomp/main/launcher/toolchain.json"
+    "toolchain": "https://raw.githubusercontent.com/hk21x/juiced-recomp/main/launcher/toolchain.json",
+    "package": "Juiced-package.zip"
 }

@@ -21,6 +21,11 @@ else()
     FetchContent_MakeAvailable(xbe_sdk)
     set(SDK ${xbe_sdk_SOURCE_DIR})
 endif()
+# on Windows the game's code is a DLL the first start compiles from the player's disc (cmake/XbeRecomp.cmake): a release
+# holds the runtime and the compiler, no game code. The harness and Linux link it in
+if(WIN32)
+    set(XBE_GAME_DLL ON)
+endif()
 include(${SDK}/cmake/XbeRecomp.cmake)
 
 file(GLOB XBE_HOST_SOURCES CONFIGURE_DEPENDS src/*/*.cpp)
