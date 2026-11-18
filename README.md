@@ -73,6 +73,8 @@ are there too.
   at 4:3 the race camera is the console's own.
 - **HUD position** - On a wide screen the race's dials, map and position sit at the screen's sides, or in the 4:3
   centre nearer the car.
+- **Hide the HUD** - F9 in a race (or PC Settings) leaves out the dials, map, times and position, for screenshots
+  and a clear view. The pause menu still shows.
 - **High frame rates** - The game runs its 60 steps a second as on the console, as its driving needs. Above a frame
   rate cap of 60, races draw the frames in between, made from the two steps before. Turn Vertical Sync off for the
   most frames.
@@ -106,6 +108,7 @@ are there too.
 | Change view | C |
 | Glance left / right / back | J / L / K |
 | Horn | H |
+| Hide the HUD | F9 |
 | Pause | Esc, P |
 | Driver info | Tab |
 | Menus | Arrows move, Enter selects, Backspace goes back |

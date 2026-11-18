@@ -22,6 +22,8 @@ bool skip_intro = false;      // no logo and intro movies at the start (Pad pres
 bool speed_blur = true;       // the race's speed blur (src/game/blur.cpp)
 // the race's HUD at the sides of a frame wider than 4:3; off, in the centred 4:3 part (src/game/widescreen.cpp)
 bool hud_sides = true;
+// the race's HUD left undrawn (src/game/hud.cpp); F9 in a race switches it
+bool hide_hud = false;
 // In a race with the frame cap over 60: frames between the game's steps (sdk gpu/interp.cpp). The game times its
 // simulation by the time between frames, but the car drives differently at another rate (at 120 frames a second it
 // accelerated about 15% harder), so the game stays at 60 and the frames between are drawn from the last two steps.
@@ -92,11 +94,24 @@ void Pad(int port, input::Pad& pad) {
     }
 }
 
+// F9 (not a repeat) in a race: the HUD hidden or shown, and saved (WM_KEYDOWN; the virtual key in wp, the repeat
+// flag bit 30 of lp; numbers, as this file builds for the headless harness too)
+bool Message(void* /*hwnd*/, uint32_t msg, uintptr_t wp, intptr_t lp, intptr_t* /*result*/) {
+    constexpr uint32_t kKeyDown = 0x100;
+    constexpr uintptr_t kF9 = 0x78;
+    if (msg != kKeyDown || wp != kF9 || (lp & (1 << 30)) || !InRace()) return false;
+    hide_hud = !hide_hud;
+    app::Save();
+    LOGI("juiced: the HUD %s (F9)", hide_hud ? "hidden" : "shown");
+    return true;
+}
+
 // after the settings load: JUICED_MODERN_BUTTONS and JUICED_SKIP_INTRO (1 or 0) override the settings, for the
 // headless harness
 void Init() {
     if (const char* e = std::getenv("JUICED_MODERN_BUTTONS"); e && *e) modern_buttons = *e == '1';
     if (const char* e = std::getenv("JUICED_SKIP_INTRO"); e && *e) skip_intro = *e == '1';
+    if (const char* e = std::getenv("JUICED_HIDE_HUD"); e && *e) hide_hud = *e == '1';
     if (skip_intro) LOGR("juiced: the logo and intro movies are skipped (skip_intro)");
     if (const char* e = std::getenv("JUICED_FOV"); e && *e) fov_percent = uint32_t(std::atoi(e));
     fov_percent = std::clamp<uint32_t>(fov_percent, 50, 150);
@@ -146,6 +161,9 @@ const app::GameInfo app::kGame = {
                 {"hud_sides", &juiced::hud_sides, nullptr, "HUD at the screen's sides",
                  "On a screen wider than 4:3 the race's dials, map and position sit at the screen's edges. Off, they stay "
                  "in the 4:3 centre, nearer the car. Changed at once."},
+                {"hide_hud", &juiced::hide_hud, nullptr, "Hide the HUD",
+                 "The race's dials, map, times and position left out, for screenshots and a clear view. F9 switches it in "
+                 "a race; the pause menu still shows."},
                 {"smooth_motion", &juiced::smooth_motion, nullptr, "Smooth motion above 60",
                  "With a frame cap over 60, races are drawn at that rate: the frames between the game's own 60 are made "
                  "from the two before. The game itself stays at 60, as its driving needs."},
@@ -156,7 +174,7 @@ const app::GameInfo app::kGame = {
     .init = juiced::Init,                 // after the settings load: the harness's overrides
     .loaded = nullptr,                    // image in memory, before its entry point runs
     .window = nullptr,                    // the game window is up
-    .message = nullptr,                   // window messages first; true takes one
+    .message = juiced::Message,           // F9 hides the HUD
     .ui = nullptr,                        // ImGui drawing each frame
     .pad = juiced::Pad,                   // RB plays White (the view), LB Black
     .rumble = nullptr,                    // changes a rumble before it is set

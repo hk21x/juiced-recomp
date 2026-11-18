@@ -29,6 +29,18 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-18 - Hide the HUD (F9)
+- Harry asked for a hide HUD option. 0x18C820 draws one window (EDI), its gadgets by their vtable's +4, then its fade;
+  the UI manager's draw (0x1893B0) calls it for each window of its stack. src/game/hud.cpp skips it for the window
+  named "hud_race" while setting hide_hud is on (plain RET: esp += 4). The game's state is not touched; the pause
+  menu, its message boxes and the race's other windows still draw.
+- F9 in a race switches it and saves (GameInfo::message, src/common/game_info.cpp; F10 is Windows' menu key; F1,
+  F3, F4, F8 and F12 are the runtime's); PC SETTINGS > GAME "HIDE HUD (F9)"; F1 "Hide the HUD"; JUICED_HIDE_HUD=1|0
+  (tests). The GAME page would have had eight rows: ENGINE AND EFFECTS LEVEL moved to SYSTEM.
+- Evidence (headless, race 1, frames 6000 to 9000 every 500, hidden and shown): the race starts at the same frame
+  in both, the HUD gone in every hidden frame, the car drives. SMOKE OK (race 884 draws a frame), wincheck ok.
+  Not seen: F9 on Windows, the pause menu over a hidden HUD.
+
 ## 2026-11-18 - The pointer follows faster and shows on every menu screen; HUD position setting; README
 - Harry on c867a2b (3440x1440): "All looks good" for the four tests asked (4:3 menus with blurred sides, live
   ASPECT, the styled pointer, the win achievements); Alt+Enter works. Reported: the selection lags the pointer; no pointer on screens

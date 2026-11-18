@@ -31,7 +31,7 @@
 using namespace kernel;
 
 namespace juiced {
-extern bool modern_buttons, skip_intro, speed_blur, smooth_motion, hud_sides;  // src/common
+extern bool modern_buttons, skip_intro, speed_blur, smooth_motion, hud_sides, hide_hud;  // src/common
 extern uint32_t fov_percent, effects_percent;
 }
 
@@ -207,14 +207,15 @@ const Page kPages[] = {
            juiced::hud_sides = !juiced::hud_sides;
            app::Save();
        }},
-      {"ENGINE AND EFFECTS LEVEL", [] { return std::to_string(juiced::effects_percent) + "%"; },
+      FLAG("HIDE HUD (F9)", juiced::hide_hud)}},
+    // (rows without a label are hidden)
+    {"SYSTEM",
+     {{"ENGINE AND EFFECTS LEVEL", [] { return std::to_string(juiced::effects_percent) + "%"; },
        [](int d) {
            juiced::effects_percent = uint32_t(std::clamp(int(juiced::effects_percent) + d * 10, 0, 100));
            app::Save();
-       }}}},
-    // (rows without a label are hidden)
-    {"SYSTEM",
-     {{"SCALING FILTER", [] { return std::string(app::Get().scale_filter ? "SHARP" : "BILINEAR"); },
+       }},
+      {"SCALING FILTER", [] { return std::string(app::Get().scale_filter ? "SHARP" : "BILINEAR"); },
        [](int) {
            auto& s = app::Get();
            s.scale_filter = s.scale_filter ? 0 : 1;
