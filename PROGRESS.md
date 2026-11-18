@@ -29,6 +29,24 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-18 - README in twine-pc's style, new shots from GPU-VM; no sound device kept the car on the line
+- Harry asked for every README shot retaken on GPU-VM, one of the HUD positions, and the README in the style of
+  CipherNovaa/twine-pc (banner, badges, links, hero, contents with back-to-top, feature table, FAQ, known issues,
+  roadmap, credits and legal, AI disclosure). Shots at 1920x800 (21:9): GPU-VM's screen is 1920x1080 and Windows
+  clamps a bigger window (3440x1440 came out 2948x1061). docs/img: banner, hero, HUD positions (sides, centre,
+  hidden), menus at 4:3 with blurred sides, PC SETTINGS' four pages (animated), the settings wipe (animated), edges,
+  MSAA, SMAA, sharpening; juiced-pc-port.webp removed. Scripts in .local/gpuvm (shot.sh, readme/batch.sh,
+  readme/panels.sh; MENU=1 stops at the main menu).
+- Open: 2 of about 12 runs with the most MSAA samples (MSAA 8x; MSAA 4x at render scale 200%) drew the road, signs,
+  sidewalk and brake lights black on the Arc for the whole shot; the same settings drew right in 7 other runs. No
+  error in the log (XBE_D3D12_CHECK=1). Not explained.
+- Open: no key moves the car on GPU-VM (W, S, A/D, Space, I; Esc pauses, E shows gear 1); brake lights stay on.
+  Headless RT drives. Not explained; asked Harry whether the keyboard drives on his PC.
+- SDK 3613605 (GameInfo::silent_clock, Juiced on): with no sound device the mixer is pulled 10 ms a time on the clock
+  and dropped, so the game's sound clock runs (before: never pulled). It did not make the car move (above), kept as
+  a fix for machines without audio.
+- The highlighted row's text draws twice, a little offset ("CCAREERR", "NEXT PAGEE"), at 1920x800; not looked into.
+
 ## 2026-11-18 - Hide the HUD (F9)
 - Harry asked for a hide HUD option. 0x18C820 draws one window (EDI), its gadgets by their vtable's +4, then its fade;
   the UI manager's draw (0x1893B0) calls it for each window of its stack. src/game/hud.cpp skips it for the window
