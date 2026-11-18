@@ -29,6 +29,25 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-18 - The career car's dark top: the car's lighting traced
+- The console (Harry's video, acbX_2q1rlA 3:08 to 3:18, a night race, frames in the scratchpad): the yellow Eclipse
+  yellow all over, its top a little darker in shade, never black. Here its top is near black, the sides dim yellow.
+- The car body's draw (vs taking v0 to v3, its HLSL vs_46EF9CBCB0A58C04; pixel shader ps 4519C0): colour = paint
+  (oT3, a lerp of c184 and c185 by a lit term, stage 3 pass-through) x diffuse (v0) x 2. Diffuse = ambient c123 +
+  three directional lights: c124 x max(N.-L1) + c133 x max(N.-L2) + c135 x max(N.-L3). Traced at a body pixel
+  (reference renderer TRACE): v0 = 0, 0, 0.025: the paint wiped out.
+- The car draw's constants: ambient c123 = (60,60,80)/511; c124 = -70/511 straight down (the night set's light 1 is
+  -70: authored, a darkening light from above); c133 = c135 = 0. The night set (0x14A250 logs: set 00600518) also has
+  lights 2 and 3 = (70,70,100) and (130,70,70); with them the top would be lit.
+- Each frame the game sets c133/c135 from that set (0x12BCA0: colour x the light object's +0x12C, 1.0) and then sets
+  them again per object; the car's are 0 at its draw. 0x164890 (from 0x161080) picks each object's two nearest lamps
+  through its lights' container (+0x14, vtable +0x3C) and sets c133/c135 to the lamp colour x (1 - distance x k,
+  floored) x a scale; other objects get 0.13 to 0.32 there. Not yet known: why the car's come out 0 (no lamp found,
+  the falloff, or a different path for the player's car).
+- Tools: src/game/envlog_tmp.cpp (uncommitted, JUICED_ENVLOG=1: 0x14A250's sets, and c123/c124/c133/c135 as set
+  through 0x2AFC80); the career race reached by live `cmd` presses (UP, A repeated) from c0 (race.txt's boot + 4300 A).
+- Next: log 0x164890 for the player's car: the lamps found, their distances, the colours set.
+
 ## 2026-11-18 - Harry: the sub-menu pointer and PRESS START right; the career car's dark top looked at
 - Harry on Windows (6804c86, recomp-vm's build 3eb05c56): the sub-menus' pointer, the series' arrows and PRESS START
   with Enter and a click all right. filelist.txt check: its time should stay at 17:43:42.
