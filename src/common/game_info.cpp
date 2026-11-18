@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <cstdlib>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -120,12 +121,16 @@ void Init() {
         if (std::string e = achievements::Check(d.condition); !e.empty()) LOGE("juiced: achievement %s: %s", d.id, e.c_str());
 }
 
-// GameInfo::hide_file, used to see the files opened: no file is hidden. While one of the boot's movies is the last
-// movie opened (D:\\movies\\THQ.bik, juicegames.bik and the intro, JuicedCGI_NTSC.bik or _PAL), intro_movie is set; with
-// skip_intro START is pressed through it (Pad)
+// GameInfo::hide_file. D:\\filelist.txt, the list of files the game opens (0x110D90), is hidden: its creation refused
+// as on the console's read-only disc, it no longer lands in the assets folder. The files opened are seen too: while one
+// of the boot's movies is the last movie opened (D:\\movies\\THQ.bik, juicegames.bik and the intro, JuicedCGI_NTSC.bik
+// or _PAL), intro_movie is set; with skip_intro START is pressed through it (Pad)
 bool HideFile(const std::string& path) {
     std::string n;
     for (char c : path) n += char(std::tolower(static_cast<unsigned char>(c)));
+    if (constexpr std::string_view kList = "\\filelist.txt";
+        n.size() >= kList.size() && n.compare(n.size() - kList.size(), kList.size(), kList) == 0)
+        return true;
     if (n.size() < 4 || n.compare(n.size() - 4, 4, ".bik") != 0) return false;
     bool intro = false;
     for (const char* movie : {"\\thq.bik", "\\juicegames.bik", "\\juicedcgi_ntsc.bik", "\\juicedcgi_pal.bik"}) {

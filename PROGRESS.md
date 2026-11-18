@@ -29,6 +29,17 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-18 - filelist.txt no longer written; the doubled highlight is the game's
+- D:\filelist.txt (each file the game opens, made at 0x110D90 by its one writer 0x114440) landed in the assets
+  folder of an unpacked disc; from an .iso the SDK already refused it, as the console's read-only disc does. SDK:
+  a file GameInfo::hide_file hides is now refused when created (STATUS_ACCESS_DENIED), as before missing when opened;
+  EoN and Nightfire hide only movies they never create. Juiced hides \filelist.txt.
+- Evidence: the stray assets/filelist.txt moved to .local/backup; scripts/smoke.sh: SMOKE OK (race 910 draws a frame),
+  no filelist.txt written.
+- The highlighted row's text drawn twice ("CCAREERR") is the game's own effect: the reference renderer draws it at
+  640x480 too (ref frames 3800 to 4000 of the main menu), a second copy that grows and fades across frames. Not a bug.
+- Next: Harry's Windows checks (pointer, HUD rows); the SDK's juiced branch onto fork main via the all-games gate.
+
 ## 2026-11-18 - README in twine-pc's style, new shots from GPU-VM; no sound device kept the car on the line
 - Harry asked for every README shot retaken on GPU-VM, one of the HUD positions, and the README in the style of
   CipherNovaa/twine-pc (banner, badges, links, hero, contents with back-to-top, feature table, FAQ, known issues,
@@ -45,7 +56,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - SDK 3613605 (GameInfo::silent_clock, Juiced on): with no sound device the mixer is pulled 10 ms a time on the clock
   and dropped, so the game's sound clock runs (before: never pulled). It did not make the car move (above), kept as
   a fix for machines without audio.
-- The highlighted row's text draws twice, a little offset ("CCAREERR", "NEXT PAGEE"), at 1920x800; not looked into.
+- The highlighted row's text draws twice, a little offset ("CCAREERR", "NEXT PAGEE"): the game's own pulse (entry above).
 
 ## 2026-11-18 - Hide the HUD (F9)
 - Harry asked for a hide HUD option. 0x18C820 draws one window (EDI), its gadgets by their vtable's +4, then its fade;
