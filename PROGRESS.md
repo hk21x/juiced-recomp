@@ -29,6 +29,25 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-18 - Harry: the sub-menu pointer and PRESS START right; the career car's dark top looked at
+- Harry on Windows (6804c86, recomp-vm's build 3eb05c56): the sub-menus' pointer, the series' arrows and PRESS START
+  with Enter and a click all right. filelist.txt check: its time should stay at 17:43:42.
+- Harry: the car's darkness under shadows in career differs from the console (his reference: a YouTube video, 3:12
+  to 3:15; not fetched here). Headless repro: career's first race (main menu A, Driver Betting A A, Place Bet? UP A,
+  contacts A; live `cmd` presses from a c0 pad of race.txt's boot plus "4300 A"): the yellow Eclipse's roof, bonnet
+  and upper body near black, the lower body yellow, in the reference renderer too.
+- Ruled out: the 160x128 texture (data 018A4800, LIN_A8R8G8B8, pitch 640) bound at stage 3 by about 557 draws a
+  frame. It is never drawn into and stays zero, but only two pixel shaders sample stage 3 (a four-tap average and a
+  bump/road program); the car's (vs 14BD541 ps 481560; DE8441, DE8601) do not. Its memory is the first of the
+  console D3D's two 640x480 frame buffers (header 0x3C1760, made by the library's own code; the runtime presents its
+  own at 03D86000 and 03EB3000). No pushed surface methods (0x200 to 0x21C) in a race (probe, removed).
+- Seen: a 160x120 target at 019D0800 (the second console frame buffer) takes one draw a frame, the finished 640x480
+  image written into alpha only (cw 8), sampled by about 105 later draws; set up with a 640x480 set of targets by
+  0x12FFD0 (called from 0x12A9F0).
+- Next: what lights the car's top: the car programs' constants (a light colour or shadow factor the CPU sets per
+  frame, perhaps from a lookup under the car) against a lit/shadowed stretch of road; Harry's frames from the video
+  for the console's look.
+
 ## 2026-11-18 - PRESS START takes Enter and a click
 - Harry: only Esc (START) went past the title's PRESS START. On that window ("start") A now counts as START too
   (src/common/pointer.cpp, MenuPointer), so Enter and Space (A) and a left click (A off the rows) go on.
