@@ -29,6 +29,21 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-18 - The career car's dark top: the lamps' reach
+- Who zeroes c133/c135 at the car: 0x164890 (each object's lamps). The player's car (object at -27649 -1393 -39028
+  on the grid, a light container of 228 lights, its set's +0x38 = 1) takes the lamp branch: light 2 and 3 =
+  max(1 - distance across (x, z) x 0.0005, 0) x 512 / 511 of the two lamps its container's query (+0x14, vtable
+  +0x3C) gives; 0 past 2000 units. The true nearest lamps on the grid: 2389 and 2460 across (one light 457 away is
+  the car's own, y -1579); driving, about 2270 to 2330. So the game's own falloff gives 0 there; the 1.0 factor
+  (0x12C300 from 0x16BF25/0x16BFA8) and the night set's lights 2 and 3 are overwritten by these zeros.
+- Driving (RT, wrong way into the barrier): one snapshot with the top fully yellow (near a lamp), two with it dark: the
+  lighting follows the lamps as the code says.
+- Open: why the console's car stays lit (the video: dimmer in shade, never black). Candidates: the lamps the query
+  gives (pairs, not the nearest), the set's +0x38 (lamps instead of the night set's lights) being 0 on the console,
+  or a lamp position read wrong. Needs a console reference of the same place (Harry), or the query's code read.
+- Tools: src/game/envlog_tmp.cpp (uncommitted; JUICED_ENVLOG=1): 0x14A250's sets, c123/c124/c133/c135 sets with
+  their callers, 0x12C300's factor, 0x164890 per object with the three nearest lights across.
+
 ## 2026-11-18 - The career car's dark top: the car's lighting traced
 - The console (Harry's video, acbX_2q1rlA 3:08 to 3:18, a night race, frames in the scratchpad): the yellow Eclipse
   yellow all over, its top a little darker in shade, never black. Here its top is near black, the sides dim yellow.
