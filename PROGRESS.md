@@ -29,6 +29,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-18 - The career car's dark top matches the Xbox; Showoff choppiness next
+- Harry: the night car's look matches the Xbox; nothing to fix (the lamp falloff above is the game's own).
+  src/game/envlog_tmp.cpp deleted.
+- Harry: Showoff races in career are choppy in play while the fps stays high. His career save asked of recomp-vm
+  (copied to GPU-VM) to load the next Showoff race.
+
 ## 2026-11-18 - The career car's dark top: the lamps' reach
 - Who zeroes c133/c135 at the car: 0x164890 (each object's lamps). The player's car (object at -27649 -1393 -39028
   on the grid, a light container of 228 lights, its set's +0x38 = 1) takes the lamp branch: light 2 and 3 =
