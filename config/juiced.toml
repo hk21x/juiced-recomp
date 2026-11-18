@@ -2,6 +2,9 @@
 # every scan rewrites it, so nothing is edited there: it is included here, and everything added by hand goes below.
 includes = ["game.toml"]
 
+[xbe]
+library = "Juiced.dll"  # the game code DLL the first start builds (Windows, XBE_GAME_DLL); this config is the one it reads
+
 # XDK 5849 D3D8LTCG: what the scan misses or gets wrong, each proven by the instructions given (addresses in this image)
 [symbols]
 # the scan's D3DResource_IsBusy (constants 1.00) is this: it waits in D3D_BlockOnTime (0x2AE9E7, 0x2AEA0B, 0x2AEA1E) and
