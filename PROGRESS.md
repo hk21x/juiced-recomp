@@ -29,6 +29,17 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-18 - Showoff choppiness: the trail blended from each in-between frame
+- Harry: Showoff is smooth with smooth motion off: smooth motion is the cause.
+- SDK (GameInfo::interp_frame_before, Juiced on; XBE_INTERP_FRAME_BEFORE=0/1 overrides): each in-between frame, once
+  shown, is copied into the step before's front buffer, so the trail pass of the next frame blends the frame just
+  shown, as at 60 on the console, not the step before's last frame for the whole step. Juiced draws all of each back
+  buffer anew (the scene's full-screen pass first), so the copy is overwritten at the next step.
+- Evidence: headless the copy runs (log line), Showoff and a race with XBE_INTERP_TEST=2 run without traps, the race
+  frame right; the trail's content cannot be judged headless (the reference renderer draws only the asked frames).
+  SMOKE OK (737 draws a frame); wincheck OK.
+- Next: Harry's Showoff with smooth motion on.
+
 ## 2026-11-18 - Showoff choppiness: the trail pass
 - Harry's save (recomp-vm, sent as base64; settings: smooth_motion on, fps_cap 0, vsync off, 3440x1440, render 200%)
   loads headless (KEEP_HDD, UDATA copied in): Career, 5th January; the next Showoff is the 7th (the Wild Cats, Angel

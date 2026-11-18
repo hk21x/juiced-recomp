@@ -232,6 +232,7 @@ const app::GameInfo app::kGame = {
     .interp_scenery_takes_camera = true,
     .interp_skip_still_targets = true,    // its cube faces and small passes drawn once a step, not in every in-between frame
     .interp_fill_frames = true,           // its own drawing takes 4 ms of a step: at 240 the 4th frame fits only closer together
+    .interp_frame_before = true,          // Showoff's trail blends the frame before: each in-between frame's, not the step's
     .interp_rebuilt_on_car = true,        // the neon and shadow under the cars: laid on the road afresh each step
     .interp_peers_on_cars = true,         // the brake lights lit as the brakes come on: with the car's body
     .interp_shared_constants = true,      // the crowd without a match: the camera's view and projection (c7 to c13) blended
