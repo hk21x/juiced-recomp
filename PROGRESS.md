@@ -29,6 +29,22 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-18 - Showoff choppiness: the trail pass
+- Harry's save (recomp-vm, sent as base64; settings: smooth_motion on, fps_cap 0, vsync off, 3440x1440, render 200%)
+  loads headless (KEEP_HDD, UDATA copied in): Career, 5th January; the next Showoff is the 7th (the Wild Cats, Angel
+  North Central, a CR-X). Route: Continue, GO RACE, RIGHT x2, A, UP A (go to event), A, A (no tutorial), A, UP A
+  (repair, $500), A (GO). Showoff steps at 60 a second (one vertical blank a frame) and the game object's +0x3C is set
+  (InRace), so smooth motion runs in it.
+- Showoff draws, each frame after the scene, a full-screen pass (vs 4E69E1, prim 7, 10 vertices, blend srcalpha /
+  invsrcalpha) sampling the other 640x480 frame buffer: the frame before, a trail. A race has no such pass. With
+  smooth motion every in-between frame of a step blends the same older picture (the frame buffer last drawn in the
+  step before), so the trail moves at 60 while the scene moves at the frame rate: likely the choppiness.
+- Headless shows the menus' picture in that trail (the reference renderer draws only the frames it is asked for, so
+  the frame before is a menu); an artifact, also with smooth motion off.
+- XBE_INTERP_LOG figures in Showoff (unmatched draws, still draws) are like a race's: nothing else stands out.
+- Next: Harry's check with smooth motion off in Showoff (choppy or not). If it is the trail: blend it in in-between
+  frames from the frame just shown, or leave it to the step's frames.
+
 ## 2026-11-18 - The career car's dark top matches the Xbox; Showoff choppiness next
 - Harry: the night car's look matches the Xbox; nothing to fix (the lamp falloff above is the game's own).
   src/game/envlog_tmp.cpp deleted.
