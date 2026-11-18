@@ -29,9 +29,21 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
-
-
-
+## 2026-11-18 - The pointer follows faster and shows on every menu screen; HUD position setting; README
+- Harry on c867a2b (3440x1440): "All looks good" for the four tests asked (4:3 menus with blurred sides, live
+  ASPECT, the styled pointer, the win achievements); Alt+Enter works. Reported: the selection lags the pointer; no pointer on screens
+  below the main menu (Arcade's races under Novice).
+- Lag: the pointer moves the selection by d-pad presses, each 4 polls down and 5 up: 9 polls (150 ms) a row.
+  Measured headless at the main menu, five rows (JUICED_POINTER=@file, JUICED_POINTER_LOG=1, the new
+  JUICED_POINTER_PULSE=hold:gap): 4:5 45 polls; 2:2 20 polls, eight moves of eight right; 2:1 and 1:2 15 polls but
+  some moves 160 polls (presses lost); 1:1 does not arrive. Now 2 down, 2 up: 67 ms a row.
+- No pointer: the arrow was shown only over a window with rows the pointer can pick; a screen of choices side by
+  side has none, though a click is A there. Now shown on every front end screen (in a race still only over the pause
+  menu's rows). Pointing still does not pick among choices side by side.
+- HUD position: setting hud_sides (on; F1 "HUD at the screen's sides", PC SETTINGS > GAME "HUD POSITION: SIDES /
+  CENTRE"), read by HudAnchored() each quad, so it changes at once.
+- README: Status, Widescreen (4:3 menus with blurred sides), live aspect, HUD position, the pointer, Alt+Enter.
+- Evidence: SMOKE OK, wincheck ok (below). The HUD setting and the arrow: GPU-VM (below).
 
 ## 2026-11-17 - The menus at 4:3 on a wide screen, a blurred copy at the sides
 Harry: what looked stretched was the menus' backdrop and their bands with the button bar (the bands' tiles ran the

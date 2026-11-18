@@ -20,6 +20,8 @@ extern bool modern_buttons;  // src/common/buttons.cpp
 void MenuPointer(input::Pad& pad);  // src/common/pointer.cpp
 bool skip_intro = false;      // no logo and intro movies at the start (Pad presses START through them)
 bool speed_blur = true;       // the race's speed blur (src/game/blur.cpp)
+// the race's HUD at the sides of a frame wider than 4:3; off, in the centred 4:3 part (src/game/widescreen.cpp)
+bool hud_sides = true;
 // In a race with the frame cap over 60: frames between the game's steps (sdk gpu/interp.cpp). The game times its
 // simulation by the time between frames, but the car drives differently at another rate (at 120 frames a second it
 // accelerated about 15% harder), so the game stays at 60 and the frames between are drawn from the last two steps.
@@ -141,6 +143,9 @@ const app::GameInfo app::kGame = {
                  "50 to 150; 100 is the game's. The race camera's field of view, changed at once."},
                 {"speed_blur", &juiced::speed_blur, nullptr, "Speed blur",
                  "The blur towards the screen's edges at speed. Off, the race is drawn without it."},
+                {"hud_sides", &juiced::hud_sides, nullptr, "HUD at the screen's sides",
+                 "On a screen wider than 4:3 the race's dials, map and position sit at the screen's edges. Off, they stay "
+                 "in the 4:3 centre, nearer the car. Changed at once."},
                 {"smooth_motion", &juiced::smooth_motion, nullptr, "Smooth motion above 60",
                  "With a frame cap over 60, races are drawn at that rate: the frames between the game's own 60 are made "
                  "from the two before. The game itself stays at 60, as its driving needs."},

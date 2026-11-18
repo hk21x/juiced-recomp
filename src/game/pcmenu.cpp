@@ -31,7 +31,7 @@
 using namespace kernel;
 
 namespace juiced {
-extern bool modern_buttons, skip_intro, speed_blur, smooth_motion;  // src/common
+extern bool modern_buttons, skip_intro, speed_blur, smooth_motion, hud_sides;  // src/common
 extern uint32_t fov_percent, effects_percent;
 }
 
@@ -202,6 +202,11 @@ const Page kPages[] = {
            app::Save();
        }},
       FLAG("SPEED BLUR", juiced::speed_blur),
+      {"HUD POSITION", [] { return std::string(juiced::hud_sides ? "SIDES" : "CENTRE"); },
+       [](int) {
+           juiced::hud_sides = !juiced::hud_sides;
+           app::Save();
+       }},
       {"ENGINE AND EFFECTS LEVEL", [] { return std::to_string(juiced::effects_percent) + "%"; },
        [](int d) {
            juiced::effects_percent = uint32_t(std::clamp(int(juiced::effects_percent) + d * 10, 0, 100));

@@ -12,8 +12,26 @@ recompiled with the [Xbox XBE Recomp](https://github.com/TGP482/XboxXBE-Recomp) 
 ## Status
 
 In progress. Races and the menus play on Windows, with widescreen, high frame rates and the PC settings
-below. Smooth motion above 60 can still make some lights and the neon under the cars flicker; turn it off in F1 if
-you see that.
+below. Not yet covered: a long career, split screen and wet races. With Smooth motion above 60 the neon under the cars
+has been seen to flicker in Showoff events; turn Smooth motion off in F1 if you see that.
+
+## Why a recompilation and not a mod of the PC version
+
+Juiced also came out for Windows, and that version can be patched. We recompiled the Xbox game instead, for these
+reasons:
+
+- **The whole game is ours to change.** Recompiling turns the game's code into C++ that we build ourselves, and the
+  renderer, sound and input under it are written new. A feature is then a change in source, not a patch laid over a
+  closed program and the graphics calls it happens to make. The frames drawn between the game's steps, the menus kept
+  at 4:3 with the race widened, and the PC Settings page inside the game's own menus were built that way.
+- **One runtime for several games.** This port shares its runtime with the other Xbox ports made with the same
+  toolkit. Widescreen, anti-aliasing, controllers and wheels, achievements and the settings window come from it, and a
+  fix made for one game reaches the others.
+- **It runs as a present-day program.** 64 bit, Direct3D 12, with no old graphics or input layers to keep working on
+  new versions of Windows.
+- **It starts from the Xbox disc.** Anyone with the console game can build and play it; the PC release is not needed.
+
+Mods of the PC version are a good route too. This is a different one, and the two do not get in each other's way.
 
 ## Supported version
 
@@ -48,8 +66,13 @@ Ryzen 5 5600G (in a virtual machine, with an Intel Arc A750) has no time left fo
 Set in the F1 window (or `settings.toml` beside the exe); the runtime's own display, graphics and controller options
 are there too.
 
-- **Widescreen** - True proportions on any frame wider than 4:3, with the 3D view widened and the menus and HUD kept
-  in a 4:3 centre.
+- **Widescreen** - True proportions on any screen, 21:9 and wider included. Races fill the screen with the 3D view
+  widened. The menus, the title and the movies keep their 4:3 shape in the middle, with a dimmed, blurred copy of
+  the picture filling the sides (Direct3D 12; black bars with Direct3D 11).
+- **Aspect, changed as you play** - Auto, 4:3, 16:9 or Fill, in PC Settings or F1. It applies at once, in a race too;
+  at 4:3 the race camera is the console's own.
+- **HUD position** - On a wide screen the race's dials, map and position sit at the screen's sides, or in the 4:3
+  centre nearer the car.
 - **High frame rates** - The game runs its 60 steps a second as on the console, as its driving needs. Above a frame
   rate cap of 60, races draw the frames in between, made from the two steps before. Turn Vertical Sync off for the
   most frames.
@@ -60,7 +83,9 @@ are there too.
 - **Skip intro** - Starts without the logo movies, the intro and the warning pages.
 - **Modern button pictures** - Prompts and the controls page show today's Xbox pad; on keyboard, your keys.
 - **PC Settings** - In the game's own menus: Options > PC SETTINGS on the title menus and the pause menu.
-- **Mouse in the menus** - Point at an item and click to select it; right click goes back.
+- **Mouse in the menus** - Point at an item and click to select it; right click goes back. The pointer is drawn in
+  the menus' own colours.
+- **Window** - Fullscreen, borderless or a window; Alt+Enter switches.
 - **Achievements** - A first set for race results (finishing, the podium, wins by race type, a ten second
   sprint), kept in `achievements.toml` beside the game. More, for the career, will follow.
 - **Screenshots** - F12 saves the frame as a full resolution PNG in the `screenshots` folder beside the game, without

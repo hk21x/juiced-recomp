@@ -233,6 +233,20 @@ void ShowArrow(bool show) {
 #endif
 }
 
+// A press played to the game: kHold polls down, then kGap up before the next. The menus take a press held for one
+// poll and want one poll up between two; one more of each for a poll the game skips. (4 down and 5 up before: a row
+// every 150 ms, which dragged behind the pointer; Harry, 2026-11-18.) JUICED_POINTER_PULSE=hold:gap (tests).
+int g_hold = 2, g_gap = 2;
+int Pulse() {
+    static const bool read = [] {
+        if (const char* e = std::getenv("JUICED_POINTER_PULSE")) std::sscanf(e, "%d:%d", &g_hold, &g_gap);
+        g_hold = std::clamp(g_hold, 1, 30), g_gap = std::clamp(g_gap, 1, 30);
+        return true;
+    }();
+    (void)read;
+    return g_hold - 1 + g_gap;  // polls left after the first one down
+}
+
 void Press(input::Pad& p, int c) {
     if (c < input::kA) p.buttons |= uint16_t(1u << c);
     else p.analog[c - input::kA] = 255;
@@ -292,14 +306,15 @@ void SetMenuManager(uint32_t manager) {
 }
 
 uint32_t MenuManager() { return g_manager.load(); }
-// the race's HUD and pause menu at the frame's sides on a wide frame (src/game/widescreen.cpp); JUICED_HUD_ANCHOR=0
-// leaves them in the centred 4:3 part (tests)
+// the race's HUD and pause menu at the frame's sides on a wide frame (src/game/widescreen.cpp); the HUD position
+// setting off, or JUICED_HUD_ANCHOR=0 (tests), leaves them in the centred 4:3 part
+extern bool hud_sides;  // src/common/game_info.cpp
 bool HudAnchored() {
     static const bool off = [] {
         const char* e = std::getenv("JUICED_HUD_ANCHOR");
         return e && *e == '0';
     }();
-    return !off;
+    return !off && hud_sides;
 }
 
 // GameInfo::pad, controller 1
@@ -309,6 +324,8 @@ void MenuPointer(input::Pad& pad) {
     static int pulse = 0, held = -1;  // the press being played: polls left of it and its gap
     static bool click = false;   // a left click waits for the selection to reach the pointer
     static Place tried, from, stuck;  // the last move's target and start; a target a press did not move towards
+    static int polls = 0;
+    polls++;
     Pointer p;
     // the window showing: the last of the manager's stack of them (+0 to +4; "opts_bg", "opts_menu" in Options)
     const uint32_t manager = g_manager.load();
@@ -335,15 +352,15 @@ void MenuPointer(input::Pad& pad) {
     const uint32_t pressed = p.buttons & ~last.buttons;
     if (std::fabs(p.x - last.x) + std::fabs(p.y - last.y) > 0.5f || pressed) armed = 90;
     last = p;
-    // the press under way: 3 polls down, then 5 up before the next
+    // the press under way (Pulse)
     if (pulse > 0) {
-        if (pulse > 5 && held >= 0) Press(pad, held);
+        if (pulse > g_gap && held >= 0) Press(pad, held);
         pulse--;
         return;
     }
     if (R32(manager + kTransition)) return;  // between two windows
     if (pressed & 2) {
-        held = input::kB, pulse = 8;
+        held = input::kB, pulse = Pulse();
         Press(pad, held);
         return;
     }
@@ -363,9 +380,11 @@ void MenuPointer(input::Pad& pad) {
     }
     Place under, current;
     const bool any = Places(window, p, under, current);
-    ShowArrow(any);
+    // the arrow on every screen the mouse does something on: in the menus a click is A on a screen without rows too
+    // (Arcade's series and its races had no arrow; Harry, 2026-11-18)
+    ShowArrow(any || !race);
     if ((pressed & 1) && !under.gadget && !race) {  // off the rows, or a screen with none (a series, a car to choose): A
-        held = input::kA, pulse = 8;
+        held = input::kA, pulse = Pulse();
         Press(pad, held);
         return;
     }
@@ -380,10 +399,16 @@ void MenuPointer(input::Pad& pad) {
     if (pressed & 1) click = true;
     if (!armed && !click) return;
     if (armed) armed--;
+    static int since = 0;  // the poll the pointer's row was first not the current one (JUICED_POINTER_LOG)
+    if (!(under == current)) since = since ? since : polls;
+    else if (since) {
+        if (trace) LOGI("pointer: reached the row after %d polls", polls - since);
+        since = 0;
+    }
     if (under == current) {
         if (click) {
             click = false;
-            held = input::kA, pulse = 8;
+            held = input::kA, pulse = Pulse();
             Press(pad, held);
         }
         return;
@@ -395,7 +420,7 @@ void MenuPointer(input::Pad& pad) {
     tried = under, from = current;
     if (std::fabs(under.y - current.y) > 1) held = under.y > current.y ? input::kDown : input::kUp;
     else held = under.x > current.x ? input::kRight : input::kLeft;
-    pulse = 8;
+    pulse = Pulse();
     Press(pad, held);
 }
 
