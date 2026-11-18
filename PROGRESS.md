@@ -43,7 +43,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - HUD position: setting hud_sides (on; F1 "HUD at the screen's sides", PC SETTINGS > GAME "HUD POSITION: SIDES /
   CENTRE"), read by HudAnchored() each quad, so it changes at once.
 - README: Status, Widescreen (4:3 menus with blurred sides), live aspect, HUD position, the pointer, Alt+Enter.
-- Evidence: SMOKE OK, wincheck ok (below). The HUD setting and the arrow: GPU-VM (below).
+- README also: why a recompilation and not a mod of the PC version (my draft of the reasons; Harry to correct).
+- Evidence: SMOKE OK (race 863 draws a frame), wincheck ok. GPU-VM (30132a9, 1920x800 window, aspect screen), race
+  1: hud_sides = true the lap, times and map at the left edge, position and dial at the right; false all in the 4:3
+  centre; no errors but GPU-VM's missing audio. Not seen: the arrow on Arcade's screens and the faster selection on
+  Windows (a screenshot has no cursor), and the PC SETTINGS row itself. Harry's exe 30132a9, SHA-256 6CF7B2AB...ACCDA0C8.
 
 ## 2026-11-17 - The menus at 4:3 on a wide screen, a blurred copy at the sides
 Harry: what looked stretched was the menus' backdrop and their bands with the button bar (the bands' tiles ran the
