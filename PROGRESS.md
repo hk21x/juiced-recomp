@@ -29,6 +29,19 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-18 - Showoff choppiness on GPU-VM: uneven frame spacing
+- Harry: 5434097 (interp_frame_before) still choppy.
+- GPU-VM: JUICED_PAD_FILE (de82c63: controls held from a file; injected keys do not drive there) drove Harry's save's
+  Showoff; settings his (smooth on, cap 0) in a 1920x800 window at render 100%. Bursts (48 frames) measured by the
+  mean change between consecutive frames: in Showoff it alternates about 3.5 and 7.5 (the in-between frame a third of
+  the way along, then a gap); XBE_INTERP_LOG: 2 to 2.4 frames a step, the second ~5 ms in, the rest cut. A race there
+  gets ~1.2 frames a step (no comparison on that machine). With XBE_INTERP_EVEN=1 (only frames that fit evenly) the
+  change is even (8 to 12 every frame), ~1 frame a step.
+- Reading: Showoff's heavier drawing (the trail pass, its extra full-screen passes) leaves room for the in-between
+  frames only early in the step, so they bunch and then a gap follows: judder at a high fps. Harry's check: Showoff
+  with XBE_INTERP_EVEN=1. If it is smooth: even spacing for Juiced (in Showoff or always).
+- GPU-VM restored (its own save and settings), lock released.
+
 ## 2026-11-18 - Showoff choppiness: the trail blended from each in-between frame
 - Harry: Showoff is smooth with smooth motion off: smooth motion is the cause.
 - SDK (GameInfo::interp_frame_before, Juiced on; XBE_INTERP_FRAME_BEFORE=0/1 overrides): each in-between frame, once
