@@ -39,7 +39,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   (tests). The GAME page would have had eight rows: ENGINE AND EFFECTS LEVEL moved to SYSTEM.
 - Evidence (headless, race 1, frames 6000 to 9000 every 500, hidden and shown): the race starts at the same frame
   in both, the HUD gone in every hidden frame, the car drives. SMOKE OK (race 884 draws a frame), wincheck ok.
-  Not seen: F9 on Windows, the pause menu over a hidden HUD.
+  GPU-VM (5b92726, race 1): F12, F9, F12, Esc, F12: the HUD, then none, then the pause menu over the race; a
+  second F9 left hide_hud = false in settings.toml. (The VM's key script had no F9; added there.) Harry's exe
+  5b92726, SHA-256 50EDEAE3...14AFF85F.
 
 ## 2026-11-18 - The pointer follows faster and shows on every menu screen; HUD position setting; README
 - Harry on c867a2b (3440x1440): "All looks good" for the four tests asked (4:3 menus with blurred sides, live
