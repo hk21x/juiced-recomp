@@ -29,6 +29,23 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-18 - The pointer in the sub-menus: carousels and side lists
+- Harry on Windows (1466ca4): the pointer's speed is right, MSAA at the most samples draws right on his GPU (the Arc's
+  black areas are GPU-VM's), W A S D drive the car (the keys not driving on GPU-VM are the VM's). In the sub-menus
+  the arrow shows but does nothing: no row highlights, the arrows between pages take no click.
+- Arcade's series (window Arcade_Championship) is a carousel: one menu of 11 choices side by side, one shown, its name
+  centred with arrows (CHAMPIONSHIP_MENU at 386 of 480, 24 high); the pointer passed it over. Now a click on its left
+  presses left, on its right right, on its name A. Evidence (headless, JUICED_POINTER=@file): current 0 -> right 1
+  -> left 0 -> left 0 (the first) -> A opens Arcade_Race.
+- Custom Race's Performance Group (window instant_manu): the groups (MENU) beside the cars in the group (CARMENU,
+  centred on the group's middle car, current 3 or 5). The pointer took the last menu's current, the cars', so it
+  pressed for ever (the groups cycling over the cars). Now current is the current item of the menu under the pointer,
+  and a menu that a press towards did not step one row its way, while another menu moved, is left out for that window.
+  Evidence: rows reached over the groups (12, 8, 16 polls); over the cars one press, "not walked", then the groups'
+  rows reached at x 420 too. Arcade's race list (reached in 8, 4, 8 polls) and the main menu (8, 8, 16) as before.
+- SMOKE OK (820 draws a frame); wincheck OK.
+- Next: Harry: the series' arrows, Custom Race's lists, and any sub-menu still dead (its name, or a shot).
+
 ## 2026-11-18 - filelist.txt no longer written; the doubled highlight is the game's
 - D:\filelist.txt (each file the game opens, made at 0x110D90 by its one writer 0x114440) landed in the assets
   folder of an unpacked disc; from an .iso the SDK already refused it, as the console's read-only disc does. SDK:

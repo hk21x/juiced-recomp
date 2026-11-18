@@ -15,6 +15,7 @@
 // JUICED_POINTER_LOG=1: each window's buttons and menus in the log as the pointer meets it.
 // JUICED_POINTER=@file: the pointer as the file's "x y buttons" says, read again as the run goes.
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cmath>
 #include <cstdio>
@@ -263,10 +264,43 @@ struct Place {
 
 bool Readable(uint32_t va, uint32_t bytes) { return va >= 0x10000 && mem::IsCommitted(va) && mem::IsCommitted(va + bytes - 1); }
 
-// false when the window has nothing to point at
-bool Places(uint32_t window, const Pointer& p, Place& under, Place& current) {
+// A carousel: a menu of choices side by side shown one at a time, its name centred with arrows either side (Arcade's
+// series: "NOVICE SERIES" and an arrow, the strip at 386 to 410 of 480). Pointed at, a click on its left steps left,
+// on its right steps right, on the name chooses it (Harry, 2026-11-18: the arrows took no click).
+constexpr float kCarouselName = 70;  // half the name's width about the strip's centre
+
+// Menus the d-pad does not walk, in the window they were found in: a list beside the one the presses move (Custom
+// Race's CARS IN GROUP beside its groups), told when a press towards one of its rows moved another menu instead
+uint32_t g_inert_window = 0;
+std::array<uint32_t, 4> g_inert{};
+bool Inert(uint32_t window, uint32_t g) {
+    return window == g_inert_window && std::find(g_inert.begin(), g_inert.end(), g) != g_inert.end();
+}
+void MakeInert(uint32_t window, uint32_t g) {
+    if (window != g_inert_window) g_inert = {}, g_inert_window = window;
+    for (uint32_t& slot : g_inert)
+        if (!slot) {
+            slot = g;
+            return;
+        }
+}
+// the current items of the window's menus but one, mixed into one number: a press that moved another menu changes it
+uint32_t OthersCurrent(uint32_t window, uint32_t except) {
+    uint32_t sum = 0;
+    for (uint32_t at = R32(window + kGadgets), end = R32(window + kGadgetsEnd); at && at < end && end - at < 0x1000; at += 4) {
+        const uint32_t g = R32(at);
+        if (g != except && Readable(g, 0x160) && R32(g + kType) == kMenu) sum = sum * 31 + g + R32(g + kCurrent) * 7919;
+    }
+    return sum;
+}
+
+// false when the window has nothing to point at; carousel: the carousel under the pointer, else 0. With no focused
+// gadget, current is the current item of the menu under the pointer (each of a window's menus keeps one), else the
+// last menu's
+bool Places(uint32_t window, const Pointer& p, Place& under, Place& current, uint32_t* carousel = nullptr) {
     bool any = false;
     const uint32_t focus = R32(window + kFocus);
+    Place mine;  // the current item of the menu under the pointer
     for (uint32_t at = R32(window + kGadgets), end = R32(window + kGadgetsEnd); at && at < end && end - at < 0x1000; at += 4) {
         const uint32_t g = R32(at);
         if (!Readable(g, 0x160) || R32(g + kHidden)) continue;
@@ -283,17 +317,24 @@ bool Places(uint32_t window, const Pointer& p, Place& under, Place& current) {
             if (!items || !count || count > 64) continue;
             const uint32_t first = R32(items);
             if (!Readable(first, 0x58) || !kernel::G<uint8_t>(first + kItemName)) continue;  // a menu of backdrops
+            if (Inert(window, g)) continue;
             const float pitch = F(g + kItemHeight) * 480 * kPitch, top = y0 + kFirst;
-            if (pitch * float(count) > h + pitch) continue;  // a row of choices side by side (Arcade's series)
+            if (pitch * float(count) > h + pitch) {  // a row of choices side by side (Arcade's series): a carousel
+                if (carousel && p.x >= x0 && p.x < x0 + w && p.y >= y0 - 6 && p.y < y0 + h + 6) *carousel = g;
+                continue;
+            }
             any = true;
             const uint32_t cur = R32(g + kCurrent);
-            if (!focus && cur < count) current = {g, int(cur), x0, top + pitch * float(cur)};
+            const Place now = {g, cur < count ? int(cur) : -1, x0, top + pitch * float(cur)};
+            if (!focus && cur < count) current = now;
             if (pitch > 4 && p.x >= x0 && p.x < x0 + w && p.y >= top && p.y < top + pitch * float(count)) {
                 const int i = int((p.y - top) / pitch);
                 under = {g, i, x0, top + pitch * float(i)};
+                mine = cur < count ? now : Place{};
             }
         }
     }
+    if (!focus && under.index >= 0 && under.gadget == mine.gadget) current = mine;
     return any;
 }
 }  // namespace
@@ -324,6 +365,7 @@ void MenuPointer(input::Pad& pad) {
     static int pulse = 0, held = -1;  // the press being played: polls left of it and its gap
     static bool click = false;   // a left click waits for the selection to reach the pointer
     static Place tried, from, stuck;  // the last move's target and start; a target a press did not move towards
+    static uint32_t others = 0;       // OthersCurrent as the last move started
     static int polls = 0;
     polls++;
     Pointer p;
@@ -379,10 +421,19 @@ void MenuPointer(input::Pad& pad) {
         }
     }
     Place under, current;
-    const bool any = Places(window, p, under, current);
+    uint32_t carousel = 0;
+    const bool any = Places(window, p, under, current, &carousel);
     // the arrow on every screen the mouse does something on: in the menus a click is A on a screen without rows too
     // (Arcade's series and its races had no arrow; Harry, 2026-11-18)
     ShowArrow(any || !race);
+    if ((pressed & 1) && carousel && !under.gadget) {  // a carousel: its left, its right, its name
+        const float mid = (F(carousel + kRect) + F(carousel + kRect + 8) / 2) * 640;
+        held = std::fabs(p.x - mid) < kCarouselName ? input::kA : p.x < mid ? input::kLeft : input::kRight;
+        if (trace) LOGI("pointer: carousel %08X current %u, at %.0f: %s", carousel, R32(carousel + kCurrent), p.x, held == input::kA ? "A" : held == input::kLeft ? "left" : "right");
+        pulse = Pulse();
+        Press(pad, held);
+        return;
+    }
     if ((pressed & 1) && !under.gadget && !race) {  // off the rows, or a screen with none (a series, a car to choose): A
         held = input::kA, pulse = Pulse();
         Press(pad, held);
@@ -393,6 +444,18 @@ void MenuPointer(input::Pad& pad) {
         return;
     }
     // a press that changed nothing (a screen whose rows the d-pad does not walk): leave that row be
+    // a press towards a menu's row that did not step that menu one row its way but moved another menu: a list the
+    // d-pad does not walk (Custom Race's cars, centred on the group's middle car, jump two rows as the group changes)
+    if (tried.gadget && tried.index >= 0 && from.index >= 0 && OthersCurrent(window, tried.gadget) != others) {
+        const int step = tried.y > from.y ? 1 : -1;
+        const int now = current.gadget == tried.gadget ? current.index : int(R32(tried.gadget + kCurrent));
+        if (now != from.index + step) {
+            if (trace) LOGI("pointer: menu %08X is not walked by the d-pad", tried.gadget);
+            MakeInert(window, tried.gadget);
+            tried = {};
+            return;
+        }
+    }
     if (tried.gadget && tried == under && from == current) stuck = under;
     tried = {};
     if (!(stuck == under)) stuck = {};
@@ -417,7 +480,7 @@ void MenuPointer(input::Pad& pad) {
         click = false;
         return;
     }
-    tried = under, from = current;
+    tried = under, from = current, others = OthersCurrent(window, under.gadget);
     if (std::fabs(under.y - current.y) > 1) held = under.y > current.y ? input::kDown : input::kUp;
     else held = under.x > current.x ? input::kRight : input::kLeft;
     pulse = Pulse();
