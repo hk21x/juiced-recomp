@@ -4,7 +4,9 @@
 #include <atomic>
 #include <cctype>
 #include <cstdint>
+#include <cstdio>
 #include <cstdlib>
+#include <iterator>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -82,8 +84,45 @@ std::array<uint16_t, 2> Keys(int c) {
 // Today's pad has RB and LB where White and Black were (the SDK reads RB as Black, LB as White). The game's change
 // of view is White and Black does nothing in any of its three layouts, so they swap: RB changes the view, as the
 // controls page's modern pad shows (src/common/buttons.cpp). The keyboard's C plays Black, so it does too.
+// JUICED_PAD_FILE=path (tests, on Windows too: GPU-VM's injected keys do not drive the car): the controls the file
+// names held while it names them, read again every 6 polls; words A B X Y LT RT UP DOWN LEFT RIGHT START BACK LSL LSR
+void PadFile(input::Pad& pad) {
+    static const char* path = std::getenv("JUICED_PAD_FILE");
+    if (!path || !*path) return;
+    static int every = 0;
+    static uint16_t buttons = 0;
+    static uint8_t analog[8] = {};
+    static int16_t lx = 0;
+    if (every++ % 6 == 0) {
+        buttons = 0, lx = 0;
+        std::fill(std::begin(analog), std::end(analog), uint8_t(0));
+        if (std::FILE* f = std::fopen(path, "r")) {
+            char w[16];
+            while (std::fscanf(f, "%15s", w) == 1) {
+                const std::string k = w;
+                static const std::pair<const char*, int> kNames[] = {
+                    {"UP", input::kUp},       {"DOWN", input::kDown}, {"LEFT", input::kLeft}, {"RIGHT", input::kRight},
+                    {"START", input::kStart}, {"BACK", input::kBack}, {"A", input::kA},       {"B", input::kB},
+                    {"X", input::kX},         {"Y", input::kY},       {"LT", input::kLT},     {"RT", input::kRT}};
+                for (const auto& [name, c] : kNames)
+                    if (k == name) {
+                        if (c < input::kA) buttons |= uint16_t(1u << c);
+                        else analog[c - input::kA] = 255;
+                    }
+                if (k == "LSL") lx = -32767;
+                if (k == "LSR") lx = 32767;
+            }
+            std::fclose(f);
+        }
+    }
+    pad.buttons |= buttons;
+    for (int i = 0; i < 8; i++) pad.analog[i] = std::max(pad.analog[i], analog[i]);
+    if (lx) pad.lx = lx;
+}
+
 void Pad(int port, input::Pad& pad) {
     if (port != 0) return;
+    PadFile(pad);
     constexpr int kBlackSlot = 4, kWhiteSlot = 5;  // Pad::analog: A B X Y Black White LT RT
     std::swap(pad.analog[kBlackSlot], pad.analog[kWhiteSlot]);
     MenuPointer(pad);  // the mouse in the menus (src/common/pointer.cpp)
