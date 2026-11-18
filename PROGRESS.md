@@ -53,6 +53,8 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   error in the log (XBE_D3D12_CHECK=1). Not explained.
 - Open: no key moves the car on GPU-VM (W, S, A/D, Space, I; Esc pauses, E shows gear 1); brake lights stay on.
   Headless RT drives. Not explained; asked Harry whether the keyboard drives on his PC.
+  PGR2 sees the same on GPU-VM (its session, 2026-11-18): likely the VM's injected keys, not Juiced. Also from it:
+  SetForegroundWindow failed with another app on the desktop; an Alt tap around it got the keys through.
 - SDK 3613605 (GameInfo::silent_clock, Juiced on): with no sound device the mixer is pulled 10 ms a time on the clock
   and dropped, so the game's sound clock runs (before: never pulled). It did not make the car move (above), kept as
   a fix for machines without audio.
