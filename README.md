@@ -202,11 +202,28 @@ in `achievements.toml` beside the game. More, for the career, will follow. The l
 ## Getting started
 <sup>[(Back to top)](#table-of-contents)</sup>
 
-A launcher, as the other ports have, will come with the first release. Until then, build the game by hand: see
-[Building](#building).
+`JuicedLauncher.exe` does everything for you: no Visual Studio, no Git, no command line, nothing installed in Windows
+and no admin rights needed. It and a build from source both make the game's code on your own PC from your own disc:
+it is never downloaded, only the program around it.
 
-Settings live in `settings.toml`, logs in `logs`, screenshots in `screenshots` and achievements in
-`achievements.toml`, all beside the game.
+1. Download `JuicedLauncher.exe` from the [latest release](https://github.com/hk21x/juiced-recomp/releases/latest).
+2. Put it in a folder of its own with a short path (for example `C:\Games\Juiced`) and run it. Everything it makes goes
+   in a `Juiced` folder beside it. Windows may warn about an unrecognised app: choose **More info**, then **Run anyway**.
+3. **Your game:** choose your disc image (`.iso`) or the folder with the disc's files. The launcher checks that it is
+   the supported release (USA/Europe).
+4. **Get the game ready:** the launcher downloads the game's package (the program and a compiler, no game code), then
+   your PC builds the game's code from your disc. You can stop at any time; it carries on where it left off.
+5. **Play.**
+
+When a new release is out, the launcher offers it at the top of its window: **Update the launcher**, then **Update**.
+The new version is built beside the game and only replaces it once it is ready, keeping your saves and settings.
+
+Files, all under the `Juiced` folder beside the launcher:
+- `play\`: `Juiced.exe`, `Juiced.dll` (the game's code, built on your PC), `settings.toml`, `hdd\` (your profile and
+  saves), `logs\`, `achievements.toml`, `screenshots\`, `compiler\`
+- `launcher.log`, the launcher's log (send it with any problem)
+
+To remove everything, delete the launcher and its `Juiced` folder (keep `play\hdd` if you want your saves).
 
 ## FAQ
 <sup>[(Back to top)](#table-of-contents)</sup>
