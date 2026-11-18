@@ -29,6 +29,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-18 - PRESS START takes Enter and a click
+- Harry: only Esc (START) went past the title's PRESS START. On that window ("start") A now counts as START too
+  (src/common/pointer.cpp, MenuPointer), so Enter and Space (A) and a left click (A off the rows) go on.
+- Evidence (headless, JUICED_SKIP_INTRO=1): no input stays on "start"; "400 A" leaves it for bootupcheck at 7.1 s; a
+  left click (JUICED_POINTER=@file) leaves it at 9.4 s. SMOKE OK (771 draws a frame); wincheck OK.
+
 ## 2026-11-18 - The pointer in the sub-menus: carousels and side lists
 - Harry on Windows (1466ca4): the pointer's speed is right, MSAA at the most samples draws right on his GPU (the Arc's
   black areas are GPU-VM's), W A S D drive the car (the keys not driving on GPU-VM are the VM's). In the sub-menus

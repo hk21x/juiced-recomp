@@ -358,8 +358,22 @@ bool HudAnchored() {
     return !off && hud_sides;
 }
 
-// GameInfo::pad, controller 1
+namespace {
+void Steer(input::Pad& pad, uint32_t& window);
+}
+
+// GameInfo::pad, controller 1: the mouse in the menus (Steer); on the title's "press START" (window "start") A is
+// START too, so Enter, Space and a left click (A off the rows) go on as Esc does (Harry, 2026-11-18)
 void MenuPointer(input::Pad& pad) {
+    uint32_t window = 0;
+    Steer(pad, window);
+    if (pad.analog[input::kA - input::kA] && Readable(window, 8) &&
+        !std::strncmp(static_cast<const char*>(kernel::HostPtr(window)), "start", 6))
+        pad.buttons |= uint16_t(1u << input::kStart);
+}
+
+namespace {
+void Steer(input::Pad& pad, uint32_t& window) {
     static Pointer last;
     static int armed = 0;        // polls the pointer still steers the selection for, after it last moved
     static int pulse = 0, held = -1;  // the press being played: polls left of it and its gap
@@ -371,7 +385,6 @@ void MenuPointer(input::Pad& pad) {
     Pointer p;
     // the window showing: the last of the manager's stack of them (+0 to +4; "opts_bg", "opts_menu" in Options)
     const uint32_t manager = g_manager.load();
-    uint32_t window = 0;
     if (Readable(manager, 0x100) && R32(manager + 4) > R32(manager) && R32(manager + 4) - R32(manager) <= 0x40)
         window = R32(R32(manager + 4) - 4);
     if (Readable(manager, 0x100) && R32(manager + kModal)) window = R32(manager + kModal);  // a message box over it
@@ -486,5 +499,6 @@ void MenuPointer(input::Pad& pad) {
     pulse = Pulse();
     Press(pad, held);
 }
+}  // namespace
 
 }  // namespace juiced
