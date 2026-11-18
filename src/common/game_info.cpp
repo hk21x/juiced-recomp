@@ -241,6 +241,7 @@ const app::GameInfo app::kGame = {
         return menus ? 4.0f / 3.0f : chosen;
     },
     .bars_backdrop = [] { return juiced::menus_narrowed.load(); },
+    .silent_clock = true,                 // without a sound device the race's start still waits on sounds ending
     .voice_3d_level = [] { return float(std::min<uint32_t>(juiced::effects_percent, 100)) / 100.0f; },  // engines and effects
     .squeeze_flat_programs = true,        // the 2D's programs: (v0 + c) * c + c, no matrix
     .line_width = 0.35f,                  // the overhead wires are line strips: fine, not a console pixel wide
