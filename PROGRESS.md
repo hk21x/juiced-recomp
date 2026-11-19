@@ -29,6 +29,13 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-19 - The sprint HUD at the sides too
+- Harry: the sprint HUD does not sit as a race's. Its window is "hud_sprint". juiced::IsRaceHud (src/game/hud.cpp):
+  hud_race, hud_cruise, hud_sprint and hud_solo, each anchored to the frame's sides and hidden by hide_hud (F9);
+  hud_split (split screen, laid out per view) and hud_spectator (not yet seen) left as they are.
+- Evidence (headless, OUTPUT=3440x1440 FRAME_ASPECT_X100=239, Arcade > Novice > race 3, a sprint): time and record
+  top left, position top right, the map bottom left, the dial bottom right. SMOKE OK (915); wincheck OK.
+
 ## 2026-11-19 - Brake to reverse
 - Harry: X to reverse feels dated. The game's three pad layouts (Options > Controls; we play option 1) all reverse on
   a face button (X, X, Y); none on the brake. Holding X is the game's reverse: from a stop it selects R and drives

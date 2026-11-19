@@ -41,6 +41,7 @@ float Squeeze() {
 namespace juiced {
 uint32_t MenuManager();  // src/common/pointer.cpp
 bool HudAnchored();      // src/common/pointer.cpp: not switched off (JUICED_HUD_ANCHOR=0, tests)
+bool IsRaceHud(const char* window_name);  // src/game/hud.cpp
 namespace {
 float g_anchor = 0;                  // -1 the left edge, 1 the right, between them in proportion, 0 none
 float g_anchor_box[4] = {0, 0, 0, 0};  // the gadget's rectangle: left, top, right, bottom
@@ -108,7 +109,7 @@ bool HudAnchor(float x0, float y0, float x1, float y1) {
             const uint32_t window = kernel::R32(at - 4);
             if (!Mapped(window, 0x64)) continue;
             const char* name = static_cast<const char*>(kernel::HostPtr(window));
-            const bool hud = !std::strcmp(name, "hud_race") || !std::strcmp(name, "hud_cruise");  // a race's, Showoff's
+            const bool hud = IsRaceHud(name);
             const float side = GadgetSide(window, hud, x0, y0, x1, y1, g_anchor_box);
             if (side == 2) continue;
             SetAnchor(side);
