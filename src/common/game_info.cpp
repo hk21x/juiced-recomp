@@ -37,6 +37,17 @@ bool InRace() {
     const uint32_t game = kernel::R32(0x372B54);
     return game >= 0x10000 && mem::IsCommitted(game + 0x3C) && kernel::R32(game + 0x3C) != 0;
 }
+// Showoff's HUD ("hud_cruise", src/game/hud.cpp) was drawn since the race began: no frames between steps there. Its
+// trail (each frame blends the one before over the new one) and the car's draws judder and jump with them, smooth with
+// them off (Harry, 2026-11-19), as at 60 on the console. Cleared out of a race
+std::atomic<bool> showoff{false};
+bool SmoothMotionNow() {
+    if (!InRace()) {
+        showoff = false;
+        return false;
+    }
+    return smooth_motion && !showoff.load();
+}
 uint32_t fov_percent = 100;   // the race camera's field of view (src/game/fov.cpp)
 // the level of the engines and effects (the game's 3D DirectSound voices: not the music, the menus' sounds or the
 // movies), percent. 50 is 6 dB under the disc's mix as mixed here, where a race came out about 15 dB over the menus
@@ -228,7 +239,7 @@ const app::GameInfo app::kGame = {
     .hide_file = juiced::HideFile,        // hides nothing: notes when a boot movie is opened (skip_intro)
     .default_keys = juiced::Keys,         // the keyboard's defaults, after the game's own layout
     .texture_bound = juiced::ButtonPictures,  // today's pad in the button pictures (src/common/buttons.cpp)
-    .step_interpolation = [] { return juiced::smooth_motion && juiced::InRace(); },  // frames between steps, in a race
+    .step_interpolation = juiced::SmoothMotionNow,  // frames between steps, in a race but not in Showoff
     .interp_transform = 18,               // its programs' world-view-projection: c18 to c21 (c0 to c2 the world, c7 to c13 view and projection)
     .interp_view_projection = 14,         // c14 to c17: the crowd's program places its people through the world and these (dumped HLSL)
     .interp_world = 0,                    // c0 to c2: a draw whose world is the step before's is still (the buildings' shift)
@@ -271,7 +282,6 @@ const app::GameInfo app::kGame = {
     .interp_scenery_takes_camera = true,
     .interp_skip_still_targets = true,    // its cube faces and small passes drawn once a step, not in every in-between frame
     .interp_fill_frames = true,           // its own drawing takes 4 ms of a step: at 240 the 4th frame fits only closer together
-    .interp_frame_before = true,          // Showoff's trail blends the frame before: each in-between frame's, not the step's
     .interp_rebuilt_on_car = true,        // the neon and shadow under the cars: laid on the road afresh each step
     .interp_peers_on_cars = true,         // the brake lights lit as the brakes come on: with the car's body
     .interp_shared_constants = true,      // the crowd without a match: the camera's view and projection (c7 to c13) blended

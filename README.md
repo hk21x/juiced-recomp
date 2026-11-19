@@ -284,7 +284,8 @@ when you report a problem on the <a href="https://discord.gg/PQjkKsdtc">Discord 
 ## Known issues
 <sup>[(Back to top)](#table-of-contents)</sup>
 
-- **Neon flicker in Showoff** with Smooth motion above 60 has been seen; turn Smooth motion off if you see it.
+- **Showoff runs at 60 frames a second** whatever the frame cap: Smooth motion steps aside there, as the trail effect it
+  draws juddered with frames between steps.
 - **Not yet covered by testing:** a long career, split screen and wet races.
 - **The menus' blurred sides** are Direct3D 12 only; Direct3D 11 shows black bars there.
 

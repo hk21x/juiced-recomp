@@ -29,6 +29,19 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-19 - Showoff without frames between steps; F9 hides its HUD
+- Harry's video with XBE_INTERP_EVEN=1 (.local/win, 3440x1440 at 240): about 62 new pictures a second, 4 to 37 ms
+  apart; the car jumping back and forth between pictures while the scene holds, and the rear window flashing white
+  in jagged triangles. Even spacing is no fix.
+- Showoff's HUD is its own window, "hud_cruise" (a race's "hud_race"; window names logged through 0x18C820 in a
+  headless Showoff from Harry's save). GameInfo::step_interpolation is now juiced::SmoothMotionNow: off once
+  hud_cruise has been drawn in this race (cleared out of a race), so Showoff runs at the game's own 60 as on the
+  console, which Harry found smooth. interp_frame_before (SDK d2fcd57) turned off again for Juiced. Hide HUD (F9)
+  also hides hud_cruise.
+- Evidence (headless, XBE_INTERP_TEST=2): Showoff 14880 frames for 14879 vertical blanks (no frames between); race 1
+  12540 frames for 8905. SMOKE OK (722); wincheck OK.
+- Next: Harry's Showoff (smooth, smooth motion on in the settings) and a race (smooth motion as before).
+
 ## 2026-11-19 - Release prep: the prebuilt model, its package and the launcher (branch release)
 - As PGR2's 1.6: XBE_GAME_DLL on Windows (CMakeLists.txt), config library Juiced.dll, game.json package
   Juiced-package.zip, prebuilt-test.bat and release-package.bat, tags make a draft release (the package attached by
