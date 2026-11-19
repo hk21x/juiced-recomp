@@ -29,6 +29,27 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-19 - Release prep: the prebuilt model, its package and the launcher (branch release)
+- As PGR2's 1.6: XBE_GAME_DLL on Windows (CMakeLists.txt), config library Juiced.dll, game.json package
+  Juiced-package.zip, prebuilt-test.bat and release-package.bat, tags make a draft release (the package attached by
+  hand), MinGit's busybox edition (PGR2's fix for a player's git dying in MSYS2's fork). README Getting started for
+  the launcher; draft notes docs/releases/v1.0.0.md; docs/RELEASING.md. Linux: recompile and SMOKE OK (862).
+- GPU-VM (Windows, Arc), all from the release branch:
+  - build.bat: Juiced.exe 6.9 MB and Juiced.dll 11.8 MB.
+  - release-package.bat: Juiced-package.zip 73.6 MB, 41 entries: Juiced.exe, the runtime DLLs, compiler (clang, lld,
+    xbe_recomp, configs, XDK layouts, headers, Juiced.lib); no game code. launcher.bat: JuicedLauncher.exe 2.5 MB.
+  - A clean folder from prebuilt-test.bat with the disc image (.iso hard link): the first start compiles 65 files in
+    about 50 s (6 threads) and offers Start. Juiced.exe --prepare-code (the launcher's way) builds the DLL headless,
+    exit 0; then the game starts and runs to the new profile's name entry. The extracted folder works as well.
+  - Once (1 of 4) the game stalled on LOADING right after the first-start window's Start button (presents stopped at
+    3, CPU idle); not seen again, and the launcher does not use that window (it builds headless, then starts afresh).
+  - The new profile's name entry shows white specks over its panels on the Arc, with either DLL; the reference
+    renderer draws it clean. To check on Harry's PC.
+  - The launcher window opens in an empty folder with the package beside it ("Launcher dev", the steps listed). Its
+    buttons could not be pressed from here (injected clicks did not register, UI Automation hung): the click-through
+    (disc image, Get the game ready, Play) is Harry's.
+- Next: Harry's Showoff check with XBE_INTERP_EVEN=1, the launcher click-through, the release branch into main.
+
 ## 2026-11-18 - Showoff choppiness on GPU-VM: uneven frame spacing
 - Harry: 5434097 (interp_frame_before) still choppy.
 - GPU-VM: JUICED_PAD_FILE (de82c63: controls held from a file; injected keys do not drive there) drove Harry's save's
