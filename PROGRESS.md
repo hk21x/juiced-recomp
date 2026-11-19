@@ -29,6 +29,14 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-19 - Ready for v1.0.0
+- Harry on fe6f491: the HUD right in races, sprints and Showoff; brake to reverse "works great"; experimental high
+  FPS off; the launcher works (his click-through).
+- README brought up to date (high FPS experimental throughout, brake to reverse, the GAME and SYSTEM pages, the HUD
+  in sprints and Showoff, Juiced.dll, the roadmap's launcher item done, NVIDIA untested); v1.0.0 notes to match.
+- Next: release into main, the package, the v1.0.0 tag (a draft release); publishing and the repository's visibility
+  are Harry's.
+
 ## 2026-11-19 - The sprint HUD at the sides too
 - Harry: the sprint HUD does not sit as a race's. Its window is "hud_sprint". juiced::IsRaceHud (src/game/hud.cpp):
   hud_race, hud_cruise, hud_sprint and hud_solo, each anchored to the frame's sides and hidden by hide_hud (F9);

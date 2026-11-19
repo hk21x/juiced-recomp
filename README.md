@@ -20,8 +20,9 @@
 
 **The 2005 Xbox street racer, running natively on PC.** This is not an emulator. The game's own x86 code is
 statically recompiled with the [Xbox XBE Recomp](https://github.com/TGP482/XboxXBE-Recomp) toolkit into a Windows
-program, with a new renderer, sound and input underneath: true widescreen up to 21:9 and beyond, frame rates above
-60, sharper graphics, mouse and keyboard, modern pads and wheels, and settings inside the game's own menus.
+program, with a new renderer, sound and input underneath: true widescreen up to 21:9 and beyond, sharper graphics,
+mouse and keyboard, modern pads and wheels, brake to reverse, settings inside the game's own menus, and experimental
+frame rates above 60.
 
 > [!NOTE]
 > This project does not include any game assets. You need your own copy of the Xbox game to build and play.
@@ -54,8 +55,8 @@ program, with a new renderer, sound and input underneath: true widescreen up to 
 </p>
 
 The Xbox drew Juiced at 640x480, at 4:3 or squeezed for a 16:9 TV, and at up to 60 frames a second. The port draws
-it at your screen's resolution and shape, as often as your screen refreshes, with anti-aliasing and sharpening
-layered on top of the game's own picture.
+it at your screen's resolution and shape at a steady 60 (more with the experimental high FPS setting), with
+anti-aliasing and sharpening layered on top of the game's own picture.
 
 ## Features
 <sup>[(Back to top)](#table-of-contents)</sup>
@@ -64,12 +65,12 @@ layered on top of the game's own picture.
 |---|---|
 | **Widescreen** | True proportions on any screen, 21:9 and wider included. Races fill the screen with the 3D view widened; the menus, title and movies keep their 4:3 shape in the middle with a dimmed, blurred copy filling the sides. |
 | **Aspect, changed as you play** | Auto, 4:3, 16:9 or Fill, applied at once, in a race too. At 4:3 the race camera is the console's own. |
-| **HUD position** | On a wide screen the dials, map and position sit at the screen's sides, or in the 4:3 centre nearer the car. **F9** hides the HUD altogether. |
+| **HUD position** | On a wide screen the dials, map and position sit at the screen's sides, or in the 4:3 centre nearer the car, in races, sprints and Showoff alike. **F9** hides the HUD altogether. |
 | **Experimental high FPS** | Off by default. The game still runs its 60 steps a second, as its driving needs; turned on, races above a frame rate cap of 60 draw the frames in between, made from the two steps before. Showoff always runs at 60. |
 | **Sharper graphics** | Render scale up to 200%, MSAA up to 8x, FXAA or SMAA, sharpening, anisotropic filtering, enhanced textures and sharp text and HUD. |
 | **PC Settings in the game** | Options > PC SETTINGS on the title menus and the pause menu, in the game's own style. Everything is also in the F1 window and `settings.toml`. |
 | **Mouse in the menus** | Point at an item and click to choose it; right click goes back. The pointer is drawn in the menus' own colours. |
-| **Controllers and wheels** | Xbox, PlayStation and Switch pads with hot plugging and rumble; steering wheels with force feedback. Modern button pictures show today's Xbox pad, or your keys. |
+| **Controllers and wheels** | Xbox, PlayStation and Switch pads with hot plugging and rumble; steering wheels with force feedback. **Brake to reverse** as in modern racing games. Modern button pictures show today's Xbox pad, or your keys. |
 | **Achievements** | A first set for race results, kept in `achievements.toml` beside the game. |
 | **Quality of life** | Skip intro, an engines and effects level against the music, field of view, speed blur on or off, F12 screenshots at full resolution, Alt+Enter for full screen. |
 
@@ -84,8 +85,8 @@ layered on top of the game's own picture.
 
 In a race the 3D view is widened to your screen's shape. The HUD is drawn in the game's 4:3 layout; with **HUD
 POSITION: SIDES** (the default) its left and right parts move out to the screen's edges, with **CENTRE** it stays
-around the car as on a 4:3 TV. **F9** in a race hides it, for screenshots and a clear view; the pause menu still
-shows.
+around the car as on a 4:3 TV. Circuit races, sprints and Showoff are all laid out this way. **F9** in a race hides
+the HUD, for screenshots and a clear view; the pause menu still shows.
 
 <p align="center">
   <img src="docs/img/juiced-menus.webp" alt="The main menu at 4:3 in the middle of a 21:9 screen, a blurred copy of it at the sides" width="800">
@@ -107,8 +108,8 @@ four pages.
 |---|---|
 | **Display** | Display mode (full screen, borderless, window), resolution, aspect, vertical sync, frame rate cap, show frame rate, pause in background |
 | **Graphics** | Render scale, MSAA, edge smoothing (FXAA, SMAA), anisotropic filter, sharp text and HUD, sharper world textures, sharpen |
-| **Game** | Modern button pictures, skip intro movies, keyboard play, field of view, speed blur, HUD position, hide HUD |
-| **System** | Engine and effects level, scaling filter, low latency, renderer (Direct3D 12 or 11), experimental high FPS |
+| **Game** | Modern button pictures, keyboard play, brake to reverse, field of view, speed blur, HUD position, hide HUD |
+| **System** | Engine and effects level, scaling filter, low latency, renderer (Direct3D 12 or 11), experimental high FPS, skip intro movies |
 
 **F1** opens the settings window over the game, with the same settings and more: key and button bindings, wheel
 setup and the controller options. Everything is saved in `settings.toml` beside the game.
@@ -178,7 +179,9 @@ Shots of one spot at 1920x800, taken one after another on an Intel Arc A750; the
 | Menus | arrows move, Enter selects, Backspace goes back; or the mouse | d-pad, A, B |
 
 Keys and buttons can be changed in the F1 window. The pad layout is the game's own layout 1; the game's
-Options > Controls page chooses another.
+Options > Controls page chooses another. **Brake to reverse** (PC SETTINGS > GAME, on by default) is the port's: hold
+the brake once the car has stopped and it reverses, as in modern racing games. The game's own reverse button still
+works, and a steering wheel's brake pedal never reverses.
 
 ## Achievements
 <sup>[(Back to top)](#table-of-contents)</sup>
@@ -197,11 +200,11 @@ in `achievements.toml` beside the game. More, for the career, will follow. The l
   NVIDIA cards are expected to work, as nothing here is specific to a vendor, but have not been tested yet: please
   report how yours runs.
 - **Minimum spec:** any 64 bit processor from the last ten years and a Direct3D 12 graphics card run the game at its
-  own 60 frames a second. Frame rates above 60 need more: the frames in between are drawn in the time the game leaves
-  free in each of its 60 steps a second, so they depend on one fast processor core more than on the graphics card. As
-  a guide from our own machines: a Ryzen 7 5800X3D shows 180 to 240 frames a second at 3440x1440; a Ryzen 5 5600G (in
-  a virtual machine, with an Intel Arc A750) has little time left for extra frames at 1080p. When there is no room,
-  the game just runs at 60: nothing breaks.
+  own 60 frames a second. The experimental high FPS setting needs more: the frames in between are drawn in the time
+  the game leaves free in each of its 60 steps a second, so they depend on one fast processor core more than on the
+  graphics card. As a guide: a Ryzen 7 5800X3D shows 180 to 240 frames a second at 3440x1440; a Ryzen 5 5600G (in a
+  virtual machine, with an Intel Arc A750) has little time left for extra frames at 1080p. When there is no room, the
+  game just runs at 60: nothing breaks.
 
 ## Getting started
 <sup>[(Back to top)](#table-of-contents)</sup>
@@ -290,13 +293,12 @@ when you report a problem on the <a href="https://discord.gg/PQjkKsdtc">Discord 
 <sup>[(Back to top)](#table-of-contents)</sup>
 
 - **Experimental high FPS** (off by default) can judder or misdraw in some races; Showoff always runs at 60.
-- **Not yet covered by testing:** a long career, split screen and wet races.
+- **Not yet covered by testing:** a long career, split screen, wet races and NVIDIA graphics cards.
 - **The menus' blurred sides** are Direct3D 12 only; Direct3D 11 shows black bars there.
 
 ## Roadmap
 <sup>[(Back to top)](#table-of-contents)</sup>
 
-- **A launcher and the first release**, as the other ports have.
 - **Achievements for the career:** cash, respect, cars won and pink slips, the Arcade series and Showoff scores.
 - **Controls in PC Settings:** key rebinding and stick options inside the game's menus, not only in F1.
 - **Smoother keyboard steering**, ramped rather than all or nothing.
@@ -316,7 +318,7 @@ For developers.
 2. Put your disc in `assets`: an `.iso`, or `default.xbe` with the game's folders beside it.
 3. Install Visual Studio 2022 with **Desktop development with C++**, **C++ Clang tools for Windows** and **C++ CMake
    tools for Windows** (`build.bat` offers to add the last two), and run `build.bat`. The first build recompiles the
-   game and takes a while. The exe is in `out\build\release`.
+   game and takes a while. `Juiced.exe` and `Juiced.dll` (the game's code) are in `out\build\release`.
 
 ## Credits and legal
 <sup>[(Back to top)](#table-of-contents)</sup>
