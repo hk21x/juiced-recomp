@@ -30,6 +30,19 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-19 - Issues 2 and 3 looked at; MSAA see-through people
+- Issue 2 (a player at 3840x2160, Chinese text): the replay's 3D scene is soft with a fine grid and black bars,
+  the HUD and text sharp. Likely the replay draws its scene into a 640x480 picture of its own that the port does
+  not scale with the render scale, shown stretched. Not reproduced yet (Harry found replays fine at 3440x1440).
+- Issue 3 (a player's video, 1280x720 capture with an overlay): 60 fps in races, 10 to 11 fps with the GPU at 96 to
+  100% on the results screen (the race scene running behind its 4:3 panel); Choose Race back at 60. Headless the
+  results screen draws fewer draws than a race (563 a frame against 668), so the cost is the port's (likely the
+  narrowed 4:3 frame with its blurred sides over a live 3D scene). GPU-VM's attempt (XBE_PERF=1, Harry's save's
+  Showoff to its results) failed: key presses did not reach the game. Also: occasional audio stutter.
+- Harry: the README's settings wipe shows the crowd see-through on the MSAA 4x, render 200% side: an MSAA bug with
+  the people (alpha-tested), to fix before retaking the shot.
+- Next: Harry's XBE_PERF=1 run to a results screen; reproduce the replay at 4K; the MSAA people.
+
 ## 2026-11-19 - v1.0.0 published
 - Harry published v1.0.0 (2026-11-19 07:52 UTC): JuicedLauncher.exe 2,544,640 bytes, Juiced-package.zip 73,623,560
   (sha256 ba11910f...180b14, matching the build), Juiced-package.zip.json. The repository is public.
