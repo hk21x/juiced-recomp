@@ -30,6 +30,24 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-19 - Issue 3: the results screen's cost; a GPU time per draw in captures
+- Harry's XBE_PERF logs (RX 7900 XT, 3440x1440): racing 3 ms GPU a frame at render 100% and 10 ms at 200%. The
+  results screen takes 20 ms (46 fps) at 100% and about 190 ms (5 fps) at 200%; the replay about 50 ms at 200%. It starts
+  as the game sets D3DRS_MULTISAMPLEMODE 4X on the frame buffer ("drawn 2x2 to a pixel"). XBE_NO_SAMPLE_SCALE=1
+  draws the scene in the top left corner: the game draws those screens at sample positions, so the scaling stays.
+- Harry's F3 capture of the results screen (render 100%): about 590 operations. The 4X draws are a sun visibility
+  point, the depth to blur amount pass (01778800, one triangle reading the depth buffer through a 512x1 table) and the
+  shrink to the 160x120 blur target (spreadtap: 9x9 taps at 100%, 17x17 at 200% ultrawide). None looks costly on
+  paper; only two draws sample their own target. Cause still unknown.
+- SDK 886102b: a capture records a GPU timestamp before each operation (and before each save, left out) and writes
+  "gpu NNNN ms" lines and the slowest twelve to frame.txt, with a log line. Built on recomp-vm (fps branch) for Harry.
+- GPU-VM: it lost the device (887A0006) both times, in the list just after PRESS START (81 draws in it), at render
+  200% and at 100%, and once more at boot. It reached races on 16 to 18 Nov. Every hang since has been with a
+  Nightfire.exe left running there since 18 Nov 23:59 without the lock. Stopping it was not permitted from here; the
+  nightfire session was told. GPU-VM restored, lock released; its checkout is now on fps.
+- Next: Harry's capture at render 200% on the results screen with this build (frame.txt's gpu lines name the
+  operation); then the fix.
+
 ## 2026-11-19 - GPU-VM: the Arc loses its device (DXGI_ERROR_DEVICE_HUNG)
 - Trying issues 2 and 3 on GPU-VM (Harry's save, 1920x1080, render 200%, XBE_PERF=1, menus driven through
   JUICED_PAD_FILE, which needs no window focus): the GPU hung, 887A0006 DXGI_ERROR_DEVICE_HUNG, then every pipeline
