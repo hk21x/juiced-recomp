@@ -29,6 +29,17 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-19 - v1.0.0 tagged: a draft release
+- main 51bd8fc tagged v1.0.0; the workflow (run 44482087489) built JuicedLauncher.exe and made the draft release
+  with docs/releases/v1.0.0.md. Earlier main runs failed only at the artifact upload (while the repository was
+  private). Harry made the repository public.
+- Package from main 51bd8fc on GPU-VM (build.bat, release-package.bat): Juiced-package.zip 73,623,560 bytes, sha256
+  ba11910fa0ea021ded973abb81d8c8b77527596bec8137581283f3bbed180b14 (copies on GPU-VM C:\Testing\juiced-recomp and
+  .local/release). Unpacked into an empty folder with the .iso: --prepare-code built Juiced.dll, the game ran (about
+  4200 frames in 71 s).
+- Next (Harry, gh is not logged in here or on GPU-VM): attach Juiced-package.zip and its .json to the draft, publish,
+  and test the published launcher in an empty folder.
+
 ## 2026-11-19 - Ready for v1.0.0
 - Harry on fe6f491: the HUD right in races, sprints and Showoff; brake to reverse "works great"; experimental high
   FPS off; the launcher works (his click-through).
