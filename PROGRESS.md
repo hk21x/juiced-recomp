@@ -30,6 +30,21 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-19 - Issues 2 and 3 continued; the see-through people are two faults
+- Replay (headless, Harry's save's Showoff, REPLAY from its results; CAP=600): the scene as in a race (640x960 scene
+  target, cube faces), then a depth-of-field pass: the depth buffer (81208000) read as a 640x960 texture (format 0x40)
+  through a 512x1 ramp into target 01778800, and a 160x120 blur blended over. The results screen has the same
+  depth pass. Harry's logs (recomp-vm): no "read as a depth buffer's bytes finds no target" lines, so on his PC the
+  depth read finds its target. Not yet known why the replay is soft at 4K, or the results screen slow.
+- Harry's logs: most 10 s reports hold 3 to 16 frames over 25 ms and one hitch of 360 to 710 ms (juiced.log 07:39,
+  juiced.5.log): to look at (issue 3's "audio stutter" may be the same).
+- See-through people (GPU-VM, the start line at 1920x800, readme/p_*): off and render 200% clean; MSAA 4x alone the
+  Arc's black areas (people black); MSAA 4x with alpha_coverage (Smooth alpha edges) the people see-through, as in the
+  README slider. The slider was shot with alpha_coverage off, so there it is the Arc's MSAA fault; Smooth alpha edges
+  (off by default) does it on any GPU, though alphacover already scales coverage against the reference. Not fixed.
+- Next: Harry's XBE_PERF run on a results screen; a replay shot at a high render scale on his PC; the slider retaken
+  on his PC (not the Arc).
+
 ## 2026-11-19 - Issues 2 and 3 looked at; MSAA see-through people
 - Issue 2 (a player at 3840x2160, Chinese text): the replay's 3D scene is soft with a fine grid and black bars,
   the HUD and text sharp. Likely the replay draws its scene into a 640x480 picture of its own that the port does
