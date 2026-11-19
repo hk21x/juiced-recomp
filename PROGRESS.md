@@ -30,6 +30,18 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-19 - GPU-VM's Arc hangs with any build: the machine, not a regression
+- With the NightFire process closed (the nightfire session did it), the Arc still lost its device (887A0006): at boot
+  (present 24 to 100) on most starts, and in the list after PRESS START on every start that got that far.
+- Not the settings: GPU-VM's own settings hung too, four boots out of four. Not the prebuilt model: a build with the game
+  code linked into the exe (new CMake option JUICED_LINKED_CODE) hung four out of four. Not our code since 18 Nov: the
+  build of 6226191 (18 Nov 06:36, when GPU-VM ran races) hung three out of three. Same driver (32.0.101.9175);
+  Windows updates went in on 16 and 17 Nov.
+- So GPU-VM's GPU is in a bad state (after many resets today, or the VM); a reboot is the next thing to try, Harry's
+  call, as other sessions use it. Nothing here says Arc players are affected.
+- Restored: the DLL build's exe, GPU-VM's save and settings, the env and pad files; the 18 Nov worktree and the
+  linked build removed; lock released.
+
 ## 2026-11-19 - Issue 3: the results screen's cost; a GPU time per draw in captures
 - Harry's XBE_PERF logs (RX 7900 XT, 3440x1440): racing 3 ms GPU a frame at render 100% and 10 ms at 200%. The
   results screen takes 20 ms (46 fps) at 100% and about 190 ms (5 fps) at 200%; the replay about 50 ms at 200%. It starts
