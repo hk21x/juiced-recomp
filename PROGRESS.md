@@ -33,6 +33,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 ## 2026-11-19 - v1.0.0 published
 - Harry published v1.0.0 (2026-11-19 07:52 UTC): JuicedLauncher.exe 2,544,640 bytes, Juiced-package.zip 73,623,560
   (sha256 ba11910f...180b14, matching the build), Juiced-package.zip.json. The repository is public.
+- Harry: the published JuicedLauncher.exe alone in an empty folder (package downloaded from the release) works.
 - Next: players' reports (NVIDIA untested), the spectator HUD, split screen, career achievements.
 
 ## 2026-11-19 - v1.0.0 tagged: a draft release
