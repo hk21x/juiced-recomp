@@ -23,7 +23,8 @@ else()
 endif()
 # on Windows the game's code is a DLL the first start compiles from the player's disc (cmake/XbeRecomp.cmake): a release
 # holds the runtime and the compiler, no game code. The harness and Linux link it in
-if(WIN32)
+option(JUICED_LINKED_CODE "Windows: the game's code linked into Juiced.exe, as before the prebuilt model (tests)" OFF)
+if(WIN32 AND NOT JUICED_LINKED_CODE)
     set(XBE_GAME_DLL ON)
 endif()
 include(${SDK}/cmake/XbeRecomp.cmake)
