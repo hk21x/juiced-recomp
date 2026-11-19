@@ -228,7 +228,7 @@ const Page kPages[] = {
            s.renderer = (s.renderer + 1) % 2;
            app::Save();
        }},
-      FLAG("SMOOTH MOTION ABOVE 60", juiced::smooth_motion)}},
+      FLAG("EXPERIMENTAL HIGH FPS", juiced::smooth_motion)}},
 };
 constexpr int kPageCount = int(sizeof(kPages) / sizeof(kPages[0]));
 

@@ -65,7 +65,7 @@ layered on top of the game's own picture.
 | **Widescreen** | True proportions on any screen, 21:9 and wider included. Races fill the screen with the 3D view widened; the menus, title and movies keep their 4:3 shape in the middle with a dimmed, blurred copy filling the sides. |
 | **Aspect, changed as you play** | Auto, 4:3, 16:9 or Fill, applied at once, in a race too. At 4:3 the race camera is the console's own. |
 | **HUD position** | On a wide screen the dials, map and position sit at the screen's sides, or in the 4:3 centre nearer the car. **F9** hides the HUD altogether. |
-| **High frame rates** | The game still runs its 60 steps a second, as its driving needs. Above a frame rate cap of 60, races draw the frames in between, made from the two steps before. |
+| **Experimental high FPS** | Off by default. The game still runs its 60 steps a second, as its driving needs; turned on, races above a frame rate cap of 60 draw the frames in between, made from the two steps before. Showoff always runs at 60. |
 | **Sharper graphics** | Render scale up to 200%, MSAA up to 8x, FXAA or SMAA, sharpening, anisotropic filtering, enhanced textures and sharp text and HUD. |
 | **PC Settings in the game** | Options > PC SETTINGS on the title menus and the pause menu, in the game's own style. Everything is also in the F1 window and `settings.toml`. |
 | **Mouse in the menus** | Point at an item and click to choose it; right click goes back. The pointer is drawn in the menus' own colours. |
@@ -108,7 +108,7 @@ four pages.
 | **Display** | Display mode (full screen, borderless, window), resolution, aspect, vertical sync, frame rate cap, show frame rate, pause in background |
 | **Graphics** | Render scale, MSAA, edge smoothing (FXAA, SMAA), anisotropic filter, sharp text and HUD, sharper world textures, sharpen |
 | **Game** | Modern button pictures, skip intro movies, keyboard play, field of view, speed blur, HUD position, hide HUD |
-| **System** | Engine and effects level, scaling filter, low latency, renderer (Direct3D 12 or 11), smooth motion above 60 |
+| **System** | Engine and effects level, scaling filter, low latency, renderer (Direct3D 12 or 11), experimental high FPS |
 
 **F1** opens the settings window over the game, with the same settings and more: key and button bindings, wheel
 setup and the controller options. Everything is saved in `settings.toml` beside the game.
@@ -192,6 +192,9 @@ in `achievements.toml` beside the game. More, for the career, will follow. The l
 - **Your own copy of the game:** the USA/Europe Xbox release (one disc for both), title id 545100EF, `default.xbe`
   SHA-1 `b38b935794b05e46b70b164acdcca9338f0b692f`. An `.iso` image of your disc, or a folder with its files.
 - **Windows 10 or 11, 64 bit**, and a graphics card with Direct3D 12 (Direct3D 11 also works, without some extras).
+- **Tested on AMD and Intel Arc graphics:** an AMD Radeon RX 7900 XT at 3440x1440 and an Intel Arc A750 at 1080p.
+  NVIDIA cards are expected to work, as nothing here is specific to a vendor, but have not been tested yet: please
+  report how yours runs.
 - **Minimum spec:** any 64 bit processor from the last ten years and a Direct3D 12 graphics card run the game at its
   own 60 frames a second. Frame rates above 60 need more: the frames in between are drawn in the time the game leaves
   free in each of its 60 steps a second, so they depend on one fast processor core more than on the graphics card. As
@@ -264,14 +267,15 @@ from your disc when you build.
 <details>
 <summary><b>How do I get the most frames above 60?</b></summary>
 <br>
-Set a Frame Rate Cap above 60 and turn <b>Vertical Sync off</b>. The game's own 60 steps a second get whole frames
-between them, so the counter settles on 120, 180 or 240.
+Turn on <b>Experimental high FPS</b> (PC SETTINGS > SYSTEM, or F1), set a Frame Rate Cap above 60 and turn
+<b>Vertical Sync off</b>. The game's own 60 steps a second get whole frames between them, so the counter settles on
+120, 180 or 240. It is experimental: some races judder or misdraw with it, and Showoff always runs at 60.
 </details>
 
 <details>
 <summary><b>Some lights or the neon under the cars flicker.</b></summary>
 <br>
-Turn <b>Smooth motion above 60</b> off (PC SETTINGS > SYSTEM, or F1). The game then runs at 60.
+Turn <b>Experimental high FPS</b> off (PC SETTINGS > SYSTEM, or F1). The game then runs at 60.
 </details>
 
 <details>
@@ -284,8 +288,7 @@ when you report a problem on the <a href="https://discord.gg/PQjkKsdtc">Discord 
 ## Known issues
 <sup>[(Back to top)](#table-of-contents)</sup>
 
-- **Showoff runs at 60 frames a second** whatever the frame cap: Smooth motion steps aside there, as the trail effect it
-  draws juddered with frames between steps.
+- **Experimental high FPS** (off by default) can judder or misdraw in some races; Showoff always runs at 60.
 - **Not yet covered by testing:** a long career, split screen and wet races.
 - **The menus' blurred sides** are Direct3D 12 only; Direct3D 11 shows black bars there.
 

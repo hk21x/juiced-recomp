@@ -29,6 +29,17 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-19 - Showoff's HUD at the sides; EXPERIMENTAL HIGH FPS, off by default; GPUs tested in the README
+- Harry: replay and sprint fine with smooth motion. Showoff's HUD must sit as a race's; smooth motion renamed
+  experimental (or removed): it causes too many issues across events.
+- src/game/widescreen.cpp anchors "hud_cruise" (Showoff) as "hud_race". Headless, OUTPUT=3440x1440
+  FRAME_ASPECT_X100=239 in Harry's Showoff: time and record top left, score, move points and combo top right, bonus
+  move bottom left, the dial bottom right.
+- smooth_motion off by default, labelled EXPERIMENTAL HIGH FPS (PC SETTINGS > SYSTEM) and "Experimental high FPS"
+  (F1); README and v1.0.0 notes say so. README: tested on an RX 7900 XT and an Arc A750, NVIDIA not yet.
+- SMOKE OK (849); wincheck OK.
+- Next: the controller layout (Harry: X to reverse feels dated).
+
 ## 2026-11-19 - Showoff without frames between steps; F9 hides its HUD
 - Harry's video with XBE_INTERP_EVEN=1 (.local/win, 3440x1440 at 240): about 62 new pictures a second, 4 to 37 ms
   apart; the car jumping back and forth between pictures while the scene holds, and the rear window flashing white

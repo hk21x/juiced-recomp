@@ -30,7 +30,9 @@ bool hide_hud = false;
 // In a race with the frame cap over 60: frames between the game's steps (sdk gpu/interp.cpp). The game times its
 // simulation by the time between frames, but the car drives differently at another rate (at 120 frames a second it
 // accelerated about 15% harder), so the game stays at 60 and the frames between are drawn from the last two steps.
-bool smooth_motion = true;
+// Off by default and labelled experimental: frames between steps judder or misdraw in some events (Showoff's trail;
+// Harry, 2026-11-19), so a player opts in
+bool smooth_motion = false;
 std::atomic<bool> menus_narrowed{false};  // the frame is 4:3 for the menus on a wider setting (GameInfo::frame_aspect)
 // the game object's +0x3C is set in a race (src/common/pointer.cpp)
 bool InRace() {
@@ -219,9 +221,9 @@ const app::GameInfo app::kGame = {
                 {"hide_hud", &juiced::hide_hud, nullptr, "Hide the HUD",
                  "The race's dials, map, times and position left out, for screenshots and a clear view. F9 switches it in "
                  "a race; the pause menu still shows."},
-                {"smooth_motion", &juiced::smooth_motion, nullptr, "Smooth motion above 60",
-                 "With a frame cap over 60, races are drawn at that rate: the frames between the game's own 60 are made "
-                 "from the two before. The game itself stays at 60, as its driving needs."},
+                {"smooth_motion", &juiced::smooth_motion, nullptr, "Experimental high FPS",
+                 "Off by default. With a frame cap over 60, races are drawn at that rate: the frames between the game's "
+                 "own 60 are made from the two before. Can judder or misdraw in some races; Showoff always runs at 60."},
                 {"effects_percent", nullptr, &juiced::effects_percent, "Engine and effects level (%)",
                  "0 to 100; 100 is the disc's mix, which is far louder in a race than in the menus and clips. Music is not changed."}},
     .load = nullptr,                      // reads more from the settings file's toml::table

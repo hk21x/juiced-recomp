@@ -9,7 +9,7 @@
 //   is, and what is drawn in it is left as drawn (gpu::State::no_squeeze): the scene keeps its shape.
 // - The speed blur's passes (src/game/blur.cpp) are full screen effects with corners inside the frame.
 // - The movies are 4:3 pictures: see PassViewport.
-// - The race's HUD (the window "hud_race": lap and position at the top corners, the times, the map and the dials at
+// - The race's HUD (the window "hud_race", Showoff's "hud_cruise": lap and position at the top corners, the times, the map and the dials at
 //   the bottom corners) belongs at the frame's sides, not the 4:3 part's: see HudAnchor.
 #include <algorithm>
 #include <atomic>
@@ -107,7 +107,8 @@ bool HudAnchor(float x0, float y0, float x1, float y1) {
         for (uint32_t at = end; at > first; at -= 4) {
             const uint32_t window = kernel::R32(at - 4);
             if (!Mapped(window, 0x64)) continue;
-            const bool hud = !std::strcmp(static_cast<const char*>(kernel::HostPtr(window)), "hud_race");
+            const char* name = static_cast<const char*>(kernel::HostPtr(window));
+            const bool hud = !std::strcmp(name, "hud_race") || !std::strcmp(name, "hud_cruise");  // a race's, Showoff's
             const float side = GadgetSide(window, hud, x0, y0, x1, y1, g_anchor_box);
             if (side == 2) continue;
             SetAnchor(side);
