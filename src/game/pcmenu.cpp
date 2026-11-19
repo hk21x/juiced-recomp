@@ -31,7 +31,7 @@
 using namespace kernel;
 
 namespace juiced {
-extern bool modern_buttons, skip_intro, speed_blur, smooth_motion, hud_sides, hide_hud;  // src/common
+extern bool modern_buttons, skip_intro, speed_blur, smooth_motion, hud_sides, hide_hud, brake_reverse;  // src/common
 extern uint32_t fov_percent, effects_percent;
 }
 
@@ -194,8 +194,8 @@ const Page kPages[] = {
        }}}},
     {"GAME",
      {FLAG("MODERN BUTTON PICTURES", juiced::modern_buttons),
-      FLAG("SKIP INTRO MOVIES", juiced::skip_intro),
       FLAG("KEYBOARD PLAY", app::Get().keyboard),
+      FLAG("BRAKE TO REVERSE", juiced::brake_reverse),
       {"FIELD OF VIEW", [] { return std::to_string(juiced::fov_percent) + "%"; },
        [](int d) {
            juiced::fov_percent = uint32_t(std::clamp(int(juiced::fov_percent) + d * 5, 50, 150));
@@ -228,7 +228,8 @@ const Page kPages[] = {
            s.renderer = (s.renderer + 1) % 2;
            app::Save();
        }},
-      FLAG("EXPERIMENTAL HIGH FPS", juiced::smooth_motion)}},
+      FLAG("EXPERIMENTAL HIGH FPS", juiced::smooth_motion),
+      FLAG("SKIP INTRO MOVIES", juiced::skip_intro)}},
 };
 constexpr int kPageCount = int(sizeof(kPages) / sizeof(kPages[0]));
 

@@ -161,9 +161,10 @@ Shots of one spot at 1920x800, taken one after another on an Intel Arc A750; the
 | Action | Keyboard | Pad |
 |---|---|---|
 | Throttle / brake | W / S | RT / LT |
+| Reverse: hold brake when stopped | S | LT |
 | Steer | A / D | left stick |
 | Handbrake | Space | A |
-| Gear up / down (and reverse) | E / Q | B / X |
+| Gear up / down (the game's own reverse too) | E / Q | B / X |
 | Nitrous | Left Shift, N | Y |
 | Change view | C | RB |
 | Glance left / right / back | J / L / K | right stick |

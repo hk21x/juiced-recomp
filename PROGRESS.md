@@ -29,6 +29,19 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-19 - Brake to reverse
+- Harry: X to reverse feels dated. The game's three pad layouts (Options > Controls; we play option 1) all reverse on
+  a face button (X, X, Y); none on the brake. Holding X is the game's reverse: from a stop it selects R and drives
+  backwards (headless: X held, R and 22 mph without throttle); RT returns to 1st by itself.
+- brake_reverse (on; PC SETTINGS > GAME BRAKE TO REVERSE, F1 "Brake to reverse"): in a race, LT held from below
+  1 m/s gives the game X instead of LT for as long as LT stays held (src/common/game_info.cpp BrakeReverse). Not
+  with a steering wheel. The speed: the race's first car (game +0x34, +0x10, +8) +0x168, velocity +0x198 to +0x1A0
+  (as 0xC3B50 reads it): headless 0 on the grid, 33 m/s driving, -17 reversing. SKIP INTRO MOVIES moved to SYSTEM
+  (GAME holds 7 rows).
+- Evidence (headless race 1): LT on the grid, R and 22 mph backwards; RT, 4th and 80 mph; LT at speed brakes (3rd,
+  62 mph, no R). SMOKE OK (651); wincheck OK. README controls and the v1.0.0 notes updated.
+- Next: Harry on a pad and the keyboard (S).
+
 ## 2026-11-19 - Showoff's HUD at the sides; EXPERIMENTAL HIGH FPS, off by default; GPUs tested in the README
 - Harry: replay and sprint fine with smooth motion. Showoff's HUD must sit as a race's; smooth motion renamed
   experimental (or removed): it causes too many issues across events.

@@ -3,6 +3,7 @@
 #include <array>
 #include <atomic>
 #include <cctype>
+#include <cstring>
 #include <cstdint>
 #include <cstdio>
 #include <cstdlib>
@@ -27,6 +28,9 @@ bool speed_blur = true;       // the race's speed blur (src/game/blur.cpp)
 bool hud_sides = true;
 // the race's HUD left undrawn (src/game/hud.cpp); F9 in a race switches it
 bool hide_hud = false;
+// LT at a standstill reverses (as modern racing games): the game's own reverse is holding X (Options > Controls,
+// option 1: "gear down / reverse"), so while LT is held from below kReverseSpeed the pad gives X instead (Pad)
+bool brake_reverse = true;
 // In a race with the frame cap over 60: frames between the game's steps (sdk gpu/interp.cpp). The game times its
 // simulation by the time between frames, but the car drives differently at another rate (at 120 frames a second it
 // accelerated about 15% harder), so the game stays at 60 and the frames between are drawn from the last two steps.
@@ -133,9 +137,52 @@ void PadFile(input::Pad& pad) {
     if (lx) pad.lx = lx;
 }
 
+// the player's car's speed in m/s: the race's first car (game +0x34, +0x10: its cars from +8 to +0xC), its physics
+// (+0x168) velocity at +0x198 to +0x1A0 (as 0xC3B50 reads it). A headless race: 0 on the grid, 33 driving, -17
+// reversing (the z part). Negative when there is no race or no car
+float PlayerSpeed() {
+    using kernel::R32;
+    const auto ok = [](uint32_t va, uint32_t n) { return va >= 0x10000 && mem::IsCommitted(va) && mem::IsCommitted(va + n - 1); };
+    const uint32_t game = R32(0x372B54);
+    if (!ok(game, 0x40) || !ok(R32(game + 0x34), 0x14)) return -1;
+    const uint32_t list = R32(R32(game + 0x34) + 0x10);
+    if (!ok(list, 0x10) || R32(list + 0xC) <= R32(list + 8) || !ok(R32(list + 8), 4)) return -1;
+    const uint32_t car = R32(R32(list + 8));
+    if (!ok(car, 0x16C) || !ok(R32(car + 0x168), 0x1A4)) return -1;
+    const uint32_t ph = R32(car + 0x168);
+    float v[3];
+    for (int i = 0; i < 3; i++) {
+        const uint32_t u = R32(ph + 0x198 + 4 * i);
+        std::memcpy(&v[i], &u, 4);
+    }
+    const float s = std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    return std::isfinite(s) ? s : -1;
+}
+
+// brake_reverse: LT pressed below this speed reverses, and keeps reversing while it stays held (about 2 mph)
+constexpr float kReverseSpeed = 1.0f;
+void BrakeReverse(input::Pad& pad) {
+    static bool reversing = false;
+    constexpr int kLTSlot = input::kLT - input::kA, kXSlot = input::kX - input::kA, kRTSlot = input::kRT - input::kA;
+    const bool lt = pad.analog[kLTSlot] > 40, rt = pad.analog[kRTSlot] > 40;
+    if (!brake_reverse || pad.wheel || !lt || rt || !InRace()) {
+        reversing = false;
+        return;
+    }
+    if (!reversing) {
+        const float speed = PlayerSpeed();
+        reversing = speed >= 0 && speed < kReverseSpeed;
+    }
+    if (reversing) {
+        pad.analog[kXSlot] = std::max(pad.analog[kXSlot], pad.analog[kLTSlot]);
+        pad.analog[kLTSlot] = 0;
+    }
+}
+
 void Pad(int port, input::Pad& pad) {
     if (port != 0) return;
     PadFile(pad);
+    BrakeReverse(pad);
     constexpr int kBlackSlot = 4, kWhiteSlot = 5;  // Pad::analog: A B X Y Black White LT RT
     std::swap(pad.analog[kBlackSlot], pad.analog[kWhiteSlot]);
     MenuPointer(pad);  // the mouse in the menus (src/common/pointer.cpp)
@@ -221,6 +268,9 @@ const app::GameInfo app::kGame = {
                 {"hide_hud", &juiced::hide_hud, nullptr, "Hide the HUD",
                  "The race's dials, map, times and position left out, for screenshots and a clear view. F9 switches it in "
                  "a race; the pause menu still shows."},
+                {"brake_reverse", &juiced::brake_reverse, nullptr, "Brake to reverse",
+                 "Holding LT (or S) when the car has stopped reverses, as in modern racing games; release it to brake "
+                 "again. The game's own reverse (X, or Q) still works. Not with a steering wheel."},
                 {"smooth_motion", &juiced::smooth_motion, nullptr, "Experimental high FPS",
                  "Off by default. With a frame cap over 60, races are drawn at that rate: the frames between the game's "
                  "own 60 are made from the two before. Can judder or misdraw in some races; Showoff always runs at 60."},
