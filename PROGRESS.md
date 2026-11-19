@@ -3,6 +3,7 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
+- Released: v1.0.0 (2026-11-19), the prebuilt model (launcher, package, the game's code built from the player's disc)
 - Higher frame rates: 230 to 240 fps at a 240 cap at half render scale, 180 to 240 at full (Harry, 682ffbf on);
   the bind memo (a9b368f) and in-between frames filling the step (interp_fill_frames, Juiced on). The GPU takes
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
@@ -28,6 +29,11 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
+
+## 2026-11-19 - v1.0.0 published
+- Harry published v1.0.0 (2026-11-19 07:52 UTC): JuicedLauncher.exe 2,544,640 bytes, Juiced-package.zip 73,623,560
+  (sha256 ba11910f...180b14, matching the build), Juiced-package.zip.json. The repository is public.
+- Next: players' reports (NVIDIA untested), the spectator HUD, split screen, career achievements.
 
 ## 2026-11-19 - v1.0.0 tagged: a draft release
 - main 51bd8fc tagged v1.0.0; the workflow (run 44482087489) built JuicedLauncher.exe and made the draft release
