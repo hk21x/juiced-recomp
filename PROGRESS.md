@@ -30,6 +30,18 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-19 - GPU-VM: the Arc loses its device (DXGI_ERROR_DEVICE_HUNG)
+- Trying issues 2 and 3 on GPU-VM (Harry's save, 1920x1080, render 200%, XBE_PERF=1, menus driven through
+  JUICED_PAD_FILE, which needs no window focus): the GPU hung, 887A0006 DXGI_ERROR_DEVICE_HUNG, then every pipeline
+  failed with 887A0005 (removed). The game runs on, its picture frozen (LOADING, or the last menu).
+- Boots: 3 of 7 hung about 5.5 s in (present 25 to 130, the boot splash), at render 200% and 100% alike; one more at
+  51 s (present 2871, just after PRESS START, render 200%). At render 200% the menus there showed only the backdrop
+  and white specks before it hung. Yesterday's one LOADING stall after the first-start window was likely the same.
+- Not seen on Harry's AMD; no player report yet. GPU-VM is not usable for issues 2 and 3 until it is understood (a
+  driver fault, or something the port asks of the Arc); restored, lock released.
+- Open: the port does not recover from a lost device (the game hangs with a frozen picture): a message and exit, or
+  recreating the device, would be better for a player who hits it.
+
 ## 2026-11-19 - Issues 2 and 3 continued; the see-through people are two faults
 - Replay (headless, Harry's save's Showoff, REPLAY from its results; CAP=600): the scene as in a race (640x960 scene
   target, cube faces), then a depth-of-field pass: the depth buffer (81208000) read as a 640x960 texture (format 0x40)
