@@ -49,7 +49,7 @@ frame rates above 60.
 <sup>[(Back to top)](#table-of-contents)</sup>
 
 <p align="center">
-  <img src="docs/img/juiced-settings-wipe.webp" alt="A wipe across the start line between all settings off and render scale 200%, MSAA 4x and sharpening 50%" width="800">
+  <img src="docs/img/juiced-settings-wipe-2.webp" alt="A wipe across the start line between all settings off and render scale 200%, MSAA 4x and sharpening 50%" width="800">
   <br>
   <i>All extras off vs. render scale 200%, MSAA 4x and sharpening 50%, at 3440x1440.</i>
 </p>
