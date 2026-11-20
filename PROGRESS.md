@@ -42,7 +42,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
   Menus' car panels (also inset passes) get the same. Headless 16:9 and 21:9 now look as 4:3. wincheck clean,
   SMOKE OK.
 - The dots poking out of the ring: the box clips them to a square around the ring; with the zoom right they should sit
-  as on a 4:3 screen. Next: Harry checks.
+  as on a 4:3 screen. Harry (3440x1440): "looks much better".
 
 ## 2026-11-20 - Issue 2: replay cars in copies; the blur source made at the console's size
 - Harry's screenshots (render 200%, 3440x1440): in some replay views the followed car is smeared into separate copies
@@ -53,7 +53,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - SDK: GameInfo::console_size_targets (gpu::TargetScale, D3D12 and D3D11, kept on a render scale change): colour
   targets of those guest sizes are made at the console's size. Juiced lists 160x120 (also the race's speed blur
   source, which now matches the console too). wincheck clean, SMOKE OK.
-- Next: Harry checks the replay views from the screenshots, and the race's speed blur.
+- Harry's later replay shot: the cars softly blurred, no copies.
 
 ## 2026-11-20 - Issue 2: the replay capture at render 100% looks right
 - Harry's replay capture (221048, render 100%): the scene before and after the depth blur, the letterbox, the replay
