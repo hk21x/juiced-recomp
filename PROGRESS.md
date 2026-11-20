@@ -3,7 +3,7 @@
 Newest first. Each entry: date, what changed, what was learned, what's next.
 
 ## Status
-- Released: v1.0.0 (2026-11-19), the prebuilt model (launcher, package, the game's code built from the player's disc)
+- Released: v1.0.0 (2026-11-19); v1.0.1 tagged (draft, 2026-11-20), the prebuilt model (launcher, package, the game's code built from the player's disc)
 - Higher frame rates: 230 to 240 fps at a 240 cap at half render scale, 180 to 240 at full (Harry, 682ffbf on);
   the bind memo (a9b368f) and in-between frames filling the step (interp_fill_frames, Juiced on). The GPU takes
   2.2 to 2.8 ms a frame (XBE_PERF timestamps); what still holds full resolution at 180 is the swap's wait.
@@ -29,6 +29,18 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - XDK: 5849 with D3D8LTCG, 157 of 278 functions, 6 of 13 data (first scan); 20 LTCG argument maps proven (config/juiced.toml)
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
+
+## 2026-11-20 - v1.0.1 tagged: a draft release
+- docs/releases/v1.0.1.md: the results screen and replay speed (#3), the replay's blurry cars (#2), the race map on
+  wide screens, the lost-device message. main 5cb4f45 tagged v1.0.1; the workflow (run 44778424593) built
+  JuicedLauncher.exe and made the draft release with the notes.
+- Package from main 5cb4f45 on GPU-VM (build.bat, release-package.bat): Juiced-package.zip 73,629,808 bytes, sha256
+  b59fc43a5a502a918fd08853e00779b1a18199856bf74f4cbe0fb1d8127abcf2. Unzipped into an empty folder with the disc:
+  --prepare-code compiled 65 files, ready; the game ran at 60 fps (about 4470 frames in 77 s). Copies: .local/release/
+  v1.0.1 and recomp-vm C:\Testing\juiced-recomp\release-v1.0.1 (J:).
+- The README's settings wipe renamed (juiced-settings-wipe-2.webp) past cached copies of the old one.
+- Next (Harry): attach Juiced-package.zip and its .json to the draft, publish, and check that the v1.0.0 launcher
+  offers v1.0.1.
 
 ## 2026-11-20 - Lost device: a message and a clean close; the see-through people not reproduced
 - SDK 0cd11db, GameInfo::device_lost_message (Juiced on): once a renderer has logged a lost GPU device (D3D12's
