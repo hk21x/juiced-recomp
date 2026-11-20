@@ -30,6 +30,17 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-20 - Issue 2: replay cars in copies; the blur source made at the console's size
+- Harry's screenshots (render 200%, 3440x1440): in some replay views the followed car is smeared into separate copies
+  about 20 screen pixels apart, not softly blurred. The game blends four offset taps of its 160x120 blur source
+  (819D0800) over the scene. On the console that source is coarse, and bilinear taps of it merge into a soft blur. Here
+  it was made at render scale (960x720 at 200%), so it kept detail the console's never had, and each tap showed as a
+  sharp copy one console texel apart.
+- SDK: GameInfo::console_size_targets (gpu::TargetScale, D3D12 and D3D11, kept on a render scale change): colour
+  targets of those guest sizes are made at the console's size. Juiced lists 160x120 (also the race's speed blur
+  source, which now matches the console too). wincheck clean, SMOKE OK.
+- Next: Harry checks the replay views from the screenshots, and the race's speed blur.
+
 ## 2026-11-20 - Issue 2: the replay capture at render 100% looks right
 - Harry's replay capture (221048, render 100%): the scene before and after the depth blur, the letterbox, the replay
   bar and the prompts all look as expected. (A capture's BMPs keep the target's alpha, mostly 0: a viewer that shows

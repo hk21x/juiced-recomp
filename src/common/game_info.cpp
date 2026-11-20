@@ -289,6 +289,7 @@ const app::GameInfo app::kGame = {
     .hud_aspect = 4.0f / 3.0f,            // the 2D is laid out for 4:3 in both of the game's modes: squeezed to it
     .sample_scaled_viewport = true,       // the glow materials' draws (4X asked on the scene target) land where the rest do
     .ff_unused_stages_unbound = true,     // the results screen's text left its scene target on stages 1 to 3: a full copy a draw
+    .console_size_targets = {{160, 120}},  // the blur source of the replay's depth of field and the race's speed blur
     .hide_file = juiced::HideFile,        // hides nothing: notes when a boot movie is opened (skip_intro)
     .default_keys = juiced::Keys,         // the keyboard's defaults, after the game's own layout
     .texture_bound = juiced::ButtonPictures,  // today's pad in the button pictures (src/common/buttons.cpp)
