@@ -30,6 +30,14 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-20 - Issue 2: the replay capture at render 100% looks right
+- Harry's replay capture (221048, render 100%): the scene before and after the depth blur, the letterbox, the replay
+  bar and the prompts all look as expected. (A capture's BMPs keep the target's alpha, mostly 0: a viewer that shows
+  alpha draws them white. View them with `convert x.bmp -alpha off x.png`.) The results screen's capture at 200%
+  (110120) also looks right.
+- So what looks wrong is not in that frame. Next: a screenshot (F12) from Harry of what looks odd, at the settings
+  where it happens.
+
 ## 2026-11-20 - Issue 3: the results screen copied its scene target for every text draw
 - Harry's F3 capture at render 200% (110120, results screen): 258 ms of GPU over 1709 operations. 305 of them take
   0.69 ms each, 205 ms in all: fixed function text and icon draws into the 640x480 scene target 83EB3000 (host
