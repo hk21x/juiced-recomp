@@ -127,6 +127,7 @@ void EndAnchor() {
 }  // namespace juiced
 
 namespace juiced {
+void InsetCamera(uint32_t camera, bool inset);  // src/game/fov.cpp
 extern std::atomic<bool> intro_movie;  // the last movie opened is one of the boot's (src/common/game_info.cpp)
 }
 
@@ -144,6 +145,8 @@ void PassViewport(X86Context& ctx, uint8_t* /*base*/) {
     d3d::State().pillar_aspect = 4.0f / 3.0f;
     d3d::State().pillar_format = 0x24;  // D3DFMT_YUY2
     d3d::State().pillar_fill = !juiced::intro_movie.load();
+    // its camera (the pass's +0x24) at the game's 4:3 angles while it is drawn in a box (src/game/fov.cpp)
+    if (const uint32_t camera = kernel::R32(ctx.ebx + 0x24); camera >= 0x10000) juiced::InsetCamera(camera, inset);
     if (!inset) return;
     static const uint32_t scratch = mem::AllocSystem(24);
     std::memcpy(kernel::HostPtr(scratch), kernel::HostPtr(vp), 24);

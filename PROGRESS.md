@@ -30,6 +30,20 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-20 - The race map at 4:3 angles at every aspect
+- Harry (3440x1440): the map's dots are tall ovals and poke out of the ring; at 4:3 the map looks different (and right).
+  Headless at 4:3, 16:9 and 21:9 (OUTPUT=3440x1440 FRAME_ASPECT_X100=133/178/239, race.txt, REF=7700): wider than 4:3 the
+  map was zoomed out and squeezed across. Its camera is a scene camera (shape 0.5625): fov.cpp gave it the frame's angles
+  (the game's 16:9 ones, or wider), but widescreen.cpp keeps the map's 112x112 box square, so it wants the 4:3 ones.
+- src/game/fov.cpp + widescreen.cpp: PassViewport finds the pass's camera (pass +0x24, found by scanning for an
+  object with a camera's shape at +0xC0) and records whether its box is inset; the camera setter (0x166A20) gives a
+  recorded inset camera the game's 4:3 angles, as at 4:3. It is narrowed when set because the pass's SetViewport comes
+  after the frame's projection is taken: narrowing there was too late (right only on frames the game did not set it).
+  Menus' car panels (also inset passes) get the same. Headless 16:9 and 21:9 now look as 4:3. wincheck clean,
+  SMOKE OK.
+- The dots poking out of the ring: the box clips them to a square around the ring; with the zoom right they should sit
+  as on a 4:3 screen. Next: Harry checks.
+
 ## 2026-11-20 - Issue 2: replay cars in copies; the blur source made at the console's size
 - Harry's screenshots (render 200%, 3440x1440): in some replay views the followed car is smeared into separate copies
   about 20 screen pixels apart, not softly blurred. The game blends four offset taps of its 160x120 blur source
