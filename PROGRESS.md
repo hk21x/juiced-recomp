@@ -40,7 +40,7 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - The rest: op 1392 at 33 ms after ops 1295 to 1391 at 0.000 reads as the 3D scene into the 640x960 target
   (host 6880x5760) counted at one stamp; op 1398 at 9.9 ms is the shrink to the 160x120 blur target (spreadtap,
   17x17 taps). Expect about 50 ms at 200% after this fix, against about 190 before.
-- Next: Harry runs this build at render 200% on the results screen and the replay (XBE_PERF).
+- Harry on Windows (RX 7900 XT, 3440x1440, render 200%): "Fixed." Issue 3 closed.
 
 ## 2026-11-19 - GPU-VM's Arc hangs with any build: the machine, not a regression
 - With the NightFire process closed (the nightfire session did it), the Arc still lost its device (887A0006): at boot
