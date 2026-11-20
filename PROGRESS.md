@@ -30,6 +30,18 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-20 - Issue 3: the results screen copied its scene target for every text draw
+- Harry's F3 capture at render 200% (110120, results screen): 258 ms of GPU over 1709 operations. 305 of them take
+  0.69 ms each, 205 ms in all: fixed function text and icon draws into the 640x480 scene target 83EB3000 (host
+  6880x2880) with that target still set on stages 1 to 3. Each bind of a draw's own target made a full copy
+  (Feedback), but the fixed function shader stops at the first D3DTOP_DISABLE stage and never reads them.
+- SDK: GameInfo::ff_unused_stages_unbound (gpu::FfStageUnused, D3D12 and D3D11): a stage the fixed function
+  shader does not read binds nothing. Juiced turns it on. wincheck clean, SMOKE OK.
+- The rest: op 1392 at 33 ms after ops 1295 to 1391 at 0.000 reads as the 3D scene into the 640x960 target
+  (host 6880x5760) counted at one stamp; op 1398 at 9.9 ms is the shrink to the 160x120 blur target (spreadtap,
+  17x17 taps). Expect about 50 ms at 200% after this fix, against about 190 before.
+- Next: Harry runs this build at render 200% on the results screen and the replay (XBE_PERF).
+
 ## 2026-11-19 - GPU-VM's Arc hangs with any build: the machine, not a regression
 - With the NightFire process closed (the nightfire session did it), the Arc still lost its device (887A0006): at boot
   (present 24 to 100) on most starts, and in the list after PRESS START on every start that got that far.
