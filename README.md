@@ -51,7 +51,7 @@ frame rates above 60.
 <p align="center">
   <img src="docs/img/juiced-settings-wipe.webp" alt="A wipe across the start line between all settings off and render scale 200%, MSAA 4x and sharpening 50%" width="800">
   <br>
-  <i>All extras off vs. render scale 200%, MSAA 4x and sharpening 50%, at 1920x800.</i>
+  <i>All extras off vs. render scale 200%, MSAA 4x and sharpening 50%, at 3440x1440.</i>
 </p>
 
 The Xbox drew Juiced at 640x480, at 4:3 or squeezed for a 16:9 TV, and at up to 60 frames a second. The port draws

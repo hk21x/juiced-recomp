@@ -40,7 +40,9 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - See-through people: not reproduced on GPU-VM after the reboot. At the start line with MSAA 4x, with and without
   Smooth alpha edges, at render 100% and 200%, the crowd is solid and the car's spoiler is there. The README wipe's
   washed-out people and missing spoiler were shot on the Arc on 19 Nov, while it was losing its device on most
-  starts: most likely that state. Harry's retake of the wipe on his PC is the check.
+  starts: most likely that state. Harry's retake on his PC (RX 7900 XT, 3440x1440; MSAA 4x at render 200%, and with
+  Smooth alpha edges too): the people solid, the spoiler there. Closed. docs/img/juiced-settings-wipe.webp remade from
+  his shots (1400x586, 64 frames), the README caption at 3440x1440.
 - GPU-VM restored: its settings and save (the career bet undone from the 18 Nov backup), env and pad files empty,
   the screenshot tasks and scripts removed, lock released.
 
