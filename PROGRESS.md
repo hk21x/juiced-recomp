@@ -30,6 +30,20 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-20 - Lost device: a message and a clean close; the see-through people not reproduced
+- SDK 0cd11db, GameInfo::device_lost_message (Juiced on): once a renderer has logged a lost GPU device (D3D12's
+  ReportRemoved, D3D11's failed Present), app::DeviceLost posts to the window thread, which restores the display mode,
+  hides the window, says what happened and what to try (driver, Render scale or MSAA, Direct3D 11), then closes as
+  the window's close does. XBE_TEST_DEVICE_LOST=N (D3D12) acts as a loss at present N. GPU-VM (Arc, rebooted):
+  the message at present 600, OK, then "the window closed (GetMessage 0 ...)" and the process gone.
+- GPU-VM after Harry's reboot runs again: boots, menus and a career race (night start line) with no device loss.
+- See-through people: not reproduced on GPU-VM after the reboot. At the start line with MSAA 4x, with and without
+  Smooth alpha edges, at render 100% and 200%, the crowd is solid and the car's spoiler is there. The README wipe's
+  washed-out people and missing spoiler were shot on the Arc on 19 Nov, while it was losing its device on most
+  starts: most likely that state. Harry's retake of the wipe on his PC is the check.
+- GPU-VM restored: its settings and save (the career bet undone from the 18 Nov backup), env and pad files empty,
+  the screenshot tasks and scripts removed, lock released.
+
 ## 2026-11-20 - The race map at 4:3 angles at every aspect
 - Harry (3440x1440): the map's dots are tall ovals and poke out of the ring; at 4:3 the map looks different (and right).
   Headless at 4:3, 16:9 and 21:9 (OUTPUT=3440x1440 FRAME_ASPECT_X100=133/178/239, race.txt, REF=7700): wider than 4:3 the
