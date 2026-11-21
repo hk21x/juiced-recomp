@@ -30,6 +30,12 @@ Newest first. Each entry: date, what changed, what was learned, what's next.
 - Push buffers: none created or replayed; game code writes NV2A commands into the device's push buffer itself
 - GitHub: private hk21x/juiced-recomp; SDK on fork branch `juiced` (7c45c2e: flat programs' 2D squeeze, no_squeeze, line_width; 4c5a099: the tall frame's resolve pass keeps plain taps; 0de0637: the double height frame's stretch; 9ed6b2f: the threaded backend's freed header guard; on 7168ae0 = fork main 26f372b + SetViewport(NULL), a reference renderer fix, DSOUND: buffer SetRolloffFactor hosted and a stream's ENVELOPECOMPLETE status; not yet on fork main: needs the all-games gate)
 
+## 2026-11-21 - .recomp.json for recomp.fyi
+
+- Added `.recomp.json` at the repo root (spec https://recomp.fyi/spec, schema v1): Juiced, Wikidata Q1711572, Xbox,
+  recomp, status released, Windows, XboxXBERecomp, Europe and USA, the Discord. Validated against the schema.
+- recomp.fyi reads it daily: keep `status` current (Harry agreed to one per port, 2026-11-21).
+
 ## 2026-11-20 - v1.0.1 tagged: a draft release
 - docs/releases/v1.0.1.md: the results screen and replay speed (#3), the replay's blurry cars (#2), the race map on
   wide screens, the lost-device message. main 5cb4f45 tagged v1.0.1; the workflow (run 44778424593) built

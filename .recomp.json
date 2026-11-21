@@ -1,0 +1,13 @@
+{
+  "$schema": "https://recomp.fyi/schema/v1.json",
+  "game": "Juiced",
+  "wikidata": "Q1711572",
+  "system": "Xbox",
+  "type": "recomp",
+  "project": "Juiced recomp",
+  "status": "released",
+  "targets": ["Windows"],
+  "toolchain": "XboxXBE-Recomp",
+  "original": [{ "region": "Europe" }, { "region": "USA" }],
+  "links": [{ "label": "Discord", "url": "https://discord.gg/PQjkKsdtc" }]
+}
